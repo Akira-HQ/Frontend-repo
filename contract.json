@@ -1,0 +1,42 @@
+[
+  {
+    "id": "notif_12345",
+    "type": "USAGE_ALERT",
+    "timestamp": "2025-10-17T10:00:00Z",
+    "read": false,
+    "data": {
+      "title": "Monthly Limit Update",
+      "message": "You've used up {value}% of your monthly limit.",
+      "progress": {
+        "value": 50,
+        "max": 100,
+        "unit": "%"
+      }
+    }
+  },
+  {
+    "id": "notif_67890",
+    "type": "ANNOUNCEMENT",
+    "timestamp": "2025-10-16T18:30:00Z",
+    "read": false,
+    "data": {
+      "title": "New Feature Alert!",
+      "message": "You can now connect your external wallets directly from settings page. Try it out today!",
+      "icon": "sparkles"
+    }
+  },
+  {
+    "id": "notif_abcde",
+    "type": "SECURITY_TIP",
+    "timestamp": "2025-10-15T11:00:00Z",
+    "read": true,
+    "data": {
+      "title": "Stay Secure",
+      "message": "Remember to never share your private keys with anyone.",
+      "icon": "sheild-check",
+      "action": {
+        "link": "/dashboard"
+      }
+    }
+  }
+]
