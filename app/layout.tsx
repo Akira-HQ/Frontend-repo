@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Header from "@/components/Header";
+import { AppProvider } from "@/components/AppContext";
+import ToastContainer from "@/components/notifications/ToastContainer";
+import PageTracker from "@/components/hooks/PageTracker";
 
 export const metadata: Metadata = {
-  title: "Akira",
+  title: "Akira AI",
   description: "Your online personal sales manager.",
 };
 
@@ -25,9 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={` antialiased`}
+        className={`w-screen overflow-x-hidden relative antialiased`}
       >
-        {children}
+       <AppProvider>
+        <PageTracker />
+          <Header />
+          <ToastContainer />
+          {children}
+       </AppProvider>
       </body>
     </html>
   );
