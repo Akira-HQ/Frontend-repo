@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "imageUrl": "https:",
+    "name": "Premium Black T-shirt",
+    "status": "Weak",
+    "health": 45
+  }, 
+  {
+    "id": 2,
+    "imageUrl": "https:",
+    "name": "Classic Blue Jeans",
+    "status": "Strong",
+    "health": 95
+  },
+  {
+    "id": 3,
+    "imageUrl": "https:",
+    "name": "Leather Messenger Bag",
+    "status": "Strong",
+    "health": 100
+  },
+  {
+    "id": 4,
+    "imageUrl": "https:",
+    "name": "Minimalist Wristwatch",
+    "status": "Weak",
+    "health": 60
+  }
+]

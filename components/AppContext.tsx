@@ -1,5 +1,6 @@
 'use client'
 import { ContextProps, Toast, User } from '@/types'
+import { useRouter } from 'next/navigation'
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 
@@ -9,7 +10,7 @@ const getLocalStorageItem = (key: string) => {
   if (typeof window !== 'undefined') {
     try {
       const item = localStorage.getItem(key)
-      return item ? JSON.parse(item) : null
+      return item !== null ? JSON.parse(item) : null
     } catch (error) {
       console.error(`Error parsing localstorage "${key}":`, error)
       localStorage.removeItem(key)
@@ -27,6 +28,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [getStarted, setGetStarted] = useState<boolean>(false)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [user, setUserState] = useState<User | null>(null)
+  const router = useRouter()
 
   const addToast = (message: string, type: "success" | "error" | 'info') => {
     if (toasts.length >= 3) {
@@ -78,9 +80,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isDarkMode, getStarted, user])
 
+  const logout = () => {
+    setUserState(null)
+    setAlertMessageState("")
+    setAlertType(null)
+    setToasts([])
+
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      localStorage.removeItem('started')
+    }
+    router.push('/register/sign-in')
+  }
+
   const contextValue = React.useMemo(() => ({
-    isDarkMode, alertMessage, alertType, user, setUser: setUserState, setIsDarkMode, initialLoadComplete: initialLoadCompleteInternal, setAlertMessage, setAlertType, getStarted, setGetStarted, toasts, addToast, removeToast
-  }), [isDarkMode, alertMessage, alertType, getStarted, toasts, addToast, removeToast, user, setUserState, setGetStarted, setIsDarkMode, setAlertMessage, setAlertType, initialLoadCompleteInternal])
+    isDarkMode, alertMessage, alertType, user, setUser: setUserState, setIsDarkMode, initialLoadComplete: initialLoadCompleteInternal, setAlertMessage, setAlertType, getStarted, setGetStarted, toasts, addToast, removeToast, logout
+  }), [isDarkMode, alertMessage, alertType, getStarted, toasts, addToast, removeToast, user, setUserState, setGetStarted, setIsDarkMode, setAlertMessage, setAlertType, initialLoadCompleteInternal, logout])
 
   return (
     <AppContext.Provider value={contextValue}>

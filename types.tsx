@@ -6,6 +6,19 @@ export interface Toast {
   type: "success" | 'error' | 'info'
 }
 
+// User Types
+export interface User {
+  id: string | number;
+  name: string;
+  email: string;
+  password: string;
+  plan: string;
+  store?: {
+    storeName: string;
+    storeUrl: string;
+  }
+}
+
 export interface ContextProps {
   isDarkMode: boolean;
   setIsDarkMode: (theme: boolean) => void;
@@ -21,6 +34,7 @@ export interface ContextProps {
   removeToast: (id: string) => void;
   user: User | null;
   setUser: (user: User | null) => void
+  logout: () => void
 }
 
 // PageTracker Types
@@ -44,15 +58,9 @@ export interface ButtonProps {
   type?: "submit" | "button"
   className?: string
   isDarkMode?: boolean
+  disabled?: boolean | string
 }
 
-// User Types
-export interface User {
-  id: string | number;
-  name: string;
-  email: string;
-  password: string;
-}
 
 // Resizable Types
 export interface UseResizableProps {
