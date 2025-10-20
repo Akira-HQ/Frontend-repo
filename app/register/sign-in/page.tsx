@@ -4,11 +4,12 @@ import { useRouter } from 'next/navigation'
 import { useAppContext } from '@/components/AppContext'
 import Button from '@/components/Button'
 import { validatePassword } from '@/components/hooks/validatePassword'
+import { UseAPI } from '@/components/hooks/UseAPI'
 
 const page = () => {
   const [email, setEmail] = useState<string | null>(null)
   const [password, setPassword] = useState<string | null>(null)
-  const { addToast, isDarkMode } = useAppContext()
+  const { addToast, isDarkMode, setUser, user } = useAppContext()
   const router = useRouter()
   const [passwordErrors, setPasswordErrors] = useState({
     capitalLetter: false,
@@ -19,19 +20,35 @@ const page = () => {
     hasLowercase: false
   });
   const [loading, setLoading] = useState<boolean>(false)
+  const { callApi } = UseAPI()
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value)
     setPasswordErrors(validatePassword(event.target.value))
   }
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    if (!email || !password) {
-      addToast("Fields cannot be empty!", 'error')
-      return;
+    try {
+      if (!email || !password) {
+        addToast("Fields cannot be empty!", 'error')
+        return;
+      }
+
+      const response = await callApi("/user/login", 'POST', { email, password })
+
+      setUser(response.data)
+      addToast(response.message, 'success')
+      localStorage.setItem('token', response.token)
+      console.log("User data:", response.data)
+      router.push('/dashboard?view=ai-training')
+    } catch (error) {
+      console.error("An error occured:", error)
+      addToast("An error occured", "error")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -54,7 +71,7 @@ const page = () => {
             </label>
 
             <label className='flex flex-col'>
-              <span className='text-2xl text-white font-semibold'>Name</span>
+              <span className='text-2xl text-white font-semibold'>Password</span>
               <input
                 type="password"
                 value={password === null ? "" : password.toString()}
@@ -77,7 +94,9 @@ const page = () => {
 
               <a href="#" className="underline">Forgot Password?</a>
             </div>
-            <Button type='submit' className={`mt-5 w-full mb-4 ${isDarkMode ? "" : "bg-[#8574c8]!"} text-xl font-bold tracking-wide`}>Sign In</Button>
+            <Button type='submit' className={`mt-5 w-full mb-4 ${isDarkMode ? "" : "bg-[#8574c8]!"} text-xl font-bold tracking-wide`}>
+              {loading ? "Signing..." : "Sign In"}
+            </Button>
           </div>
         </form>
       </div>

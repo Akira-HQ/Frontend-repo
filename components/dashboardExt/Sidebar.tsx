@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
 import { useAppContext } from '../AppContext'
-import { useResizable } from '../hooks/Resizable'
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi'
 import { MdSupportAgent } from 'react-icons/md'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -20,10 +19,9 @@ interface SidebarProps {
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const Sidebar = ({ isCollapsed, onToggle,  width, onMouseDown }: SidebarProps) => {
+const Sidebar = ({ isCollapsed, onToggle, width, onMouseDown }: SidebarProps) => {
   const searchParams = useSearchParams()
-  const [selectedPlan, setSelectedPlan] = useState<string | null>('free')
-  const { isDarkMode, user } = useAppContext()
+  const { isDarkMode, user, logout } = useAppContext()
   const initial = user?.name ? user?.name.charAt(0).toUpperCase() : '?';
   const [state, setState] = useState<number | null>(null);
   const [allNotifications, setAllNotifications] = useState<Notification[]>([])
@@ -114,10 +112,22 @@ const Sidebar = ({ isCollapsed, onToggle,  width, onMouseDown }: SidebarProps) =
                 <div className='flex w-full justify-between items-center'>
                   <h1 className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl`}>{user?.name}</h1>
                   <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md">
-                    {selectedPlan}
+                    {user?.plan}
                   </span>
                 </div>
-                <p className='pt-2 text-[15px]'>Teelight's Store</p>
+                {user?.store ? (
+                  <a
+                    href={user.store.storeUrl.startsWith('http') ? user.store.storeUrl : `https://${user.store.storeUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className='pt-2 text-[15px] text-gray-400 hover:underline truncate block'
+                    title={user.store.storeName}
+                  >
+                    {user.store.storeName}
+                  </a>
+                ) : (
+                  <p className='pt-2 text-[15px] text-gray-500'>No store connected</p>
+                )}
               </div>
             )}
           </div>
@@ -226,6 +236,7 @@ const Sidebar = ({ isCollapsed, onToggle,  width, onMouseDown }: SidebarProps) =
 
             <div
               className={`rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
+              onClick={logout}
             >
               <FaArrowRightFromBracket className='text-xl' />
               {!isCollapsed && (

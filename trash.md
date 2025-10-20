@@ -70,3 +70,99 @@
 // </div>
 // )
 // }
+
+
+//create akira account
+router.post(
+  "/user/signup",
+  checkSchema(signupValidatorSchema),
+  async (request, response) => {
+    const { email, password, name, plan } = request.body;
+    const result = validationResult(request);
+    const validatedEmail = emailValidator(email);
+    const validatedPassword = passwordValidator(password);
+    const insert_query =
+      "INSERT INTO users (id, name, email, password, plan) VALUES ($1, $2, $3, $4, $5)";
+    const filter_query = "SELECT email FROM users WHERE email = $1";
+    const insert_confirmation_query =
+      "INSERT INTO confirmation_tokens (id, user_id, otp, email_to_confirm, created_at, expires_at) VALUES ($1, $2, $3, $4, $5, $6)";
+    const emailExists = await pool.query(filter_query, [email]);
+
+    try {
+      if (!result.isEmpty() || !validatedEmail) {
+        return response.status(400).send({ message: "Invalid Credentials" });
+      }
+
+      if (emailExists.rows.length > 0) {
+        return response.status(409).send({ message: "Email already exists" });
+      }
+
+      if (!name) {
+        return response.status(400).send({ message: "Must provide name " });
+      }
+
+      if (!validatedPassword.valid) {
+        return response.status(400).send({ error: validatedPassword.errors });
+      }
+
+      const newRequest = matchedData(request);
+      newRequest.password = await hashPassword(password);
+      const code = getConfirmationCode(newRequest.email);
+
+      const userid = generateID(6);
+      const subject = "Welcome! Confirm your account";
+      const text = `Enter this code to confirm your account: ${code.otpCode}. This code expires in 2 minutes.`;
+      const link = `https://akiraai.com/user?cc=${code.otpCode}`;
+      const html = `<p>Click <a href="${link}">Here</a> to proceed to confirmation page </p>`;
+
+      const mailSent = await sendMail(email, subject, text, html);
+
+      if (!mailSent) {
+        console.error("Failed to send confirmation email.");
+      }
+      const newUser = {
+        id: userid,
+        ...newRequest,
+        plan: plan,
+      };
+
+      await pool.query(insert_query, [
+        userid,
+        newRequest.name,
+        newRequest.email,
+        newRequest.password,
+        plan,
+      ]);
+
+      await pool.query(insert_confirmation_query, [
+        code.otpId,
+        userid,
+        code.otpCode,
+        code.email,
+        code.expiresAt,
+        code.createdAt,
+      ]);
+
+      const jsonToken = jwt.sign(
+        {
+          userID: user.id,
+          email: user.email,
+          plan: user.plan,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "4h" }
+      );
+
+      return response.status(201).send({
+        message: "Account created. Check yout mail to confirm.",
+        data: buildUserFeedback(newUser),
+        token: jsonToken,
+      });
+    } catch (error) {
+      console.error("An error occured", error);
+      return response
+        .status(500)
+        .send({ message: "An error occured", error: error });
+    }
+  }
+);
