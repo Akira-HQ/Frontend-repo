@@ -11,13 +11,13 @@ type Product = {
   id: string;
   name: string;
   description: string | null;
-  imageUrl: string | null;
+  imageUrls: string[] | null; // <-- CORRECT (array of strings)
   status: 'Strong' | 'Weak';
   health: number;
   reasons: string[];
   auditChecklist: AuditCheck[];
-  stock: number; // <-- ADD THIS LINE
-  price: number; // <-- ADD THIS LINE
+  stock: number;
+  price: number;
 }
 
 interface ProductTableProps {

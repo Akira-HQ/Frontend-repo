@@ -53,34 +53,45 @@ const page = () => {
   }
 
   return (
-    <div className={`${isDarkMode ? 'main-bg' : 'bg-pure'} w-screen h-screen overflow-hidden flex flex-col justify-center items-center`}>
+    // {/* Added p-4 for padding on mobile screens */}
+    <div className={`${isDarkMode ? 'main-bg' : 'bg-pure'} w-screen h-screen overflow-hidden flex flex-col justify-center items-center p-4`}>
 
-      <div className={`${isDarkMode ? "" : ""} w-[800px] flex flex-col justify-center items-center rounded-md py-3`}>
-        <h1 className='text-4xl font-semibold tracking-wide text-white'>Sign Into Your Account</h1>
+      {/* Replaced fixed w-[800px] with w-full and a max-w-md (448px) to constrain the container */}
+      <div className={`w-full max-w-md flex flex-col justify-center items-center rounded-md py-3`}>
+        {/* Added text-center and responsive text sizing */}
+        <h1 className='text-3xl sm:text-4xl font-semibold tracking-wide text-white text-center'>
+          Sign Into Your Account
+        </h1>
 
-        <form onSubmit={handleSignIn} className={`${isDarkMode ? "bg-gray-900" : 'bg-pure'} shadow-2xl my-9 py-7 w-[600px] overflow-hidden relative flex flex-col justify-center items-center`}>
-          <div className={`${isDarkMode ? "bg-gray-900" : 'bg-pure'} flex flex-col justify-center items-center`}>
-            <label className='flex flex-col'>
+        {/* Removed fixed w-[600px]. w-full makes it fill the parent (max-w-md) */}
+        {/* Added px-6 sm:px-8 for horizontal padding inside the form */}
+        <form onSubmit={handleSignIn} className={`${isDarkMode ? "bg-gray-900" : 'bg-pure'} shadow-2xl my-9 py-7 w-full overflow-hidden relative flex flex-col justify-center items-center px-6 sm:px-8`}>
+          <div className={`${isDarkMode ? "bg-gray-900" : 'bg-pure'} w-full flex flex-col justify-center items-center`}>
+            {/* Added w-full to labels to they fill the space */}
+            <label className='flex flex-col w-full'>
               <span className='text-2xl text-white font-semibold'>Email</span>
               <input
                 type="email"
                 value={email === null ? "" : email.toString()}
-                className='w-[350px] rounded-md bg-white h-8 mb-3 text-black px-2 outline-none'
+                // {/* Replaced fixed w-[350px] with w-full */}
+                className='w-full rounded-md bg-white h-8 mb-3 text-black px-2 outline-none'
                 onChange={(e) => setEmail(e.target.value)}
               />
             </label>
 
-            <label className='flex flex-col'>
+            {/* Added w-full to labels to they fill the space */}
+            <label className='flex flex-col w-full'>
               <span className='text-2xl text-white font-semibold'>Password</span>
               <input
                 type="password"
                 value={password === null ? "" : password.toString()}
-                className='w-[350px] rounded-md bg-white h-8 mb-3 text-black px-2 outline-none'
+                // {/* Replaced fixed w-[350px] with w-full */}
+                className='w-full rounded-md bg-white h-8 mb-3 text-black px-2 outline-none'
                 onChange={handlePasswordChange}
               />
             </label>
             {passwordErrors && (
-              <div className='text-red-50 py-2 text-20px'>
+              <div className='text-red-50 py-2 text-20px w-full'> {/* Added w-full */}
                 {passwordErrors.capitalLetter && <div>• Password must contain a capital letter.</div>}
                 {passwordErrors.number && <div>• Password must contain a number.</div>}
                 {passwordErrors.minLength && <div>• Password must be at least 8 characters long.</div>}
@@ -89,10 +100,10 @@ const page = () => {
               </div>
             )}
 
-            <div className='items-start mt-1 w-full text-xl text-white'>
+            {/* Stack links on mobile, side-by-side on larger screens (sm:) */}
+            <div className='mt-1 w-full text-xl text-white flex flex-col sm:flex-row sm:justify-between'>
               <p>Don't have an account? <a href="/register" className="underline">Sign Up</a></p>
-
-              <a href="#" className="underline">Forgot Password?</a>
+              <a href="#" className="underline mt-2 sm:mt-0">Forgot Password?</a>
             </div>
             <Button type='submit' className={`mt-5 w-full mb-4 ${isDarkMode ? "" : "bg-[#8574c8]!"} text-xl font-bold tracking-wide`}>
               {loading ? "Signing..." : "Sign In"}
