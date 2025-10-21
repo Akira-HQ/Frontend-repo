@@ -1,14 +1,23 @@
 'use client'
 import React from 'react'
 
+type AuditCheck = {
+  id: string;
+  met: boolean;
+  text: string;
+}
+
 type Product = {
-  id: string; // The database ID is a string
+  id: string;
   name: string;
   description: string | null;
-  imageurl: string | null; // Matches your DB schema
+  imageUrl: string | null;
   status: 'Strong' | 'Weak';
   health: number;
   reasons: string[];
+  auditChecklist: AuditCheck[];
+  stock: number; // <-- ADD THIS LINE
+  price: number; // <-- ADD THIS LINE
 }
 
 interface ProductTableProps {
