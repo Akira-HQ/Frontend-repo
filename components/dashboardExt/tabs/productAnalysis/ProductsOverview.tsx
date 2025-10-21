@@ -19,14 +19,15 @@ type Product = {
   id: string;
   name: string;
   description: string | null;
-  imageUrl: string | null;
+  imageUrls: string[] | null; // <-- CORRECT (array of strings)
   status: 'Strong' | 'Weak';
   health: number;
   reasons: string[];
   auditChecklist: AuditCheck[];
-  stock: number; // <-- ADD THIS LINE
-  price: number; // <-- ADD THIS LINE
+  stock: number;
+  price: number;
 }
+
 type AnalysisSummary = {
   totalProducts: number;
   strongCount: number;
@@ -61,6 +62,17 @@ const ProductsOverview = () => {
     };
     fetchAndAnalyzeProducts();
   }, [callApi]);
+
+  const handleProductUpdated = (updatedProduct: Product) => {
+    setAnalyzedProducts(prevProducts =>
+      prevProducts.map(p =>
+        p.id === updatedProduct.id ? updatedProduct : p
+      )
+    );
+
+   
+    setSelectedProduct(updatedProduct);
+  };
 
 
   return (
@@ -161,6 +173,7 @@ const ProductsOverview = () => {
               <ProductAudit
                 product={selectedProduct}
                 onSelect={(product) => setSelectedProduct(product)}
+                onProductUpdated={handleProductUpdated} // <-- MAKE SURE THIS PROP IS PASSED
               />
             </div>
           </div>
