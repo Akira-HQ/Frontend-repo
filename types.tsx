@@ -1,9 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, createContext, useContext } from "react";
 
 export interface Toast {
   id: string;
   message: string;
-  type: "success" | 'error' | 'info'
+  type: "success" | 'error' | 'info' | "loading"
 }
 
 // User Types
@@ -30,7 +30,7 @@ export interface ContextProps {
   getStarted: boolean;
   setGetStarted: (start: boolean) => void;
   toasts: Toast[];
-  addToast: (message: string, type: "success" | "error" | "info") => void;
+  addToast: (message: string, type: "success" | "error" | "info" | "loading") => void;
   removeToast: (id: string) => void;
   user: User | null;
   setUser: (user: User | null) => void
@@ -110,3 +110,17 @@ export type Notification = {
     | { type: "ANNOUNCEMENT"; data: AnnoucementData }
     | { type: "SECURITY_TIP"; data: SecurityTipData }
   )
+
+export type ThemeContextType = { isDarkMode: boolean; toggleDarkMode: () => void; };
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) return { isDarkMode: true, toggleDarkMode: () => { } };
+  return context;
+};
+
+export const BASE_BG = "bg-[#050505]"; 
+export const NEON_GRADIENT = "bg-gradient-to-r from-[#00A7FF] to-[#A500FF]";
+export const ACCENT_COLOR_BLUE = "#00A7FF";
+export const ACCENT_COLOR_PURPLE = "#A500FF";
+export const CARD_BG = "bg-gray-900/50";

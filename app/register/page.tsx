@@ -1,29 +1,26 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAppContext } from '@/components/AppContext';
-import { UseAPI } from '../../components/hooks/UseAPI';
-import Stars from '@/components/Stars';
-
+import React from 'react';
 import { Loader } from '@/components/ui/Loader';
+import { AkiraStarsBackground } from '@/components/Stars';
 import RegisterContent from '@/components/RegisterForm';
 
-const page = () => {
-  const {  isDarkMode } = useAppContext();
-
-  
-  
-
+const RegistrationPage = () => {
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 " : "bg-pur"} flex items-center justify-center text-white`}>
-      <Stars />
-      <Suspense fallback={<Loader />}>
-        <RegisterContent />
-      </Suspense>
+    <div className="min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden relative flex items-center justify-center p-4">
+
+      {/* 1. Nebula Background Effect */}
+      <AkiraStarsBackground density={200} />
+
+      {/* 2. Main Content Wrapper */}
+      <div className="py-12 w-full max-w-xl">
+        <React.Suspense fallback={<Loader />}>
+          <RegisterContent />
+        </React.Suspense>
+      </div>
     </div>
   );
 };
 
-export default page;
+export default RegistrationPage;
 

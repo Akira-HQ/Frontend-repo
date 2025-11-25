@@ -1,4 +1,3 @@
-'use client'
 import { Notification } from "@/types"
 import { useState } from "react";
 import { IoMegaphoneOutline, IoShieldCheckmarkOutline, IoWarningOutline, IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5"

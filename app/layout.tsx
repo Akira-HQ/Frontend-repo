@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
+import {Header, ThemeProvider} from "@/components/Header";
 import { AppProvider } from "@/components/AppContext";
 import ToastContainer from "@/components/notifications/ToastContainer";
 import PageTracker from "@/components/hooks/PageTracker";
+import Footer from "@/components/Footer";
+import BannerAlert from "@/components/notifications/AlertNotifications";
+import NotificationContainer from "@/components/notifications/ToastContainer";
 
 export const metadata: Metadata = {
   title: "Akira AI",
@@ -23,9 +26,14 @@ export default function RootLayout({
       >
        <AppProvider>
         <PageTracker />
+        <ThemeProvider>
           <Header />
+
+          {/* <BannerAlert /> */}
           <ToastContainer />
           {children}
+          {/* <Footer /> */}
+        </ThemeProvider>
        </AppProvider>
       </body>
     </html>

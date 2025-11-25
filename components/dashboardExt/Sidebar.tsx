@@ -93,7 +93,7 @@ const Sidebar = ({ isCollapsed, onToggle, width, onMouseDown }: SidebarProps) =>
 
 
   return (
-    <div className={`sidebar ${isDarkMode ? "backdrop-filter backdrop-blur-md bg-[#0d0f12]" : "bg-pure"} fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`} style={{ width: `${width}px` }}>
+    <div className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12]  fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`} style={{ width: `${width}px` }}>
       <span className='p-0! absolute right-3 z-10 grid h-6 place-items-center  text-white shadow-2xl cursor-grab text-2xl transition-all duration-300 ' onClick={onToggle} onMouseDown={onMouseDown}>
         {isCollapsed ? <BiChevronRight className='mr-1' size={32} /> : <BiChevronLeft size={32} />}
       </span>

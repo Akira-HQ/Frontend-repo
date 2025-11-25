@@ -14,13 +14,13 @@ const AiTrainingContent = () => {
           <div className={`rounded-md shadow-2xl  h-[40px] px-4 flex items-center cursor-pointer hover:scale-[1.01] transition-all duration-300 ${activeTab === 1 ? "bg-[#1C2526]" : "bg-[#333333]"}`}
             onClick={() => setActiveTab(1)}
           >
-            Products Overview
+            Products Analysis
           </div>
 
           <div className={`rounded-md shadow-2xl h-[40px] px-4 flex items-center cursor-pointer hover:scale-[1.01] transition-all duration-300 ${activeTab === 2 ? "bg-[#1C2526]" : "bg-[#333333]"}`}
             onClick={() => setActiveTab(2)}
           >
-            Selling Points
+            Products Overview
           </div>
         </div>
 
