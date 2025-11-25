@@ -2,7 +2,7 @@
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react'
 import { BsSend, BsX } from 'react-icons/bs';
 import Button from '../Button';
-import Stars from '../Stars';
+import { AkiraStarsBackground } from '../Stars';
 
 interface Message {
   sender: 'Akira' | 'User';
@@ -69,7 +69,7 @@ const ChatWindow = ({ onClose }: Props) => {
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto relative">
-        <Stars count={30} />
+        <AkiraStarsBackground />
         {messages.map((msg, index) => (
           <div key={index} className={`mb-2 ${msg.sender === 'Akira' ? 'text-left' : 'text-right z-40'}`}>
             <span className={`inline-block p-2 rounded-lg max-w-[80%]  z-40 ${msg.sender === 'Akira' ? "bg-gray-200 text-black" : "bg-indigo-600 text-white"}`}>
