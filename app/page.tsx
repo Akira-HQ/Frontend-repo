@@ -1,231 +1,241 @@
-'use client'
-import Button from '@/components/Button';
-import ChatWidget from '@/components/chatTools/ChatWidget';
-import Stars from '@/components/Stars';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react'
-import { FaComment, FaCommentDots, FaLink, FaShoppingCart, FaTag } from 'react-icons/fa';
-import { useAppContext } from '@/components/AppContext';
+"use client"
+import React, { useState } from 'react';
+import { MessageCircle, Tag, ShoppingCart, Link, Zap, TrendingUp, Handshake,  Target,  Smile,  Globe, Smartphone, Mail, Clock, RefreshCw, Layers, Trello } from 'lucide-react';
+import { AkiraStarsBackground } from '@/components/Stars';
+import { HeroSection } from '@/components/landing/Hero';
+import { handleCtaClick } from '@/components/functions/helpers';
+import { TestimonialPlaceholder } from '@/components/landing/TestimonialSection';
+import { IntegrationGrid } from '@/components/landing/IntegrationSection';
+import { FeatureCard, FeatureCardProps } from '@/components/landing/FeatureCard';
+import { HowItWorksAnimation } from '@/components/landing/HowItWorks';
+import { Capability, CapabilityGrid } from '@/components/landing/Capability';
+import { DeepConversionSection } from '@/components/landing/DeepConversation';
+import { PricingCard, PricingToggle } from '@/components/landing/Pricings';
+import { FinalCTA } from '@/components/landing/FinalCTA';
 
-export default function Home() {
-  const { isDarkMode, setGetStarted, initialLoadComplete } = useAppContext();
-  const router = useRouter();
+const Home: React.FC = () => {
+  const [isMonthly, setIsMonthly] = useState(true);
 
-  useEffect(() => {
-    if (initialLoadComplete) {
-      setGetStarted(false)
+  // Explicitly type the parameter as string
+  
+
+  const featureData = [
+    {
+      icon: MessageCircle,
+      title: "Intelligent Q&A",
+      description: "Akira instantly handles complex customer questions and objections, ensuring zero friction in the pre-sale process."
+    },
+    {
+      icon: Tag,
+      title: "Proactive Recommendation",
+      description: "Utilizes real-time behavior data to recommend products, boosting average order value (AOV) without upselling manually."
+    },
+    {
+      icon: ShoppingCart,
+      title: "Cart Recovery",
+      description: "Automatically engages customers who abandon carts via their preferred channel (email, chat) to complete the purchase."
+    },
+    {
+      icon: Link,
+      title: "Seamless Integration",
+      description: "Connect Akira to your e-commerce platform and all major messaging channels in minutes, not hours."
+    },
+  ];
+
+  // Section 1: New Capabilities Data
+  const capabilityData: Capability[] = [
+    { icon: Zap, title: "Autonomous Sales Engine" },
+    { icon: Target, title: "Customer Intent Prediction" },
+    { icon: Smile, title: "Emotion-Aware Conversation Layer" },
+    { icon: RefreshCw, title: "Real-time Product Intelligence" },
+    { icon: Globe, title: "Multilingual Selling Agent" },
+    { icon: Smartphone, title: "Omnichannel (WhatsApp + IG + Email)" },
+    { icon: TrendingUp, title: "Smart Upsell / Cross-Sell" },
+    { icon: Layers, title: "Campaign-Driven Conversations" },
+  ];
+
+  // Section 4: Deep Conversion Data
+  const deepConversionFeatures: FeatureCardProps[] = [
+    {
+      icon: Trello,
+      title: "Dynamic Conversation Flows",
+      description: "Flows adapt in real-time based on customer mood, product stock, and current site promotions."
+    },
+    {
+      icon: Clock,
+      title: "AI-Driven Offer Timing",
+      description: "Akira predicts the optimal micro-moment to deploy discounts or limited-time offers for maximum conversion likelihood."
+    },
+    {
+      icon: Handshake,
+      title: "Adaptive Recommendation Engine",
+      description: "Recommendations learn from every interaction, ensuring suggested products are always highly relevant to the individual shopper."
+    },
+    {
+      icon: ShoppingCart,
+      title: "Abandoned Cart Recovery",
+      description: "Personalized, non-intrusive reminders sent directly via the customer's preferred chat channel."
+    },
+    {
+      icon: Mail,
+      title: "Post-Purchase Messaging",
+      description: "Drive repeat business and loyalty by automatically following up with relevant accessory suggestions and reviews."
     }
-  }, [initialLoadComplete])
+  ];
 
-  const start = (plan: string) => {
-    router.push(`/register?plan=${plan}`)
-    setGetStarted(true)
-  }
+  // Section 5: Pricing Data (Adjusted for Annual)
+  const calculatePrice = (basePrice: number) => {
+    // 79 * 12 = 948 (monthly) vs (79 * 0.8) * 12 = 758.4 (annual)
+    // 199 * 12 = 2388 (monthly) vs (199 * 0.8) * 12 = 1910.4 (annual)
+    const annualPrice = Math.round(basePrice * 12 * 0.8);
+    const monthlyPrice = basePrice;
+    return isMonthly ? monthlyPrice : annualPrice;
+  };
+
+  const getPriceLabel = (basePrice: number, planTitle: string) => {
+    if (planTitle === 'Free') return '€0 / mo';
+    if (isMonthly) return `€${basePrice} / mo`;
+    // For annual, display the total yearly price
+    return `€${calculatePrice(basePrice)} / yr`;
+  };
+
+
+  const pricingData = [
+    {
+      title: "Free",
+      price: getPriceLabel(0, 'Free'),
+      features: ["Up to 100 sessions/mo", "Web Chat Widget", "Standard Q&A", "Email Support"],
+      isFeatured: false,
+      basePrice: 0
+    },
+    {
+      title: "Growth",
+      price: getPriceLabel(79, 'Growth'),
+      features: ["Up to 10,000 sessions/mo", "Multi-Platform Integration", "Advanced Recommendations", "Automated Follow-ups", "Sales Analytics"],
+      isFeatured: true,
+      basePrice: 79
+    },
+    {
+      title: "Pro",
+      price: getPriceLabel(199, 'Pro'),
+      features: ["Unlimited Sessions", "Voice Conversation Support", "Dedicated Account Manager", "Advanced A/B Testing", "Custom API Access", "Priority VIP Support"],
+      isFeatured: false,
+      basePrice: 199
+    },
+  ];
 
   return (
-    // {/* Use min-h-screen to ensure it at least fills the viewport */}
-    <section className={`${isDarkMode ? 'main-bg' : 'bg-pure'} transition-colors duration-600 min-h-screen w-screen h-full relative flex flex-col dark:main-bg z-10 scroll-smooth`}>
-      <Stars count={80} />
-      <ChatWidget />
-      {/* - Reduced mobile padding-top (pt-48) from pt-[280px]
-        - Added horizontal padding (px-6) for mobile
-      */}
-      <div className='flex flex-col justify-center items-center pt-48 md:pt-[280px] px-6 relative'>
-        <h2 className={`isDarkMode ? "" : "" text-3xl font-bold text-white`}>AKIRA:</h2>
-        {/* - Reduced text size on mobile (text-5xl)
-        */}
-        <h1 className='text-5xl md:text-7xl text-center font-bold mb-4 text-shimmer'>
-          Your Personal AI Sales Manager.
-        </h1>
-        {/* - Replaced fixed-width (w-[750px]) with w-full and max-w-3xl
-          - Reduced text size on mobile (text-lg)
-        */}
-        <p className={`${!isDarkMode && "text-white"} w-full max-w-3xl text-lg md:text-2xl text-center my-5`}>
-          Akira is an intelligent, automated assistant that engages customers, proactively interacts with customers, and drives sales for your e-commerce business.
-        </p>
-        <div className="buttons">
-          {/* ... */}
-        </div>
+    <div className="relative min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden">
 
-        {/* - Replaced fixed-width (w-[900px]) with w-full and max-w-4xl
-          - Replaced fixed-height (h-[450px]) with aspect-video for responsive scaling
-        */}
-        <div className="bg-gray-600 w-full max-w-4xl aspect-video rounded-xl shadow-md mt-5 overflow-hidden relative">
-          <img src="/waitlist.png" alt="demo" className='w-full h-full object-cover' /> {/* Changed to w-full h-full */}
-          <div className="overlay"></div>
-        </div>
-      </div>
+      {/* 1. Nebula Background Effect */}
+      <AkiraStarsBackground density={200} />
 
-      {/* - Replaced large horizontal padding (px-[200px]) with mobile (px-6) and large-screen (lg:px-[200px])
-      */}
-      <div className="section-2 my-8 px-6 lg:px-[200px] mt-[100px] relative">
-        {/* - Reduced text size on mobile (text-3xl)
-        */}
-        <h2 className={!isDarkMode ? 'gradient-text text-3xl md:text-[45px] font-semibold mb-5' : 'text-3xl md:text-[45px] font-semibold mb-5'}>Stop Losing Sales to Inefficiency.</h2>
-        {/* - Replaced fixed-width (w-[750px]) with w-full and max-w-3xl
-          - Reduced text size on mobile (text-lg)
-        */}
-        <p className='text-[#f2f1f8] w-full max-w-3xl text-lg md:text-2xl'>
-          You have a great product, but managing every customer conversation, tracking every abandoned cart, and personalizing every interaction is impossible. The result? Frustrated customers and lost revenue. <br /> Akira solves this by giving you the power of an entire sales team in one AI-powered platform.
-        </p>
-      </div>
+      {/* 2. Main Content Wrapper */}
+      <main className="relative z-10 pt-16 pb-24 text-white">
 
-      {/* - Replaced large padding (px-[80px]) with mobile (px-6) and large-screen (lg:px-[80px])
-      */}
-      <div className="features-section mt-[70px] px-6 lg:px-[80px] pb-[50px] relative">
-        <h1 className={`${!isDarkMode && "text-white"} text-3xl md:text-4xl scale-y-100 font-bold tracking-wide`}>How Akira Works</h1>
+        <HeroSection />
 
-        {/* - Swapped flex-wrap for a responsive grid.
-          - Stacks to 1 column on mobile, 2 on medium, 4 on large.
-        */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-9'>
+        {/* === FEATURES SECTION: How Akira Works (Existing) === */}
+        <section className="container mx-auto px-4 py-20 max-w-7xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            Key Features
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featureData.map((feature, index) => (
+              <FeatureCard
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            ))}
+          </div>
+        </section>
 
-          {/* Removed fixed-width (w-[300px]) and height (h-[320px]). Grid handles width, min-h sets height. */}
-          <div className={`${!isDarkMode && 'text-white'} min-h-[320px] border rounded-md p-5  flex flex-col justify-center items-center gap-2 bg-gradient-to-br from-gray-900 to-indigo-600 relative shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out`}>
-            <FaCommentDots className='mt-[20px] text-4xl absolute top-1 right-5' />
-            <div>
-              <h2 className='text-2xl font-semibold mb-5 pt-2'>Intelligent Q&A:</h2>
-              <p className='text text-base'>Akira instantly answers customer questions about products, shipping, and returns, 24/7, so you never miss a sale.</p>
+        {/* === WHY AKIRA SECTION (Existing) === */}
+        <section className="container mx-auto px-4 py-20 max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Future of Sales is Here. Why Choose Akira
+            </h2>
+            <p className="text-lg text-gray-400 max-w-4xl mx-auto">
+              Akira moves beyond reactive customer service. It is a proactive, learning system designed to empower store owners, giving them a scalable sales team that never sleeps and only focuses on the bottom line.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 text-left">
+            <div className="p-6 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-[#A500FF] transition duration-300">
+              <Zap className="w-8 h-8 text-[#A500FF] mb-3" />
+              <h3 className="text-xl font-bold text-white mb-2">A Partner, Not a Tool</h3>
+              <p className="text-gray-400">Akira acts as a true sales manager, making autonomous decisions to maximize revenue rather than just following fixed, static scripts.</p>
+            </div>
+            <div className="p-6 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-[#A500FF] transition duration-300">
+              <TrendingUp className="w-8 h-8 text-[#A500FF] mb-3" />
+              <h3 className="text-xl font-bold text-white mb-2">Designed for Growth</h3>
+              <p className="text-gray-400">Every feature is tuned for one goal: boosting your conversion rate and increasing your average transaction value, driving sustainable business growth.</p>
+            </div>
+            <div className="p-6 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-[#A500FF] transition duration-300">
+              <Handshake className="w-8 h-8 text-[#A500FF] mb-3" />
+              <h3 className="text-xl font-bold text-white mb-2">Effortless Integration</h3>
+              <p className="text-gray-400">Go live in minutes. No complex APIs or coding needed—just a simple, single-script install for your e-commerce site and messaging apps.</p>
             </div>
           </div>
+        </section>
 
-          <div className={`${!isDarkMode && 'text-white'} min-h-[320px] border rounded-md p-5  flex flex-col justify-center items-center gap-2 bg-gradient-to-br from-gray-900 to-indigo-600 relative shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out`}>
-            <FaTag className='mt-[20px] text-4xl absolute top-0 right-5' />
-            <div>
-              <h2 className='text-2xl font-semibold mb-3'>Proactive Recommendation:</h2>
-              <p className='text text-base'>
-                Akira analyzes your product catalog and customer behavior to suggest personalized products, increasing your average order value with every conversation.
-              </p>
-            </div>
+        {/* === NEW SECTION 1: AKIRA CAPABILITIES === */}
+        <CapabilityGrid capabilities={capabilityData} />
+
+        {/* === NEW SECTION 2: HOW AKIRA WORKS ANIMATION === */}
+        <HowItWorksAnimation />
+
+        {/* === NEW SECTION 4: DEEP CONVERSION SECTION === */}
+        <DeepConversionSection features={deepConversionFeatures} />
+
+        {/* === NEW SECTION 3: AKIRA FOR YOUR STACK INTEGRATIONS === */}
+        <IntegrationGrid />
+
+        {/* === NEW SECTION 5: EXTENDED PLANS SECTION === */}
+        <section className="container mx-auto px-4 py-20 max-w-7xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">
+            Start Driving Sales Today
+          </h2>
+          <PricingToggle monthly={isMonthly} setMonthly={setIsMonthly} />
+
+          <div className="grid lg:grid-cols-3 gap-8 items-stretch">
+            {pricingData.map((plan, index) => (
+              <PricingCard
+                key={index}
+                title={plan.title}
+                price={plan.price}
+                features={plan.features}
+                isFeatured={plan.isFeatured}
+                onCTA={handleCtaClick}
+                monthly={isMonthly}
+              />
+            ))}
           </div>
+        </section>
 
-          <div className={`${!isDarkMode && 'text-white'} min-h-[320px] border rounded-md p-5  flex flex-col justify-center items-center gap-2 bg-gradient-to-br from-gray-900 to-indigo-600 relative shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out`}>
-            <div className=''>
-              <FaShoppingCart className='text-4xl absolute top-4 right-5' />
-              <h2 className='text-2xl font-semibold mb-3'>Cart Recovery:</h2>
-              <p className='text text-base'>Akira automatically follows up with customers who leave items in their cart, giving them a gentle nudge and bringing them back to complete their purchase.</p>
-            </div>
-          </div>
+        {/* === NEW SECTION 6: TESTIMONIALS PLACEHOLDER === */}
+        <TestimonialPlaceholder />
 
-          <div className={`${!isDarkMode && 'text-white'} min-h-[320px] border rounded-md p-5  flex flex-col justify-center items-center gap-2 bg-gradient-to-br from-gray-900 to-indigo-600 relative shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out`}>
-            <FaLink className='text-4xl absolute top-4 right-5' />
-            <div>
-              <h2 className='text-2xl font-semibold mb-3'>Seamless Integration:</h2>
-              <p className='text text-[18px] text-base'>Akira connects directly to your store, effortlessly syncing with your products, inventory, and order data to provide accurate, real-time information.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* === NEW SECTION 7: FINAL CTA SECTION === */}
+        <FinalCTA
+          onStart={() => handleCtaClick("Start Free Trial (Final CTA)")}
+          onSeePlans={() => handleCtaClick("See Plans (Final CTA)")}
+        />
 
 
-      {/* - Replaced large padding (px-[80px]) with mobile (px-6) and large-screen (lg:px-[80px])
-      */}
-      <div className="why-Akira px-6 lg:px-[80px] pt-16 relative">
-        <h2 className={`${!isDarkMode && 'text-white'} text-3xl md:text-4xl font-bold`}>Future of Sales is Here. <br /> Why Choose Akira</h2>
-        {/* - Replaced fixed-width (w-[800px]) with w-full and max-w-4xl
-          - Reduced text size on mobile (text-lg)
-        */}
-        <p className={`${!isDarkMode && "text-white"} text-lg md:text-xl w-full max-w-4xl mt-4`}>
-          Akira isn't just another chatbot. It's a proactive sales partner built to give you a competitive edge. Our AI doesn't just respond; it learns, adapts, and helps you sell. We empower store owners like you to scale their business with intelligent automation, without the overhead of hiring an entire sales team.
-        </p>
-        <ul className={`list-disc mt-4 pl-5 text-lg md:text-xl ${!isDarkMode && 'text-white'}`}>
-          {/* - Replaced fixed-width (w-[600px]) with w-full and max-w-2xl
-          */}
-          <li className='w-full max-w-2xl'>
-            <span className='font-bold'>A Partner, Not a Tool:</span> Unlike generic chatbots, Akira actively learns from your data to provide personalized, human-like attention to every customer. It's like having a top-performing sales manager who can multitask and is available 24/7.
-          </li>
-
-          <li className='w-full max-w-2xl mt-5'>
-            <span className='font-bold'>Designed for Growth:</span> Akira grows with you. Our tiered plans ensire you only pay for what you need, with features that unlock new revenue streams as your business expands.
-          </li>
-
-          <li className='w-full max-w-2xl mt-5'>
-            <span className='font-bold'>Effortless Integration:</span> Go live in minutes. Our seamless, no-code setup means you can start recovering abandoned carts and engaging customers today.
-          </li>
-        </ul>
-      </div>
-
-      {/* - Replaced large padding (px-[80px]) with mobile (px-6) and large-screen (lg:px-[80px])
-      */}
-      <div className="plans px-6 lg:px-[80px] my-20 flex flex-col justify-center items-center w-full relative" id='pricings'>
-        <h1 className={`${!isDarkMode && 'text-[#fff]'} text-3xl md:text-4xl mb-5 font-bold`}>Start Driving Sales Today.</h1>
-        <p className={`${!isDarkMode && "text-white"} text-lg md:text-xl text-center`}>Choose a plan that fits your business. <br /> Scale your AI as you grow.</p>
-
-        {/* - Changed flex container to stack on mobile (flex-col) and be a row on large screens (lg:flex-row)
-          - Centered items on mobile (items-center)
-          - Added a gap (gap-8)
-          - Removed fixed-width (w-[1100px]) and let flexbox handle it
-        */}
-        <div className={`${!isDarkMode && "text-white"} pricings mt-9 flex flex-col lg:flex-row justify-between items-center lg:items-start w-full max-w-6xl gap-8 z-10`}>
-
-          {/* - Cards are now w-full on mobile and have fixed widths only on large screens (lg:w-[...])
-          */}
-          <div className="Free bg-gradient-to-br from-gray-900 to-indigo-600 w-full lg:w-[270px] p-5 rounded-md shadow hover:scale-[1.02] transition-all duration-300 ease-in-out">
-            <h1 className='text-3xl font-semibold mb-2'>Plan: Free</h1>
-            <h2 className='text-2xl mb-2'>Price: $0/month</h2>
-
-            <h2 className=' text-[22px]'>Key Features:</h2>
-            <ul className='list-disc pl-5 text-[19px] mt-1'>
-              <li>500 monthly messages</li>
-              <li>Unlimited conversations</li>
-              <li>Instant customer Q&A</li>
-              <li>Basic product Recommendations</li>
-            </ul>
-            {/* - Button is now w-full for a consistent look on mobile
-            */}
-            <Button
-              className='mt-4 align-middle bg-white! main-text font-bold text-xl w-full cursor-pointer'
-              onClick={() => start('free')}
-            >
-              Start Free Trial
-            </Button>
-          </div>
-
-          <div className="Free bg-gradient-to-br from-gray-900 to-indigo-600 w-full lg:w-[370px] p-5 rounded-md shadow hover:scale-[1.02] transition-all duration-300 ease-in-out">
-            <h1 className='text-3xl font-semibold mb-2'>Plan: Growth</h1>
-            <h2 className='text-2xl mb-2'>Price: $49/month</h2>
-
-            <h2 className=' text-[22px]'>Key Features:</h2>
-            <ul className='list-disc pl-5 text-[19px] mt-1'>
-              <li>10,000 monthly messages</li>
-              <li>Proactive Recommendations</li>
-              <li>Automated Cart Recovery</li>
-              <li>Comprehensive analytics dashboard</li>
-              <li>Priority support</li>
-            </ul>
-            {/* - Button is now w-full
-            */}
-            <Button
-              className='mt-4 align-middle bg-white! main-text font-bold text-xl w-full cursor-pointer'
-              onClick={() => start('growth')}
-            >
-              Get Started
-            </Button>
-          </div>
-
-          <div className="Pro bg-gradient-to-br from-gray-900 to-indigo-600 w-full lg:w-[380px] p-5 rounded-md shadow hover:scale-[1.02] transition-all duration-300 ease-in-out">
-            <h1 className='text-3xl font-semibold mb-2'>Plan: Pro</h1>
-            <h2 className='text-2xl mb-2'>Price: $199/month</h2>
-
-            <h2 className=' text-[22px]'>Key Features:</h2>
-            <ul className='list-disc pl-5 text-[19px] mt-1'>
-              <li>100,000 monthly messages</li>
-              <li>All Growth features</li>
-              <li>Custom API Integrations</li>
-              <li>Voice chat capabilities (future feature)</li>
-              <li>Dedicated account manager</li>
-            </ul>
-            {/* - Button is now w-full
-            */}
-            <Button
-              className='mt-4 align-middle bg-white! main-text font-bold text-xl w-full cursor-pointer'
-              onClick={() => start('pro')}
-            >
-              Get Started
-            </Button>
+        {/* Placeholder Chat Widget (Existing) */}
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="w-16 h-16 rounded-full bg-[#FFB300] flex items-center justify-center text-white text-3xl shadow-xl cursor-pointer">
+            <MessageCircle className="w-8 h-8" />
           </div>
         </div>
-      </div>
-    </section>
+
+      </main>
+    </div>
   );
-}
+};
+
+export default Home;

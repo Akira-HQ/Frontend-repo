@@ -1,6 +1,6 @@
 'use client'
 // --- MODIFIED: Added imports ---
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { HiSparkles } from 'react-icons/hi2'
 import { IoClose, IoLockClosed } from 'react-icons/io5'
 import {
@@ -24,7 +24,6 @@ type Product = {
   id: string;
   name: string;
   description: string | null;
-  // --- FIXED: Should be an array of strings ---
   imageUrls: string[] | null;
   status: 'Strong' | 'Weak';
   health: number;
@@ -67,28 +66,54 @@ const AuditChecklistItem = ({ status, text }: { status: CheckStatus, text: strin
 
 const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   const { callApi } = UseAPI();
-  const isPremium = false;
+  const isPremium = true;
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editableDescription, setEditableDescription] = useState(product?.description || '');
+  const [editableDescription, setEditableDescription] = useState(product?.description || '');// --- NEW: Ref for the hidden file input ---
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-  // --- NEW: State for the currently displayed image ---
   const [displayImage, setDisplayImage] = useState<string | null>(null);
 
   useEffect(() => {
     setEditableDescription(product?.description || '');
-    // --- NEW: Set the display image when the product changes ---
-    // Default to the first image in the array
     if (product?.imageUrls && product.imageUrls.length > 0) {
       setDisplayImage(product.imageUrls[0]);
     } else {
-      setDisplayImage(null); // Reset if no images
+      setDisplayImage(null);
+    }
+    // Clear old previews when product changes
+    setImagePreviews([]);
+  }, [product]);
+
+  useEffect(() => {
+    setEditableDescription(product?.description || '');
+    if (product?.imageUrls && product.imageUrls.length > 0) {
+      setDisplayImage(product.imageUrls[0]);
+    } else {
+      setDisplayImage(null); 
     }
   }, [product]);
+  const handleAddImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreviews(prev => [...prev, previewUrl]);
+
+      setDisplayImage(previewUrl);
+
+      console.log("File selected, ready for upload:", file);
+    }
+  };
 
 
   const handleEnhanceDescription = async () => {
-    // ... (This function is correct, no changes)
     if (!product || !isPremium) return;
     setIsEnhancing(true);
     try {
@@ -109,7 +134,6 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   };
 
   const handleSaveChanges = async () => {
-    // ... (This function is correct, no changes)
     if (!product) return;
 
     setIsSaving(true);
@@ -131,7 +155,6 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
 
 
   if (!product) {
-    // ... (This 'no product' view is correct, no changes)
     return (
       <div className='h-[500px] flex flex-col items-center  bg-[#0f1117] rounded-lg p-6 '>
         <div className="text-center mt-20">
@@ -142,7 +165,6 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
     )
   }
 
-  // --- Checklist Logic ---
   const descLength = product.description?.length || 0;
   let descStatus: CheckStatus = 'fail';
   let descText = 'Description is too short (under 50 chars)';
@@ -154,9 +176,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
     descText = 'Description is okay (50-150 chars)';
   }
 
-  // --- FIXED: Use the new displayImage state ---
   const imgStatus: CheckStatus = (product.imageUrls && product.imageUrls.length > 0) ? 'pass' : 'fail';
-  // --- FIXED: Completed the text ---
   const imgText = imgStatus === 'pass' ? 'Product image is present' : 'Missing product image';
 
   let stockStatus: CheckStatus = 'fail';
@@ -176,63 +196,89 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   return (
     <>
       <div className="rounded-lg p-6 animate-fade-in bg-[#0f1117] relative">
-        <IoClose
-          className='absolute right-2 top-2 text-xl cursor-pointer bg-gray-800 w-6 h-6 rounded-lg '
-          onClick={() => onSelect(null)}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelected}
+          className="hidden"
+          accept="image/png, image/jpeg, image/webp"
         />
+        <div className="rounded-lg p-6 animate-fade-in bg-[#0f1117] relative">
+          <IoClose
+            className='absolute right-2 top-2 text-xl cursor-pointer bg-gray-800 w-6 h-6 rounded-lg '
+            onClick={() => onSelect(null)}
+          />
 
-        {/* --- MODIFIED: Main Image Display --- */}
-        <div className="mb-4">
-          {displayImage ? (
-            // --- FIXED: Use displayImage state variable ---
-            <img src={displayImage} alt={product.name} className='h-[250px] mb-4 rounded w-full object-cover' />
-          ) : (
-            // --- FIXED: Added "Add Image" button ---
-            <div className='h-[250px] mb-4 rounded w-full bg-gray-900 flex flex-col items-center justify-center gap-2'>
-              <span className='text-gray-500'>No Image</span>
-              <button className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300">
-                <IoAddCircleOutline />
-                Add Image
-              </button>
-            </div>
-          )}
+          {/* Main Image Display */}
+          <div className="mb-4">
+            {/* --- MODIFIED: Checks displayImage state first --- */}
+            {displayImage ? (
+              <img src={displayImage} alt={product.name} className='h-[250px] mb-4 rounded w-full object-cover' />
+            ) : (
+              // "No Image" placeholder
+              <div className='h-[250px] mb-4 rounded w-full bg-gray-900 flex flex-col items-center justify-center gap-2'>
+                <span className='text-gray-500'>No Image</span>
+                {/* --- MODIFIED: Connects button to handler --- */}
+                <button
+                  className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
+                  onClick={handleAddImageClick}
+                >
+                  <IoAddCircleOutline />
+                  Add Image
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Image Gallery Row */}
+          <div className="flex items-center gap-2 mb-4">
+            {/* 1. Renders existing images from DB */}
+            {product.imageUrls && product.imageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt="thumbnail"
+                onClick={() => setDisplayImage(url)}
+                className={`w-12 h-12 rounded object-cover cursor-pointer ${displayImage === url ? 'ring-2 ring-blue-500' : 'ring-0'
+                  }`}
+              />
+            ))}
+
+            {/* 2. Renders NEW local preview images */}
+            {imagePreviews.map((url, index) => (
+              <img
+                key={`preview-${index}`}
+                src={url}
+                alt="new preview"
+                onClick={() => setDisplayImage(url)}
+                className={`w-12 h-12 rounded object-cover cursor-pointer ${displayImage === url ? 'ring-2 ring-blue-500' : 'ring-0'
+                  }`}
+              />
+            ))}
+
+            {/* "Add More" button */}
+            {/* --- MODIFIED: Connects button to handler --- */}
+            <button
+              className="w-12 h-12 rounded bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white"
+              onClick={handleAddImageClick}
+            >
+              <IoAddCircleOutline className="text-2xl" />
+            </button>
+          </div>
+
+          <h3 className='text-lg font-bold text-white'>{product.name}</h3>
+
+          {/* Checklist */}
+          <div className="my-4 p-3 bg-gray-900/70 rounded-lg space-y-2">
+            <h4 className='text-sm font-semibold text-gray-300 mb-3'>AI Audit Checklist</h4>
+            <AuditChecklistItem status={descStatus} text={descText} />
+            {/* --- MODIFIED: This now updates instantly on preview --- */}
+            <AuditChecklistItem status={imgStatus} text={imgText} />
+            <AuditChecklistItem status={stockStatus} text={stockText} />
+            <AuditChecklistItem status={priceStatus} text={priceText} />
+          </div>
         </div>
 
-        {/* --- NEW: Image Gallery/Upload Row --- */}
-        <div className="flex items-center gap-2 mb-4">
-          {/* Map over all images to show thumbnails */}
-          {product.imageUrls && product.imageUrls.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt="thumbnail"
-              // When clicked, update the main display image
-              onClick={() => setDisplayImage(url)}
-              className={`w-12 h-12 rounded object-cover cursor-pointer ${
-                // Highlight the thumbnail that matches the main display image
-                displayImage === url ? 'ring-2 ring-blue-500' : 'ring-0'
-                }`}
-            />
-          ))}
-
-          {/* "Add More" button */}
-          <button className="w-12 h-12 rounded bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white">
-            <IoAddCircleOutline className="text-2xl" />
-          </button>
-        </div>
-
-        <h3 className='text-lg font-bold text-white'>{product.name}</h3>
-
-        {/* --- Checklist --- */}
-        <div className="my-4 p-3 bg-gray-900/70 rounded-lg space-y-2">
-          <h4 className='text-sm font-semibold text-gray-300 mb-3'>AI Audit Checklist</h4>
-          <AuditChecklistItem status={descStatus} text={descText} />
-          <AuditChecklistItem status={imgStatus} text={imgText} />
-          <AuditChecklistItem status={stockStatus} text={stockText} />
-          <AuditChecklistItem status={priceStatus} text={priceText} />
-        </div>
-
-        {/* --- Description Box and Buttons --- */}
         <div className="mb-6">
           <label className="text-sm font-semibold text-gray-300">Description</label>
 
@@ -244,7 +290,6 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
           />
 
           <div className="mt-3 flex items-center gap-3">
-            {/* ... (Enhance Button - correct, no changes) ... */}
             <button
               className={`text-sm font-semibold flex gap-1 items-center px-3 py-1.5 rounded-lg
                 ${isPremium
@@ -263,7 +308,6 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
               {isEnhancing ? 'Enhancing...' : 'Enhance with AI'}
             </button>
 
-            {/* ... (Save Button - correct, no changes) ... */}
             <button
               className="text-sm font-semibold text-gray-300 hover:text-white flex gap-1 items-center px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-wait"
               onClick={handleSaveChanges}
