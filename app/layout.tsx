@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {Header, ThemeProvider} from "@/components/Header";
 import { AppProvider } from "@/components/AppContext";
 import ToastContainer from "@/components/notifications/ToastContainer";
 import PageTracker from "@/components/hooks/PageTracker";
 import Footer from "@/components/Footer";
 import BannerAlert from "@/components/notifications/AlertNotifications";
 import NotificationContainer from "@/components/notifications/ToastContainer";
+import {  Header, ThemeProvider } from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Akira AI",

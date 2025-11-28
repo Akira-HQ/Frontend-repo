@@ -1,82 +1,42 @@
-"use client"
-import React, { useState, useContext, createContext, useMemo, useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react'; // Using Lucide for icon consistency
+"use client";
+import React, { useState, useContext, createContext, useMemo, useEffect } from "react";
+import { Moon, Sun, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
-// --- 1. Dark Mode Context Setup ---
-
-// Define the shape of the context data
-type ThemeContextType = {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-};
-
-// Create the context
+// Theme Context (same as before)
+type ThemeContextType = { isDarkMode: boolean; toggleDarkMode: () => void };
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Custom hook to consume the theme context
-const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used inside ThemeProvider");
+  return ctx;
 };
 
-// Theme Provider Component - wraps the application
-type ThemeProviderProps = { children: React.ReactNode };
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
-const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Default to dark mode for the Akira aesthetic
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(prev => !prev);
-  };
-
-  const value = useMemo(() => ({ isDarkMode, toggleDarkMode }), [isDarkMode]);
-
-  // Effect to apply the 'dark' class to the root element for Tailwind
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  const value = useMemo(() => ({ isDarkMode, toggleDarkMode }), [isDarkMode]);
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
-
-// --- 2. Shimmer Title Component ---
-// Encapsulates the custom animation CSS for the shimmering text effect
+// ShimmerTitle (same as before)
 const ShimmerTitle: React.FC = () => (
   <>
-    {/* Injecting CSS for the custom animation */}
     <style jsx global>{`
       @keyframes shimmer {
-        0% {
-          background-position: -400% 0;
-        }
-        100% {
-          background-position: 400% 0;
-        }
+        0% { background-position: -400% 0; }
+        100% { background-position: 400% 0; }
       }
       .shimmer-text {
-        /* Gradient defined using the neon colors */
-        background: linear-gradient(
-          90deg,
-          #ffffff 0%,
-          #a500ff 25%,
-          #00a7ff 50%,
-          #a500ff 75%,
-          #ffffff 100%
-        );
-        background-size: 400% 100%; /* Wider than container for animation */
+        background: linear-gradient(90deg, #ffffff 0%, #a500ff 25%, #00a7ff 50%, #a500ff 75%, #ffffff 100%);
+        background-size: 400% 100%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         animation: shimmer 20s infinite linear;
@@ -88,77 +48,128 @@ const ShimmerTitle: React.FC = () => (
   </>
 );
 
-// --- 3. Header Component ---
-
-type HeaderProps = {
-  // Determines if the CTA button should link to #pricings (for homepage)
-  isHomepage?: boolean;
-};
-
-const Header: React.FC<HeaderProps> = ({ isHomepage = true }) => {
-  // Use the custom hook to access theme state
+// Header with scroll spy
+export const Header = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const pathname = usePathname();
 
-  // CTA Button Gradient style from previous design
-  const NEON_GRADIENT = "bg-gradient-to-r from-[#00A7FF] to-[#A500FF]";
+  if (pathname.startsWith("/dashboard") || pathname === "/register") return null;
+
+  const navLinks = [
+    { id: "hero", label: "Hero" },
+    { id: "features", label: "Features" },
+    { id: "why-akira", label: "Why Akira" },
+    { id: "capacity", label: "Capacity" },
+    { id: "how-it-works", label: "How It Works" },
+    { id: "conversation", label: "Conversation" },
+    { id: "integration", label: "Integrations" },
+    { id: "pricing", label: "Pricing" },
+    { id: "testimonial", label: "Testimonials" },
+  ];
+
+  const [active, setActive] = useState("hero");
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  // Scroll spy
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px" } // triggers when section is in middle of screen
+    );
+
+    navLinks.forEach((link) => {
+      const el = document.getElementById(link.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [navLinks]);
+
+  const handleScroll = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMobileMenu(false);
+  };
 
   return (
-    <header
-      className="
-        fixed top-0 left-0 w-full z-50 transition-colors duration-300
-        bg-black/5 backdrop-blur-md shadow-lg shadow-black/30
-      "
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="fixed top-0 left-0 w-full z-50 bg-black/10 backdrop-blur-xl shadow-lg">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
 
-        {/* Left: Site Title with Shimmer Effect */}
         <ShimmerTitle />
 
-        {/* Right: Actions */}
-        <div className="flex items-center space-x-4 sm:space-x-6">
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex space-x-2 bg-white/10 border border-white/20 rounded-full p-1 backdrop-blur-lg">
+          {navLinks.map(link => (
+            <button
+              key={link.id}
+              onClick={() => handleScroll(link.id)}
+              className="relative px-4 py-1.5 text-sm font-medium text-gray-300"
+            >
+              {active === link.id && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-[#A500FF] to-[#FFB300] opacity-40"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{link.label}</span>
+            </button>
+          ))}
+        </nav>
 
-          {/* Optional Search Input (Commented out) */}
-          {
-            /* {!isHomepage && (
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="px-3 py-1.5 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00A7FF] transition-all hidden sm:block"
-              />
-            )}
-            */
-          }
+        {/* Mobile */}
+        <div className="md:hidden flex items-center space-x-2">
+          <button onClick={() => setMobileMenu(prev => !prev)} className="p-2 rounded-full hover:bg-white/10 transition">
+            {mobileMenu ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+          </button>
+        </div>
 
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            aria-label={`Toggle ${isDarkMode ? 'Light' : 'Dark'} Mode`}
-            className="p-2 rounded-full text-gray-300 hover:bg-white/10 transition duration-200"
-          >
-            {isDarkMode
-              ? <Sun className="w-5 h-5 text-amber-300 hover:text-white" />
-              : <Moon className="w-5 h-5 text-gray-700 hover:text-black" />
-            }
+        {/* Theme & CTA */}
+        <div className="hidden md:flex items-center space-x-4">
+          <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-white/10 transition">
+            {isDarkMode ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}
           </button>
 
-          {/* CTA Button (Only on Homepage) */}
-          {isHomepage && (
-            <a
-              href="#pricings"
-              className={`
-                hidden sm:block text-white font-semibold py-2 px-4 rounded-xl text-sm
-                transition duration-300 ease-in-out transform hover:scale-[1.05]
-                ${NEON_GRADIENT} shadow-[0_0_15px_rgba(165,0,255,0.4)]
-              `}
-            >
-              Get Started
-            </a>
-          )}
+          <a
+            href="#pricing"
+            className="hidden sm:block px-4 py-2 rounded-xl text-white text-sm font-semibold
+              bg-gradient-to-r from-[#00A7FF] to-[#A500FF]
+              shadow-[0_0_12px_rgba(165,0,255,0.4)]
+              hover:scale-[1.05] transition-transform"
+          >
+            Get Started
+          </a>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {mobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="md:hidden bg-black/95 backdrop-blur-lg rounded-xl mx-4 mt-2 p-4 absolute w-[calc(100%-2rem)] left-0 right-0 shadow-xl"
+          >
+            {navLinks.map(link => (
+              <button
+                key={link.id}
+                onClick={() => handleScroll(link.id)}
+                className={`block w-full text-left px-4 py-2 mb-2 rounded-lg ${active === link.id ? "bg-gradient-to-r from-[#A500FF] to-[#FFB300] text-white" : "text-gray-300 hover:bg-white/10"
+                  } transition`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
-
-// Export both the main component and the provider for application-wide usage
-export { Header, ThemeProvider, useTheme };

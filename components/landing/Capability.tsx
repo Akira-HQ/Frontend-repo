@@ -4,7 +4,7 @@ import { LucideIcon } from "lucide-react";
 export type Capability = { icon: LucideIcon; title: string; };
 
 export const CapabilityGrid: React.FC<{ capabilities: Capability[] }> = ({ capabilities }) => (
-  <section className="container mx-auto px-4 py-20 max-w-7xl">
+  <section id="capacity" className="container mx-auto px-4 py-20 max-w-7xl">
     <div className="text-center mb-16">
       <h2 className="text-3xl md:text-4xl font-bold mb-4">
         Akira's Core Capabilities
@@ -18,12 +18,13 @@ export const CapabilityGrid: React.FC<{ capabilities: Capability[] }> = ({ capab
         <div
           key={index}
           className="
-            group p-6 rounded-xl bg-gray-900/60 border border-gray-800 
-            hover:border-[#00A7FF] hover:shadow-[0_0_15px_rgba(0,167,255,0.4)]
-            transition duration-330
-          "
+            group p-6 rounded-2xl h-full flex flex-col justify-center text-center
+            bg-white/5 backdrop-blur-sm border border-gray-800 
+            transition duration-500 transform hover:scale-[1.05]
+            hover:border-[#A500FF] hover:shadow-xl hover:shadow-purple-900/50 
+          "
         >
-          <cap.icon className="w-8 h-8 text-[#A500FF] mb-3 group-hover:text-[#00A7FF]" />
+          <cap.icon className="w-8 h-8 text-[#FFB300] mb-3 mx-auto transition duration-300 group-hover:text-[#A500FF]" />
           <h3 className="text-lg font-semibold text-white">{cap.title}</h3>
         </div>
       ))}
