@@ -83,7 +83,7 @@ const Footer: React.FC = () => {
     ],
     legal: [
       { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
+      { name: 'Terms of Service', href: '/terms-of-service' },
       { name: 'Cookie Policy', href: '/cookies' },
     ],
   };

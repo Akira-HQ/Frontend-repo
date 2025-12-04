@@ -99,7 +99,7 @@ const usagePurposeData: TableData[] = [
 ];
 
 
-const PrivacyPolicyPage: React.FC = () => {
+const page: React.FC = () => {
   return (
     // Set the darkest background to match the landing page
     <div className="min-h-screen bg-gray-950 text-gray-400 p-4 sm:p-8">
@@ -270,4 +270,4 @@ const PrivacyPolicyPage: React.FC = () => {
   );
 };
 
-export default PrivacyPolicyPage;
+export default page;
