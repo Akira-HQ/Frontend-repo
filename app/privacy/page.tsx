@@ -244,8 +244,19 @@ const PrivacyPolicyPage: React.FC = () => {
             </div>
           </CollapsibleSection>
 
+          {/* Section 7: Contact Us (FINAL CONTENT) */}
           <CollapsibleSection title="7. Contact Us">
-            <p className="text-sm italic">This section will include the dedicated contact information for privacy-related inquiries. [Placeholder Content]</p>
+            <div className="space-y-4">
+              <p>If you have any questions or concerns regarding this Privacy Policy, our data practices, or if you wish to exercise any of your rights described in Section 5, please contact our dedicated Privacy Team:</p>
+
+              <h4 className="text-lg font-bold text-gray-300">Data Protection Contact</h4>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-white">Company Name:</strong> [Insert Legal Company Name Here]</li>
+                <li><strong className="text-white">Mailing Address:</strong> [Insert Mailing Address Here]</li>
+                <li><strong className="text-white">Email for Privacy Requests:</strong> <a href="mailto:privacy@akira-ai.com" className="text-[#A500FF] hover:underline">privacy@akira-ai.com</a> (Recommended for all data rights requests)</li>
+              </ul>
+              <p>We take all privacy inquiries seriously and will respond promptly to address your concerns.</p>
+            </div>
           </CollapsibleSection>
 
         </section>
