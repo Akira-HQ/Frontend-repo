@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -205,13 +205,43 @@ const PrivacyPolicyPage: React.FC = () => {
             </div>
           </CollapsibleSection>
 
-          {/* TO BE COMPLETED SECTIONS GO HERE */}
+          {/* Section 5: Your Rights and Choices (NEW CONTENT) */}
           <CollapsibleSection title="5. Your Rights and Choices">
-            <p className="text-sm italic">This section will outline the rights of Owners (access, correction, deletion) and how to exercise those rights. [Placeholder Content]</p>
+            <div className="space-y-4">
+              <p>You have certain rights regarding the personal data we hold about you. These rights apply primarily to your **Owner Data** (Section 1A) where Akira AI acts as the Data Controller.</p>
+
+              <h4 className="text-lg font-bold text-gray-300">5.1. Core Data Rights</h4>
+              <p>Depending on your jurisdiction, your rights may include:</p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-white">Right of Access:</strong> You can request confirmation of whether we are processing your personal data and obtain a copy of the data we hold about you.</li>
+                <li><strong className="text-white">Right to Rectification (Correction):</strong> You can request that we correct any incomplete or inaccurate data we hold about you.</li>
+                <li><strong className="text-white">Right to Erasure (Deletion):</strong> You can request the deletion of your personal data, subject to certain legal obligations (e.g., retaining records for billing/tax purposes).</li>
+                <li><strong className="text-white">Right to Data Portability:</strong> You can request to receive your personal data in a structured, commonly used, and machine-readable format.</li>
+              </ul>
+
+              <h4 className="text-lg font-bold text-gray-300">5.2. Exercising Your Rights</h4>
+              <p>You can typically exercise these rights in two ways:</p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li><strong className="text-white">Admin Dashboard:</strong> Most contact and configuration data can be accessed, reviewed, and updated directly within the Akira AI Admin Dashboard.</li>
+                <li><strong className="text-white">Contact Request:</strong> For deletion or portability requests, you may contact us directly via the details provided in Section 7. We will respond to all valid requests within a reasonable timeframe.</li>
+              </ul>
+
+              <h4 className="text-lg font-bold text-gray-300">5.3. Customer Data Rights (Our Role as Processor)</h4>
+              <p>For **Customer Data** (Section 1B), we act only as a Data Processor on your behalf. If one of your customers submits a data rights request (e.g., a "Right to Delete") related to the data processed by Akira AI, you, the shop owner, are responsible for handling that request. You must forward the request to us, and we will assist in fulfilling your obligations, subject to the terms of our Data Processing Addendum (DPA).</p>
+            </div>
           </CollapsibleSection>
 
+          {/* Section 6: Changes to this Privacy Policy (NEW CONTENT) */}
           <CollapsibleSection title="6. Changes to this Privacy Policy">
-            <p className="text-sm italic">This section will describe how and when we notify you of policy changes. [Placeholder Content]</p>
+            <div className="space-y-4">
+              <p>We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any material changes by:</p>
+              <ul className="list-disc list-inside ml-4 space-y-2">
+                <li>Sending an email notification to the primary email address associated with your Owner Account.</li>
+                <li>Placing a prominent notice within the Akira AI Admin Dashboard prior to the change becoming effective.</li>
+                <li>Updating the "Last Updated" date at the top of this Privacy Policy.</li>
+              </ul>
+              <p>The updated Privacy Policy will become effective on the date stated in the notification. Your continued use of the Service after the effective date means you accept the updated Privacy Policy. If you do not agree to the changes, you must discontinue your use of the Service.</p>
+            </div>
           </CollapsibleSection>
 
           <CollapsibleSection title="7. Contact Us">
