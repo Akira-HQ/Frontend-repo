@@ -81,7 +81,7 @@ const OverviewProductTable = ({ products, selectedProduct, onSelectedProduct }: 
 
             {/* 2. Price */}
             <div className="col-span-2 text-right font-medium text-white">
-              {product.price > 0 ? `$${product.price.toFixed(2)}` : 'N/A'}
+              {product.price > 0 ? `${product.price.toFixed(2)}` : 'N/A'}
             </div>
 
             {/* 3. Stock */}
