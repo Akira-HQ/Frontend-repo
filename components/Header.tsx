@@ -55,7 +55,7 @@ export const Header = () => {
   const pathname = usePathname();
 
   // Determine if the header should be minimal (logo only)
-  const isMinimalHeader = pathname.startsWith("/dashboard") || pathname === "/register";
+  const isMinimalHeader = pathname.startsWith("/dashboard") || pathname === "/register/sign-in" || pathname === "/register";
 
   const navLinks = [
     { id: "hero", label: "Hero" },
