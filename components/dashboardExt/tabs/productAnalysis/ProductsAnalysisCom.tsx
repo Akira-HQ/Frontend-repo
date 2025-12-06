@@ -35,7 +35,7 @@ type AnalysisSummary = {
   healthScore: number;
 }
 
-const ProductsOverview = () => {
+const ProductsAnalysisCom = () => {
   const [analysisView, setAnalysisView] = useState<'summary' | 'weak' | 'closed'>('summary');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -183,4 +183,4 @@ const ProductsOverview = () => {
   )
 }
 
-export default ProductsOverview
+export default ProductsAnalysisCom

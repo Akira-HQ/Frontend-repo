@@ -1,7 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../AppContext'
-import ProductsOverview from './tabs/productAnalysis/ProductsOverview'
+import ProductsAnalysisCom from './tabs/productAnalysis/ProductsAnalysisCom'
+import ProductOverview from './tabs/productOverview/ProductOverview'
 
 const AiTrainingContent = () => {
   const { isDarkMode } = useAppContext()
@@ -24,15 +25,23 @@ const AiTrainingContent = () => {
           </div>
         </div>
 
-        <div className='absolute right-4'>
+        {/* <div className='absolute right-4'>
           <input type="text" className='border rounded-md h-8 w-[280px] px-2 placeholder:text-gray-600 placeholder:italic' placeholder='search...' />
-        </div>
+        </div> */}
       </div>
 
 
       <div className="TabContents">
         {activeTab === 1 && (
-          <ProductsOverview />
+          <ProductsAnalysisCom />
+        )}
+      </div>
+
+      <div className="TabContents">
+        {activeTab === 2 && (
+          <div className="mt-26">
+            <ProductOverview />
+          </div>
         )}
       </div>
     </div>
