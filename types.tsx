@@ -137,3 +137,54 @@ export type Product = {
   sku?: string;
 }
 
+// Shared Metrics Type
+export type Metric = {
+  label: string;
+  value: string;
+  trend: 1 | 0 | -1; // 1: up, 0: neutral, -1: down
+};
+
+// Shared Report Data Type
+export type ReportData = {
+  id: string;
+  type: 'DIGEST' | 'ALERT' | 'ESCALATION' | 'QUERY_RESPONSE';
+  title: string;
+  message: string;
+  time: string;
+  conversationId?: string;
+};
+
+// Mock KPI Data
+export const MOCK_KPIS: Metric[] = [
+  { label: "Conversion Rate Lift", value: "+7.1%", trend: 1 },
+  { label: "Average Order Value", value: "$134", trend: 0 },
+  { label: "Response Time (Avg)", value: "0.8s", trend: -1 },
+  { label: "Abandoned Cart Recovery", value: "12%", trend: 1 },
+];
+
+// Mock Reports
+export const MOCK_REPORTS: ReportData[] = [
+  {
+    id: 'r_003',
+    type: 'ALERT',
+    title: 'Hottest Product Alert!',
+    message: "The **Pro DSLR Camera MK-V** saw a 25% increase in purchase intent after Akira recommended it 45 times yesterday. Consider boosting ad spend.",
+    time: '1 hour ago',
+    conversationId: 'conv_789'
+  },
+  {
+    id: 'r_002',
+    type: 'DIGEST',
+    title: 'Daily Sales Digest: 12/05/2025',
+    message: "Total conversions increased by 7% thanks to automated follow-ups. However, the **Smartwatch Series 8** hit 0 stock, generating 12 frustrated customer chats.",
+    time: '5 hours ago',
+  },
+  {
+    id: 'r_001',
+    type: 'ESCALATION',
+    title: 'Human Intervention Required',
+    message: "A customer is demanding a refund outside the 30-day window for order #3098. Please review the chat log and handle the exception.",
+    time: '1 day ago',
+    conversationId: 'conv_101'
+  },
+];
