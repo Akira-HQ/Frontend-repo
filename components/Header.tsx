@@ -3,6 +3,7 @@ import React, { useState, useContext, createContext, useMemo, useEffect } from "
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 // Theme Context (same as before)
 type ThemeContextType = { isDarkMode: boolean; toggleDarkMode: () => void };
@@ -53,7 +54,8 @@ export const Header = () => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const pathname = usePathname();
 
-  if (pathname.startsWith("/dashboard") || pathname === "/register") return null;
+  // Determine if the header should be minimal (logo only)
+  const isMinimalHeader = pathname.startsWith("/dashboard") || pathname === "/register";
 
   const navLinks = [
     { id: "hero", label: "Hero" },
@@ -72,6 +74,9 @@ export const Header = () => {
 
   // Scroll spy
   useEffect(() => {
+    // Only run scroll spy if the header is not minimal
+    if (isMinimalHeader) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -89,7 +94,7 @@ export const Header = () => {
     });
 
     return () => observer.disconnect();
-  }, [navLinks]);
+  }, [navLinks, isMinimalHeader]);
 
   const handleScroll = (id: string) => {
     const el = document.getElementById(id);
@@ -101,56 +106,64 @@ export const Header = () => {
     <header className="fixed top-0 left-0 w-full z-50 bg-black/10 backdrop-blur-xl shadow-lg">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
 
-        <ShimmerTitle />
+        <Link href={"/"}>
+          <ShimmerTitle />
+        </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex space-x-2 bg-white/10 border border-white/20 rounded-full p-1 backdrop-blur-lg">
-          {navLinks.map(link => (
-            <button
-              key={link.id}
-              onClick={() => handleScroll(link.id)}
-              className="relative px-4 py-1.5 text-sm font-medium text-gray-300"
-            >
-              {active === link.id && (
-                <motion.div
-                  layoutId="active-pill"
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-[#A500FF] to-[#FFB300] opacity-40"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              <span className="relative z-10">{link.label}</span>
+        {/* Desktop Nav (Hidden in minimal mode) */}
+        {!isMinimalHeader && (
+          <nav className="hidden md:flex space-x-2 bg-white/10 border border-white/20 rounded-full p-1 backdrop-blur-lg">
+            {navLinks.map(link => (
+              <button
+                key={link.id}
+                onClick={() => handleScroll(link.id)}
+                className="relative px-4 py-1.5 text-sm font-medium text-gray-300"
+              >
+                {active === link.id && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 rounded-full bg-gradient-to-r from-[#A500FF] to-[#FFB300] opacity-40"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
+              </button>
+            ))}
+          </nav>
+        )}
+
+        {/* Mobile Menu Button (Hidden in minimal mode) */}
+        {!isMinimalHeader && (
+          <div className="md:hidden flex items-center space-x-2">
+            <button onClick={() => setMobileMenu(prev => !prev)} className="p-2 rounded-full hover:bg-white/10 transition">
+              {mobileMenu ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
             </button>
-          ))}
-        </nav>
+          </div>
+        )}
 
-        {/* Mobile */}
-        <div className="md:hidden flex items-center space-x-2">
-          <button onClick={() => setMobileMenu(prev => !prev)} className="p-2 rounded-full hover:bg-white/10 transition">
-            {mobileMenu ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
-          </button>
-        </div>
+        {/* Theme & CTA (Hidden in minimal mode) */}
+        {!isMinimalHeader && (
+          <div className="hidden md:flex items-center space-x-4">
+            <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-white/10 transition">
+              {isDarkMode ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}
+            </button>
 
-        {/* Theme & CTA */}
-        <div className="hidden md:flex items-center space-x-4">
-          <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-white/10 transition">
-            {isDarkMode ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}
-          </button>
-
-          <a
-            href="#pricing"
-            className="hidden sm:block px-4 py-2 rounded-xl text-white text-sm font-semibold
-              bg-gradient-to-r from-[#00A7FF] to-[#A500FF]
-              shadow-[0_0_12px_rgba(165,0,255,0.4)]
-              hover:scale-[1.05] transition-transform"
-          >
-            Get Started
-          </a>
-        </div>
+            <a
+              href="#pricing"
+              className="hidden sm:block px-4 py-2 rounded-xl text-white text-sm font-semibold
+                bg-gradient-to-r from-[#00A7FF] to-[#A500FF]
+                shadow-[0_0_12px_rgba(165,0,255,0.4)]
+                hover:scale-[1.05] transition-transform"
+            >
+              Get Started
+            </a>
+          </div>
+        )}
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown (Only shown if mobileMenu is true AND not minimal) */}
       <AnimatePresence>
-        {mobileMenu && (
+        {mobileMenu && !isMinimalHeader && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
