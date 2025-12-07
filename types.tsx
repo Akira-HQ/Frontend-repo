@@ -124,6 +124,12 @@ export const NEON_GRADIENT = "bg-gradient-to-r from-[#00A7FF] to-[#A500FF]";
 export const ACCENT_COLOR_BLUE = "#00A7FF";
 export const ACCENT_COLOR_PURPLE = "#A500FF";
 export const CARD_BG = "bg-gray-900/50";
+// --- STYLING CONSTANTS ---
+export const NEON_PURPLE = "#A500FF";
+export const NEON_ORANGE = "#FFB300";
+export const ACCENT_BLUE = "#00A7FF";
+export const TEXT_GRAY = "#9ca3af"; // gray-400
+export const CHART_GRID_COLOR = "#374151"; // gray-700
 
 export type Product = {
   id: string;

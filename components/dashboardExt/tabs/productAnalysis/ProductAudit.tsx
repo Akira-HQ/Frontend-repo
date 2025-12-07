@@ -66,7 +66,7 @@ const AuditChecklistItem = ({ status, text }: { status: CheckStatus, text: strin
 
 const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   const { callApi } = UseAPI();
-  const isPremium = true;
+  const isPremium = !true;
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editableDescription, setEditableDescription] = useState(product?.description || '');// --- NEW: Ref for the hidden file input ---
