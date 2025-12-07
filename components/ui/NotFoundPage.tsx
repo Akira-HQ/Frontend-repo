@@ -99,7 +99,7 @@ export default function NotFound() {
 
           {/* Secondary CTA: Login/Dashboard */}
           <button
-            onClick={() => handleNavigate('/login')}
+            onClick={() => handleNavigate('/register/sign-in')}
             className={`
               relative inline-flex items-center justify-center px-8 py-3 text-lg font-medium rounded-full 
               border border-white/20 text-gray-300 transition duration-300 hover:border-[${NEON_ORANGE}] hover:text-white

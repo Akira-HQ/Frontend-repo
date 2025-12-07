@@ -36,7 +36,7 @@ const Home: React.FC = () => {
       planParam = 'pro';
     } else {
       // For general buttons like "See Plans" or "Start Free Trial", default to Growth plan trial
-      planParam = 'growth';
+      planParam = 'free';
     }
 
     console.log(`Redirecting to /register?plan=${planParam}`);
