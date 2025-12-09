@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import React, { useContext, createContext } from 'react';
-import { Linkedin, Twitter, Github, MessageCircle } from 'lucide-react';
+import React, { useContext, createContext } from "react";
+import { Linkedin, Twitter, Github, MessageCircle } from "lucide-react";
 
 // --- 1. Theme Context Placeholder (Replicated for component independence) ---
 type ThemeContextType = {
@@ -12,8 +12,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    console.error('useTheme must be used within a ThemeProvider.');
-    return { isDarkMode: true, toggleDarkMode: () => { } }; // Default fallback
+    console.error("useTheme must be used within a ThemeProvider.");
+    return { isDarkMode: true, toggleDarkMode: () => {} }; // Default fallback
   }
   return context;
 };
@@ -63,40 +63,58 @@ const Footer: React.FC = () => {
   // Link Column Definitions
   const links = {
     product: [
-      { name: 'Overview', href: '/' },
-      { name: 'Features', href: '#features' },
-      { name: 'Pricing', href: '#pricings' },
-      { name: 'Demo', href: '/demo' },
-      { name: 'Dashboard', href: '/dashboard' },
+      { name: "Overview", href: "/" },
+      { name: "Features", href: "#features" },
+      { name: "Pricing", href: "#pricings" },
+      { name: "Demo", href: "/demo" },
+      { name: "Dashboard", href: "/dashboard" },
     ],
     company: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Contact', href: '/contact' },
+      { name: "About Us", href: "/about" },
+      { name: "Careers", href: "/careers" },
+      { name: "Contact", href: "/contact" },
     ],
     resources: [
-      { name: 'Blog', href: '/blog' },
-      { name: 'Guides', href: '/guides' },
-      { name: 'Docs', href: '/docs' },
-      { name: 'API', href: '/api' },
-      { name: 'FAQ', href: '/faq' },
+      { name: "Blog", href: "/blog" },
+      { name: "Guides", href: "/guides" },
+      { name: "Docs", href: "/docs" },
+      { name: "API", href: "/api" },
+      { name: "FAQ", href: "/faq" },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms-of-service' },
-      { name: 'Cookie Policy', href: '/cookies' },
+      { name: "Privacy Policy", href: "/privacy" },
+      { name: "Terms of Service", href: "/terms-of-service" },
+      { name: "Cookie Policy", href: "/cookies" },
     ],
   };
 
   // Social icons data
   const socialIcons = [
-    { icon: Linkedin, href: 'https://linkedin.com/company/akira-ai', label: 'LinkedIn', hoverColor: NEON_ORANGE },
-    { icon: Twitter, href: 'https://twitter.com/akira-ai', label: 'X (Twitter)', hoverColor: NEON_PURPLE },
-    { icon: Github, href: 'https://github.com/akira-ai', label: 'GitHub', hoverColor: NEON_ORANGE },
+    {
+      icon: Linkedin,
+      href: "https://linkedin.com/company/akira-ai",
+      label: "LinkedIn",
+      hoverColor: NEON_ORANGE,
+    },
+    {
+      icon: Twitter,
+      href: "https://twitter.com/akira-ai",
+      label: "X (Twitter)",
+      hoverColor: NEON_PURPLE,
+    },
+    {
+      icon: Github,
+      href: "https://github.com/akira-ai",
+      label: "GitHub",
+      hoverColor: NEON_ORANGE,
+    },
   ];
 
   // Helper Component for a Link Column
-  const LinkColumn: React.FC<{ title: string, items: { name: string, href: string }[] }> = ({ title, items }) => (
+  const LinkColumn: React.FC<{
+    title: string;
+    items: { name: string; href: string }[];
+  }> = ({ title, items }) => (
     <div className="space-y-4">
       {/* Title uses a subtle gradient or highlight */}
       <h4 className="text-sm font-bold text-white mb-2 tracking-wider uppercase drop-shadow-sm">
@@ -123,22 +141,23 @@ const Footer: React.FC = () => {
   );
 
   return (
-    <footer className="
+    <footer
+      className="
       relative z-10 
       bg-gray-950/90 backdrop-blur-sm
       shadow-[0_-5px_30px_rgba(165,0,255,0.1)] /* Subtle top purple glow */
       py-16 md:py-20
-    ">
+    "
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-white">
-
         {/* --- MAIN GRID LAYOUT --- */}
         <div className="grid grid-cols-2 gap-12 md:grid-cols-6 lg:gap-20">
-
           {/* 1. Brand Section (Left-most column) */}
           <div className="col-span-2 md:col-span-2 space-y-4">
             <ShimmerTitle />
             <p className="text-sm text-gray-400 max-w-xs">
-              Autonomous sales management for e-commerce, powered by intelligent AI.
+              Autonomous sales management for e-commerce, powered by intelligent
+              AI.
             </p>
 
             {/* Social Icons (Styled for neon hover effect with alternating colors) */}
@@ -176,7 +195,6 @@ const Footer: React.FC = () => {
 
           {/* 5. Legal Links */}
           <LinkColumn title="Legal" items={links.legal} />
-
         </div>
 
         {/* --- BOTTOM ROW: COPYRIGHT (Sleek Divider) --- */}

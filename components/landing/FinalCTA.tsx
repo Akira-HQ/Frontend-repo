@@ -1,8 +1,11 @@
 import { NEON_GRADIENT } from "@/types";
 import { SecondaryButton } from "../Button";
 
-export const FinalCTA: React.FC<{ onStart: () => void; onSeePlans: () => void }> = ({ onStart, onSeePlans }) => (
-  <section  className="container mx-auto px-4 py-20 max-w-7xl">
+export const FinalCTA: React.FC<{
+  onStart: () => void;
+  onSeePlans: () => void;
+}> = ({ onStart, onSeePlans }) => (
+  <section className="container mx-auto px-4 py-20 max-w-7xl">
     <div
       className={`
         bg-gradient-to-r from-[#00A7FF] to-[#A500FF] p-12 rounded-3xl text-center
@@ -28,9 +31,7 @@ export const FinalCTA: React.FC<{ onStart: () => void; onSeePlans: () => void }>
         >
           Start Free
         </button>
-        <SecondaryButton onClick={onSeePlans}>
-          See Plans
-        </SecondaryButton>
+        <SecondaryButton onClick={onSeePlans}>See Plans</SecondaryButton>
       </div>
     </div>
   </section>

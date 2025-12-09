@@ -1,5 +1,11 @@
 "use client";
-import React, { useState, useContext, createContext, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useContext,
+  createContext,
+  useMemo,
+  useEffect,
+} from "react";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -17,14 +23,16 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
+  const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
   const value = useMemo(() => ({ isDarkMode, toggleDarkMode }), [isDarkMode]);
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };
 
 // ShimmerTitle (same as before)
@@ -55,7 +63,10 @@ export const Header = () => {
   const pathname = usePathname();
 
   // Determine if the header should be minimal (logo only)
-  const isMinimalHeader = pathname.startsWith("/dashboard") || pathname === "/register/sign-in" || pathname === "/register";
+  const isMinimalHeader =
+    pathname.startsWith("/dashboard") ||
+    pathname === "/register/sign-in" ||
+    pathname === "/register";
 
   const navLinks = [
     { id: "hero", label: "Hero" },
@@ -85,7 +96,7 @@ export const Header = () => {
           }
         });
       },
-      { rootMargin: "-50% 0px -50% 0px" } // triggers when section is in middle of screen
+      { rootMargin: "-50% 0px -50% 0px" }, // triggers when section is in middle of screen
     );
 
     navLinks.forEach((link) => {
@@ -105,7 +116,6 @@ export const Header = () => {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/10 backdrop-blur-xl shadow-lg">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-
         <Link href={"/"}>
           <ShimmerTitle />
         </Link>
@@ -113,7 +123,7 @@ export const Header = () => {
         {/* Desktop Nav (Hidden in minimal mode) */}
         {!isMinimalHeader && (
           <nav className="hidden md:flex space-x-2 bg-white/10 border border-white/20 rounded-full p-1 backdrop-blur-lg">
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => handleScroll(link.id)}
@@ -135,8 +145,15 @@ export const Header = () => {
         {/* Mobile Menu Button (Hidden in minimal mode) */}
         {!isMinimalHeader && (
           <div className="md:hidden flex items-center space-x-2">
-            <button onClick={() => setMobileMenu(prev => !prev)} className="p-2 rounded-full hover:bg-white/10 transition">
-              {mobileMenu ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+            <button
+              onClick={() => setMobileMenu((prev) => !prev)}
+              className="p-2 rounded-full hover:bg-white/10 transition"
+            >
+              {mobileMenu ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-white" />
+              )}
             </button>
           </div>
         )}
@@ -144,8 +161,15 @@ export const Header = () => {
         {/* Theme & CTA (Hidden in minimal mode) */}
         {!isMinimalHeader && (
           <div className="hidden md:flex items-center space-x-4">
-            <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-white/10 transition">
-              {isDarkMode ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5 text-gray-800" />}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-white/10 transition"
+            >
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-yellow-300" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-800" />
+              )}
             </button>
 
             <a
@@ -170,12 +194,15 @@ export const Header = () => {
             exit={{ opacity: 0, y: -10 }}
             className="md:hidden bg-black/95 backdrop-blur-lg rounded-xl mx-4 mt-2 p-4 absolute w-[calc(100%-2rem)] left-0 right-0 shadow-xl"
           >
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => handleScroll(link.id)}
-                className={`block w-full text-left px-4 py-2 mb-2 rounded-lg ${active === link.id ? "bg-gradient-to-r from-[#A500FF] to-[#FFB300] text-white" : "text-gray-300 hover:bg-white/10"
-                  } transition`}
+                className={`block w-full text-left px-4 py-2 mb-2 rounded-lg ${
+                  active === link.id
+                    ? "bg-gradient-to-r from-[#A500FF] to-[#FFB300] text-white"
+                    : "text-gray-300 hover:bg-white/10"
+                } transition`}
               >
                 {link.label}
               </button>

@@ -1,13 +1,17 @@
-import React from 'react';
+import React from "react";
 import { LucideIcon } from "lucide-react";
 
 export type FeatureCardProps = {
   icon: LucideIcon;
   title: string;
-  description: string
+  description: string;
 };
 
-export const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description }) => (
+export const FeatureCard: React.FC<FeatureCardProps> = ({
+  icon: Icon,
+  title,
+  description,
+}) => (
   <div
     className="
       group bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-gray-800 
@@ -21,7 +25,9 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, des
       {/* Icon color is the vibrant purple, softening slightly on hover */}
       <Icon className="w-6 h-6 text-[#FFB300] transition duration-300 group-hover:text-[#A500FF]" />
     </div>
-    <h3 className="text-xl font-bold text-white transition duration-300 group-hover:text-gray-50">{title}</h3>
+    <h3 className="text-xl font-bold text-white transition duration-300 group-hover:text-gray-50">
+      {title}
+    </h3>
     <p className="text-gray-400">{description}</p>
   </div>
 );

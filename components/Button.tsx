@@ -1,22 +1,35 @@
-import React from 'react'
-import { ButtonProps } from '@/types'
-import { useRef, useEffect } from 'react';
-import gsap from 'gsap'
+import React from "react";
+import { ButtonProps } from "@/types";
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
 
-type ButtonProp = { children: React.ReactNode; onClick?: () => void; className?: string; href?: string; type?: "button" | "submit" | "reset" | undefined; disabled?: boolean; };
+type ButtonProp = {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  href?: string;
+  type?: "button" | "submit" | "reset" | undefined;
+  disabled?: boolean;
+};
 const NEON_GRADIENT = "bg-gradient-to-r from-[#00A7FF] to-[#A500FF]";
 
-
-export const PrimaryButton: React.FC<ButtonProp> = ({ children, onClick, className = '', href, type, disabled }) => {
-  const Comp = href ? 'a' : 'button';
+export const PrimaryButton: React.FC<ButtonProp> = ({
+  children,
+  onClick,
+  className = "",
+  href,
+  type,
+  disabled,
+}) => {
+  const Comp = href ? "a" : "button";
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    if (typeof gsap === 'undefined') return;
+    if (typeof gsap === "undefined") return;
     // GSAP Hover Animation
     gsap.to(buttonRef.current, {
       duration: 0.2,
-      ease: 'power1.inOut',
+      ease: "power1.inOut",
       boxShadow: `0 0 20px rgba(165,0,255,0.6)`,
       scale: 1, // Reset initial scale
       paused: true,
@@ -24,14 +37,22 @@ export const PrimaryButton: React.FC<ButtonProp> = ({ children, onClick, classNa
   }, []);
 
   const handleMouseEnter = () => {
-    if (typeof gsap !== 'undefined') {
-      gsap.to(buttonRef.current, { scale: 1.05, boxShadow: `0 0 35px rgba(0,167,255,0.9)`, duration: 0.3 });
+    if (typeof gsap !== "undefined") {
+      gsap.to(buttonRef.current, {
+        scale: 1.05,
+        boxShadow: `0 0 35px rgba(0,167,255,0.9)`,
+        duration: 0.3,
+      });
     }
   };
 
   const handleMouseLeave = () => {
-    if (typeof gsap !== 'undefined') {
-      gsap.to(buttonRef.current, { scale: 1, boxShadow: `0 0 20px rgba(165,0,255,0.6)`, duration: 0.3 });
+    if (typeof gsap !== "undefined") {
+      gsap.to(buttonRef.current, {
+        scale: 1,
+        boxShadow: `0 0 20px rgba(165,0,255,0.6)`,
+        duration: 0.3,
+      });
     }
   };
 
@@ -55,19 +76,31 @@ export const PrimaryButton: React.FC<ButtonProp> = ({ children, onClick, classNa
   );
 };
 
-
-const Button = ({children, className, onClick, isDarkMode, type, disabled} : ButtonProps) => {
+const Button = ({
+  children,
+  className,
+  onClick,
+  isDarkMode,
+  type,
+  disabled,
+}: ButtonProps) => {
   return (
-    <button type={type} onClick={onClick} className={`${className} ${isDarkMode ? "" : "bg-btn"} py-1 px-3 rounded shadow tracking-wide`}>
+    <button
+      type={type}
+      onClick={onClick}
+      className={`${className} ${isDarkMode ? "" : "bg-btn"} py-1 px-3 rounded shadow tracking-wide`}
+    >
       {children}
     </button>
-  )
-}
+  );
+};
 
-export default Button
+export default Button;
 
-
-export const SecondaryButton: React.FC<ButtonProps> = ({ children, onClick }) => (
+export const SecondaryButton: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+}) => (
   <button
     onClick={onClick}
     className={`

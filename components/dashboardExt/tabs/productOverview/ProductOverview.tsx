@@ -1,13 +1,17 @@
-'use client'
-import React, { useState, useEffect, useCallback, createContext, useContext } from 'react'
+"use client";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
 
 // Mock Lucide Icons (to ensure necessary icons are available)
-import SkeletonGrid from './SkeletonGrid';
-import { UseAPI } from '@/components/hooks/UseAPI';
-import { Product } from '@/types';
-import OverviewProductCardGrid from './ProductCard';
-
-
+import SkeletonGrid from "./SkeletonGrid";
+import { UseAPI } from "@/components/hooks/UseAPI";
+import { Product } from "@/types";
+import OverviewProductCardGrid from "./ProductCard";
 
 const ProductOverview = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,13 +25,15 @@ const ProductOverview = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const response = await callApi('/products/analyze');
+        const response = await callApi("/products/analyze");
         if (response.data && response.data.analyzedProducts) {
           // Injecting SKU based on externalId or ID, as per your database logic
-          const productsWithSku = response.data.analyzedProducts.map((p: Product) => ({
-            ...p,
-            sku: (p as any).externalId || p.id.substring(0, 8).toUpperCase()
-          }));
+          const productsWithSku = response.data.analyzedProducts.map(
+            (p: Product) => ({
+              ...p,
+              sku: (p as any).externalId || p.id.substring(0, 8).toUpperCase(),
+            }),
+          );
           setProducts(productsWithSku);
         }
       } catch (error) {
@@ -40,7 +46,7 @@ const ProductOverview = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In the Overview tab, clicking a product doesn't necessarily open the Audit, 
+  // In the Overview tab, clicking a product doesn't necessarily open the Audit,
   // but the card component still needs the prop. We'll simply console log for now.
   const handleSelectProduct = (product: Product | null) => {
     if (product) {
@@ -49,7 +55,7 @@ const ProductOverview = () => {
   };
 
   return (
-    <div className='mt-5 ml-6'>
+    <div className="mt-5 ml-6">
       {isLoading ? (
         <SkeletonGrid />
       ) : (

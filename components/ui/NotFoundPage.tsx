@@ -1,12 +1,11 @@
-import React from 'react';
-import { Zap, Home, LogIn } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // Removed problematic import
+import React from "react";
+import { Zap, Home, LogIn } from "lucide-react";
+import { useRouter } from "next/navigation"; // Removed problematic import
 
 // FIX: Mock useRouter to prevent compilation errors in isolated environments
 // const useRouter = () => ({
 //   push: (path: string) => console.log(`[Mock Router] Navigating to: ${path}`),
 // });
-
 
 // Define the core neon colors for consistency
 const NEON_PURPLE = "#A500FF";
@@ -32,9 +31,7 @@ const customStyles = `
 }
 `;
 
-
 export default function NotFound() {
-
   // FIX: Calling useRouter hook INSIDE the functional component
   const router = useRouter();
 
@@ -61,10 +58,11 @@ export default function NotFound() {
                    border border-[#A500FF]/50 max-w-lg w-full
                    shadow-2xl shadow-purple-900/60 transition duration-500"
       >
-
         {/* Error Code */}
-        <h1 className="text-8xl md:text-9xl font-extrabold mb-4 
-                       bg-clip-text text-transparent bg-gradient-to-r from-[#A500FF] to-[#FFB300]">
+        <h1
+          className="text-8xl md:text-9xl font-extrabold mb-4 
+                       bg-clip-text text-transparent bg-gradient-to-r from-[#A500FF] to-[#FFB300]"
+        >
           404
         </h1>
 
@@ -76,15 +74,15 @@ export default function NotFound() {
 
         {/* Description */}
         <p className="text-lg text-gray-400 mb-10 max-w-md mx-auto">
-          The autonomous sales agent could not locate the requested endpoint. The path may have been decommissioned or moved.
+          The autonomous sales agent could not locate the requested endpoint.
+          The path may have been decommissioned or moved.
         </p>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-
           {/* Primary CTA: Go Home */}
           <button
-            onClick={() => handleNavigate('/')}
+            onClick={() => handleNavigate("/")}
             className={`
               relative inline-flex items-center justify-center px-8 py-3 overflow-hidden text-lg font-medium text-white rounded-full group 
               bg-gradient-to-br from-[${NEON_PURPLE}] to-[${NEON_ORANGE}] transition duration-300 
@@ -99,7 +97,7 @@ export default function NotFound() {
 
           {/* Secondary CTA: Login/Dashboard */}
           <button
-            onClick={() => handleNavigate('/register/sign-in')}
+            onClick={() => handleNavigate("/register/sign-in")}
             className={`
               relative inline-flex items-center justify-center px-8 py-3 text-lg font-medium rounded-full 
               border border-white/20 text-gray-300 transition duration-300 hover:border-[${NEON_ORANGE}] hover:text-white

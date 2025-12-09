@@ -68,7 +68,11 @@ body {
 }
 
 .text-glow {
-  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #601ef9, 0 0 30px #601ef9,
+  text-shadow:
+    0 0 5px #fff,
+    0 0 10px #fff,
+    0 0 20px #601ef9,
+    0 0 30px #601ef9,
     0 0 40px #601ef9;
 }
 .gradient-text {
@@ -123,7 +127,9 @@ body {
   background-color: var(--blurple-light);
   filter: blur(2px);
   opacity: 0.3;
-  box-shadow: 0 0 10px var(--blurple-light), 0 0 20px var(--blurple-light);
+  box-shadow:
+    0 0 10px var(--blurple-light),
+    0 0 20px var(--blurple-light);
   animation: pulse 3s infinite ease-in-out alternate;
 }
 
@@ -156,7 +162,7 @@ body {
     transform: translateY(100%);
     opacity: 0;
   }
-  80%{
+  80% {
     transform: translateY(-10px);
     opacity: 1;
   }
@@ -181,7 +187,7 @@ body {
 }
 
 .animate-toast-out {
-  animation: toast-out 0.5s ease-out forwards
+  animation: toast-out 0.5s ease-out forwards;
 }
 
 .loader {
@@ -193,27 +199,27 @@ body {
   display: inline-block;
   width: 3px;
   height: 50px;
-  background-color: tgba(255, 255, 255, .5);
+  background-color: tgba(255, 255, 255, 0.5);
   border-radius: 10px;
   animation: scale-up4 1s linear infinite;
 }
 .bar:nth-child(2) {
   height: 65px;
   margin: 0 5px;
-  animation-delay: .25s;
+  animation-delay: 0.25s;
 }
 .bar:nth-child(3) {
-  animation-delay: .5s;
+  animation-delay: 0.5s;
 }
 
 @keyframes scale-up4 {
   20% {
     background-color: #ffff;
-    transform: scaleY(1.5)
+    transform: scaleY(1.5);
   }
 
   40% {
-    transform: sval
+    transform: sval;
   }
 }
 

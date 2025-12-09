@@ -1,6 +1,6 @@
-'use client'
-import React, { useState } from 'react';
-import { Zap, AlertTriangle, X } from 'lucide-react';
+"use client";
+import React, { useState } from "react";
+import { Zap, AlertTriangle, X } from "lucide-react";
 
 interface ConfirmModalProps {
   title: string;
@@ -16,25 +16,25 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   message,
   onConfirm,
   onCancel,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel'
+  confirmText = "Confirm",
+  cancelText = "Cancel",
 }) => {
-
   const NEON_PURPLE = "#A500FF";
   const NEON_ORANGE = "#FFB300";
 
   return (
     // Modal Overlay
     <div className="fixed inset-0 z-[9000] flex items-center justify-center bg-gray-950/80 backdrop-blur-sm p-4">
-
       {/* Modal Card */}
       <div className="w-full max-w-sm bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl shadow-purple-900/50 p-6 transform transition-all duration-300 scale-100">
-
         {/* Header */}
         <div className="flex items-start space-x-3 border-b border-gray-800 pb-4">
           <AlertTriangle className="w-6 h-6 text-yellow-400 flex-shrink-0" />
           <h3 className="text-xl font-bold text-white flex-1">{title}</h3>
-          <button onClick={onCancel} className="text-gray-500 hover:text-white transition">
+          <button
+            onClick={onCancel}
+            className="text-gray-500 hover:text-white transition"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -46,7 +46,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
         {/* Footer Buttons */}
         <div className="mt-6 flex justify-end space-x-3">
-
           {/* Cancel Button */}
           <button
             onClick={onCancel}
@@ -68,4 +67,4 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     </div>
   );
 };
-export default ConfirmModal
+export default ConfirmModal;

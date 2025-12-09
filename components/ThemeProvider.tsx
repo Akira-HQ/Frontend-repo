@@ -9,7 +9,7 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps>({
   isDarkMode: false,
-  toggleDarkMode: () => { },
+  toggleDarkMode: () => {},
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
