@@ -3,7 +3,7 @@ import { ReactNode, createContext, useContext } from "react";
 export interface Toast {
   id: string;
   message: string;
-  type: "success" | 'error' | 'info' | "loading"
+  type: "success" | "error" | "info" | "loading";
 }
 
 // User Types
@@ -16,25 +16,33 @@ export interface User {
   store?: {
     storeName: string;
     storeUrl: string;
-  }
+    storeId: string;
+    snippetToken: string;
+  };
 }
 
 export interface ContextProps {
   isDarkMode: boolean;
   setIsDarkMode: (theme: boolean) => void;
   alertMessage: string;
-  setAlertMessage: (message: string, type?: 'success' | 'error' | "loading" | null) => void;
-  alertType: 'success' | "error" | "loading" | null;
+  setAlertMessage: (
+    message: string,
+    type?: "success" | "error" | "loading" | null,
+  ) => void;
+  alertType: "success" | "error" | "loading" | null;
   setAlertType: (type: "success" | "error" | "loading" | null) => void;
   initialLoadComplete: boolean;
   getStarted: boolean;
   setGetStarted: (start: boolean) => void;
   toasts: Toast[];
-  addToast: (message: string, type: "success" | "error" | "info" | "loading") => void;
+  addToast: (
+    message: string,
+    type: "success" | "error" | "info" | "loading",
+  ) => void;
   removeToast: (id: string) => void;
   user: User | null;
-  setUser: (user: User | null) => void
-  logout: () => void
+  setUser: (user: User | null) => void;
+  logout: () => void;
 }
 
 // PageTracker Types
@@ -55,12 +63,11 @@ export interface PageHistory {
 export interface ButtonProps {
   children: string | ReactNode;
   onClick?: () => void;
-  type?: "submit" | "button"
-  className?: string
-  isDarkMode?: boolean
-  disabled?: boolean | string
+  type?: "submit" | "button";
+  className?: string;
+  isDarkMode?: boolean;
+  disabled?: boolean | string;
 }
-
 
 // Resizable Types
 export interface UseResizableProps {
@@ -98,7 +105,7 @@ export interface SecurityTipData {
   action: {
     text: string;
     link: string;
-  }
+  };
 }
 
 export type Notification = {
@@ -106,20 +113,24 @@ export type Notification = {
   timestamp: string;
   read: boolean;
 } & (
-    | { type: "USAGE_ALERT"; data: UsageAlertData }
-    | { type: "ANNOUNCEMENT"; data: AnnoucementData }
-    | { type: "SECURITY_TIP"; data: SecurityTipData }
-  )
+  | { type: "USAGE_ALERT"; data: UsageAlertData }
+  | { type: "ANNOUNCEMENT"; data: AnnoucementData }
+  | { type: "SECURITY_TIP"; data: SecurityTipData }
+);
 
-export type ThemeContextType = { isDarkMode: boolean; toggleDarkMode: () => void; };
+export type ThemeContextType = {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+};
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (context === undefined) return { isDarkMode: true, toggleDarkMode: () => { } };
+  if (context === undefined)
+    return { isDarkMode: true, toggleDarkMode: () => {} };
   return context;
 };
 
-export const BASE_BG = "bg-[#050505]"; 
+export const BASE_BG = "bg-[#050505]";
 export const NEON_GRADIENT = "bg-gradient-to-r from-[#00A7FF] to-[#A500FF]";
 export const ACCENT_COLOR_BLUE = "#00A7FF";
 export const ACCENT_COLOR_PURPLE = "#A500FF";
@@ -136,12 +147,12 @@ export type Product = {
   name: string;
   description: string | null;
   imageUrls: string[] | null;
-  status: 'Strong' | 'Weak';
+  status: "Strong" | "Weak";
   health: number;
   stock: number;
   price: number;
   sku?: string;
-}
+};
 
 // Shared Metrics Type
 export type Metric = {
@@ -153,7 +164,7 @@ export type Metric = {
 // Shared Report Data Type
 export type ReportData = {
   id: string;
-  type: 'DIGEST' | 'ALERT' | 'ESCALATION' | 'QUERY_RESPONSE';
+  type: "DIGEST" | "ALERT" | "ESCALATION" | "QUERY_RESPONSE";
   title: string;
   message: string;
   time: string;
@@ -171,26 +182,29 @@ export const MOCK_KPIS: Metric[] = [
 // Mock Reports
 export const MOCK_REPORTS: ReportData[] = [
   {
-    id: 'r_003',
-    type: 'ALERT',
-    title: 'Hottest Product Alert!',
-    message: "The **Pro DSLR Camera MK-V** saw a 25% increase in purchase intent after Akira recommended it 45 times yesterday. Consider boosting ad spend.",
-    time: '1 hour ago',
-    conversationId: 'conv_789'
+    id: "r_003",
+    type: "ALERT",
+    title: "Hottest Product Alert!",
+    message:
+      "The **Pro DSLR Camera MK-V** saw a 25% increase in purchase intent after Akira recommended it 45 times yesterday. Consider boosting ad spend.",
+    time: "1 hour ago",
+    conversationId: "conv_789",
   },
   {
-    id: 'r_002',
-    type: 'DIGEST',
-    title: 'Daily Sales Digest: 12/05/2025',
-    message: "Total conversions increased by 7% thanks to automated follow-ups. However, the **Smartwatch Series 8** hit 0 stock, generating 12 frustrated customer chats.",
-    time: '5 hours ago',
+    id: "r_002",
+    type: "DIGEST",
+    title: "Daily Sales Digest: 12/05/2025",
+    message:
+      "Total conversions increased by 7% thanks to automated follow-ups. However, the **Smartwatch Series 8** hit 0 stock, generating 12 frustrated customer chats.",
+    time: "5 hours ago",
   },
   {
-    id: 'r_001',
-    type: 'ESCALATION',
-    title: 'Human Intervention Required',
-    message: "A customer is demanding a refund outside the 30-day window for order #3098. Please review the chat log and handle the exception.",
-    time: '1 day ago',
-    conversationId: 'conv_101'
+    id: "r_001",
+    type: "ESCALATION",
+    title: "Human Intervention Required",
+    message:
+      "A customer is demanding a refund outside the 30-day window for order #3098. Please review the chat log and handle the exception.",
+    time: "1 day ago",
+    conversationId: "conv_101",
   },
 ];

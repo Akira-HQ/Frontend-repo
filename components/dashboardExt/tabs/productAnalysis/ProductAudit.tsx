@@ -1,37 +1,32 @@
-'use client'
+"use client";
 // --- MODIFIED: Added imports ---
-import React, { useState, useEffect, useRef } from 'react'
-import { HiSparkles } from 'react-icons/hi2'
-import { IoClose, IoLockClosed } from 'react-icons/io5'
-import {
-  IoCheckmarkCircle,
-  IoWarning,
-  IoCloseCircle
-} from 'react-icons/io5'
+import React, { useState, useEffect, useRef } from "react";
+import { HiSparkles } from "react-icons/hi2";
+import { IoClose, IoLockClosed } from "react-icons/io5";
+import { IoCheckmarkCircle, IoWarning, IoCloseCircle } from "react-icons/io5";
 // --- MODIFIED: Added import ---
-import { UseAPI } from '@/components/hooks/UseAPI'
-import { HiOutlineSave } from 'react-icons/hi';
-import { IoAddCircleOutline } from 'react-icons/io5';
-
+import { UseAPI } from "@/components/hooks/UseAPI";
+import { HiOutlineSave } from "react-icons/hi";
+import { IoAddCircleOutline } from "react-icons/io5";
 
 type AuditCheck = {
   id: string;
   met: boolean;
   text: string;
-}
+};
 
 type Product = {
   id: string;
   name: string;
   description: string | null;
   imageUrls: string[] | null;
-  status: 'Strong' | 'Weak';
+  status: "Strong" | "Weak";
   health: number;
   reasons: string[];
   auditChecklist: AuditCheck[];
   stock: number;
   price: number;
-}
+};
 
 interface Audit {
   product: Product | null;
@@ -39,9 +34,15 @@ interface Audit {
   onProductUpdated: (updatedProduct: Product) => void;
 }
 
-type CheckStatus = 'pass' | 'warn' | 'fail';
+type CheckStatus = "pass" | "warn" | "fail";
 
-const AuditChecklistItem = ({ status, text }: { status: CheckStatus, text: string }) => {
+const AuditChecklistItem = ({
+  status,
+  text,
+}: {
+  status: CheckStatus;
+  text: string;
+}) => {
   // ... (This component is unchanged)
   const icon = {
     pass: <IoCheckmarkCircle className="text-green-500" />,
@@ -50,9 +51,9 @@ const AuditChecklistItem = ({ status, text }: { status: CheckStatus, text: strin
   }[status];
 
   const textColor = {
-    pass: 'text-gray-300',
-    warn: 'text-yellow-400',
-    fail: 'text-red-400',
+    pass: "text-gray-300",
+    warn: "text-yellow-400",
+    fail: "text-red-400",
   }[status];
 
   return (
@@ -60,24 +61,25 @@ const AuditChecklistItem = ({ status, text }: { status: CheckStatus, text: strin
       {icon}
       <span className="text-sm">{text}</span>
     </div>
-  )
-}
-
+  );
+};
 
 const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   const { callApi } = UseAPI();
   const isPremium = !true;
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editableDescription, setEditableDescription] = useState(product?.description || '');// --- NEW: Ref for the hidden file input ---
+  const [editableDescription, setEditableDescription] = useState(
+    product?.description || "",
+  ); // --- NEW: Ref for the hidden file input ---
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const [displayImage, setDisplayImage] = useState<string | null>(null);
 
   useEffect(() => {
-    setEditableDescription(product?.description || '');
+    setEditableDescription(product?.description || "");
     if (product?.imageUrls && product.imageUrls.length > 0) {
       setDisplayImage(product.imageUrls[0]);
     } else {
@@ -88,11 +90,11 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
   }, [product]);
 
   useEffect(() => {
-    setEditableDescription(product?.description || '');
+    setEditableDescription(product?.description || "");
     if (product?.imageUrls && product.imageUrls.length > 0) {
       setDisplayImage(product.imageUrls[0]);
     } else {
-      setDisplayImage(null); 
+      setDisplayImage(null);
     }
   }, [product]);
   const handleAddImageClick = () => {
@@ -104,7 +106,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
       const file = event.target.files[0];
 
       const previewUrl = URL.createObjectURL(file);
-      setImagePreviews(prev => [...prev, previewUrl]);
+      setImagePreviews((prev) => [...prev, previewUrl]);
 
       setDisplayImage(previewUrl);
 
@@ -112,12 +114,11 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
     }
   };
 
-
   const handleEnhanceDescription = async () => {
     if (!product || !isPremium) return;
     setIsEnhancing(true);
     try {
-      const response = await callApi('/products/enhance-description', "POST", {
+      const response = await callApi("/products/enhance-description", "POST", {
         productId: product.id,
         description: editableDescription,
         productName: product.name,
@@ -138,7 +139,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
 
     setIsSaving(true);
     try {
-      const response = await callApi('/products/update-description', "POST", {
+      const response = await callApi("/products/update-description", "POST", {
         productId: product.id,
         description: editableDescription,
       });
@@ -153,45 +154,52 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
     }
   };
 
-
   if (!product) {
     return (
-      <div className='h-[500px] flex flex-col items-center  bg-[#0f1117] rounded-lg p-6 '>
+      <div className="h-[500px] flex flex-col items-center  bg-[#0f1117] rounded-lg p-6 ">
         <div className="text-center mt-20">
-          <p className="text-gray-400">Select a product to view its AI audit.</p>
-          <p className="text-sm text-gray-500 mt-2">Click on any product to the left to see its analysis.</p>
+          <p className="text-gray-400">
+            Select a product to view its AI audit.
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Click on any product to the left to see its analysis.
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   const descLength = product.description?.length || 0;
-  let descStatus: CheckStatus = 'fail';
-  let descText = 'Description is too short (under 50 chars)';
+  let descStatus: CheckStatus = "fail";
+  let descText = "Description is too short (under 50 chars)";
   if (descLength >= 150) {
-    descStatus = 'pass';
-    descText = 'Detailed description (over 150 chars)';
+    descStatus = "pass";
+    descText = "Detailed description (over 150 chars)";
   } else if (descLength >= 50) {
-    descStatus = 'warn';
-    descText = 'Description is okay (50-150 chars)';
+    descStatus = "warn";
+    descText = "Description is okay (50-150 chars)";
   }
 
-  const imgStatus: CheckStatus = (product.imageUrls && product.imageUrls.length > 0) ? 'pass' : 'fail';
-  const imgText = imgStatus === 'pass' ? 'Product image is present' : 'Missing product image';
+  const imgStatus: CheckStatus =
+    product.imageUrls && product.imageUrls.length > 0 ? "pass" : "fail";
+  const imgText =
+    imgStatus === "pass" ? "Product image is present" : "Missing product image";
 
-  let stockStatus: CheckStatus = 'fail';
-  let stockText = 'Product is out of stock';
+  let stockStatus: CheckStatus = "fail";
+  let stockText = "Product is out of stock";
   if (product.stock > 10) {
-    stockStatus = 'pass';
+    stockStatus = "pass";
     stockText = `Good stock level (${product.stock} items)`;
   } else if (product.stock > 0) {
-    stockStatus = 'warn';
+    stockStatus = "warn";
     stockText = `Stock is low (${product.stock} items)`;
   }
 
-  const priceStatus: CheckStatus = product.price > 0 ? 'pass' : 'fail';
-  const priceText = priceStatus === 'pass' ? 'Valid price is set' : 'Price is invalid or not set';
-
+  const priceStatus: CheckStatus = product.price > 0 ? "pass" : "fail";
+  const priceText =
+    priceStatus === "pass"
+      ? "Valid price is set"
+      : "Price is invalid or not set";
 
   return (
     <>
@@ -205,7 +213,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
         />
         <div className="rounded-lg p-6 animate-fade-in bg-[#0f1117] relative">
           <IoClose
-            className='absolute right-2 top-2 text-xl cursor-pointer bg-gray-800 w-6 h-6 rounded-lg '
+            className="absolute right-2 top-2 text-xl cursor-pointer bg-gray-800 w-6 h-6 rounded-lg "
             onClick={() => onSelect(null)}
           />
 
@@ -213,11 +221,15 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
           <div className="mb-4">
             {/* --- MODIFIED: Checks displayImage state first --- */}
             {displayImage ? (
-              <img src={displayImage} alt={product.name} className='h-[250px] mb-4 rounded w-full object-cover' />
+              <img
+                src={displayImage}
+                alt={product.name}
+                className="h-[250px] mb-4 rounded w-full object-cover"
+              />
             ) : (
               // "No Image" placeholder
-              <div className='h-[250px] mb-4 rounded w-full bg-gray-900 flex flex-col items-center justify-center gap-2'>
-                <span className='text-gray-500'>No Image</span>
+              <div className="h-[250px] mb-4 rounded w-full bg-gray-900 flex flex-col items-center justify-center gap-2">
+                <span className="text-gray-500">No Image</span>
                 {/* --- MODIFIED: Connects button to handler --- */}
                 <button
                   className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
@@ -233,16 +245,18 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
           {/* Image Gallery Row */}
           <div className="flex items-center gap-2 mb-4">
             {/* 1. Renders existing images from DB */}
-            {product.imageUrls && product.imageUrls.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt="thumbnail"
-                onClick={() => setDisplayImage(url)}
-                className={`w-12 h-12 rounded object-cover cursor-pointer ${displayImage === url ? 'ring-2 ring-blue-500' : 'ring-0'
+            {product.imageUrls &&
+              product.imageUrls.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt="thumbnail"
+                  onClick={() => setDisplayImage(url)}
+                  className={`w-12 h-12 rounded object-cover cursor-pointer ${
+                    displayImage === url ? "ring-2 ring-blue-500" : "ring-0"
                   }`}
-              />
-            ))}
+                />
+              ))}
 
             {/* 2. Renders NEW local preview images */}
             {imagePreviews.map((url, index) => (
@@ -251,8 +265,9 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
                 src={url}
                 alt="new preview"
                 onClick={() => setDisplayImage(url)}
-                className={`w-12 h-12 rounded object-cover cursor-pointer ${displayImage === url ? 'ring-2 ring-blue-500' : 'ring-0'
-                  }`}
+                className={`w-12 h-12 rounded object-cover cursor-pointer ${
+                  displayImage === url ? "ring-2 ring-blue-500" : "ring-0"
+                }`}
               />
             ))}
 
@@ -266,11 +281,13 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
             </button>
           </div>
 
-          <h3 className='text-lg font-bold text-white'>{product.name}</h3>
+          <h3 className="text-lg font-bold text-white">{product.name}</h3>
 
           {/* Checklist */}
           <div className="my-4 p-3 bg-gray-900/70 rounded-lg space-y-2">
-            <h4 className='text-sm font-semibold text-gray-300 mb-3'>AI Audit Checklist</h4>
+            <h4 className="text-sm font-semibold text-gray-300 mb-3">
+              AI Audit Checklist
+            </h4>
             <AuditChecklistItem status={descStatus} text={descText} />
             {/* --- MODIFIED: This now updates instantly on preview --- */}
             <AuditChecklistItem status={imgStatus} text={imgText} />
@@ -280,7 +297,9 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
         </div>
 
         <div className="mb-6">
-          <label className="text-sm font-semibold text-gray-300">Description</label>
+          <label className="text-sm font-semibold text-gray-300">
+            Description
+          </label>
 
           <textarea
             className="w-full text-sm text-gray-400 mt-2 bg-gray-900 p-3 rounded-md max-h-40 min-h-[120px] overflow-y-auto"
@@ -292,20 +311,23 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
           <div className="mt-3 flex items-center gap-3">
             <button
               className={`text-sm font-semibold flex gap-1 items-center px-3 py-1.5 rounded-lg
-                ${isPremium
-                  ? 'text-blue-400 hover:text-blue-300'
-                  : 'text-gray-500 bg-gray-800 cursor-not-allowed'
+                ${
+                  isPremium
+                    ? "text-blue-400 hover:text-blue-300"
+                    : "text-gray-500 bg-gray-800 cursor-not-allowed"
                 } 
                 disabled:opacity-50 disabled:cursor-wait`}
               onClick={handleEnhanceDescription}
               disabled={isEnhancing || isSaving || !isPremium}
             >
               {isPremium ? (
-                <HiSparkles className={`text-yellow-400 ${isEnhancing ? 'animate-spin' : ''}`} />
+                <HiSparkles
+                  className={`text-yellow-400 ${isEnhancing ? "animate-spin" : ""}`}
+                />
               ) : (
                 <IoLockClosed className="text-yellow-600" />
               )}
-              {isEnhancing ? 'Enhancing...' : 'Enhance with AI'}
+              {isEnhancing ? "Enhancing..." : "Enhance with AI"}
             </button>
 
             <button
@@ -313,8 +335,8 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
               onClick={handleSaveChanges}
               disabled={isEnhancing || isSaving}
             >
-              <HiOutlineSave className={`${isSaving ? 'animate-spin' : ''}`} />
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              <HiOutlineSave className={`${isSaving ? "animate-spin" : ""}`} />
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
 
@@ -327,7 +349,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: Audit) => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ProductAudit
+export default ProductAudit;

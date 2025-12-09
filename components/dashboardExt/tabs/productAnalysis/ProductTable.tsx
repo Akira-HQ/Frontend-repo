@@ -1,34 +1,38 @@
-'use client'
-import React from 'react'
+"use client";
+import React from "react";
 
 type AuditCheck = {
   id: string;
   met: boolean;
   text: string;
-}
+};
 
 type Product = {
   id: string;
   name: string;
   description: string | null;
   imageUrls: string[] | null; // <-- CORRECT (array of strings)
-  status: 'Strong' | 'Weak';
+  status: "Strong" | "Weak";
   health: number;
   reasons: string[];
   auditChecklist: AuditCheck[];
   stock: number;
   price: number;
-}
+};
 
 interface ProductTableProps {
   products: Product[] | null;
   selectedProduct: Product | null;
-  onSelectedProduct: (product: Product | null) => void
+  onSelectedProduct: (product: Product | null) => void;
 }
 
-const ProductTable = ({ products, selectedProduct, onSelectedProduct }: ProductTableProps) => {
+const ProductTable = ({
+  products,
+  selectedProduct,
+  onSelectedProduct,
+}: ProductTableProps) => {
   return (
-    <div className='flex flex-col gap-3'>
+    <div className="flex flex-col gap-3">
       <div className="grid grid-cols-12 gap-4 px-4 text-sm font-semibold text-gray-400">
         {/* <div className="col-span-5">ID</div> */}
         <div className="col-span-5">Product</div>
@@ -37,32 +41,36 @@ const ProductTable = ({ products, selectedProduct, onSelectedProduct }: ProductT
       </div>
 
       {products?.map((product) => (
-        <div key={product.id}
+        <div
+          key={product.id}
           onClick={() => onSelectedProduct(product)}
-          className={`grid grid-cols-12 gap-4 items-center p-4 rounded-lg bg-[#0f1117] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${selectedProduct?.id === product.id ? 'ring-2 ring-blue-500' : "ring-0"}`}
+          className={`grid grid-cols-12 gap-4 items-center p-4 rounded-lg bg-[#0f1117] shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 ${selectedProduct?.id === product.id ? "ring-2 ring-blue-500" : "ring-0"}`}
         >
           <div className="col-span-5 flex item-center gap-4">
-            <span className='font-medium text-white'>{product.name}</span>
+            <span className="font-medium text-white">{product.name}</span>
           </div>
 
           <div className="col-span-3">
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${product.status === "Strong" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+            <span
+              className={`px-2 py-1 text-xs font-semibold rounded-full ${product.status === "Strong" ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}
+            >
               {product.status}
             </span>
           </div>
 
           <div className="col-span-4 flex items-center gap-2">
             <div className="w-full bg-gray-700 rounded-full h-1.5">
-              <div className={`h-1.5 rounded-full ${product.health > 65 ? "bg-green-500" : "bg-yellow-500"}`} style={{ width: `${product.health}%` }}></div>
+              <div
+                className={`h-1.5 rounded-full ${product.health > 65 ? "bg-green-500" : "bg-yellow-500"}`}
+                style={{ width: `${product.health}%` }}
+              ></div>
             </div>
-            <span className="text-sm text-gray-300">
-              {product.health}
-            </span>
+            <span className="text-sm text-gray-300">{product.health}</span>
           </div>
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default ProductTable
+export default ProductTable;

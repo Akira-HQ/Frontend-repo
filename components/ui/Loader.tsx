@@ -1,11 +1,11 @@
-import React from 'react'
+import React from "react";
 
 interface LoaderProps {
   className?: string;
 }
 
 export const Loader: React.FC<LoaderProps> = ({ className }) => {
-  const animationId = `pulse-draw-${React.useId()}`
+  const animationId = `pulse-draw-${React.useId()}`;
 
   const pathLength = 1050;
 
@@ -34,10 +34,10 @@ export const Loader: React.FC<LoaderProps> = ({ className }) => {
   `;
 
   return (
-    <div className='loader w-screen h-screen flex justify-center items-center'>
+    <div className="loader w-screen h-screen flex justify-center items-center">
       <span className="bar"></span>
       <span className="bar"></span>
       <span className="bar"></span>
     </div>
-  )
-}
+  );
+};

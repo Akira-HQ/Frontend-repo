@@ -1,5 +1,5 @@
-'use client'
-import React from 'react'
+"use client";
+import React from "react";
 
 const ProductTableSkeleton = () => {
   const SkeletonRow = () => (
@@ -17,23 +17,23 @@ const ProductTableSkeleton = () => {
         <div className="h-4 w-full rounded bg-gray-700"></div>
       </div>
     </div>
-  )
-  
+  );
+
   return (
-    <div className='flex flex-col gap-3 animate-pulse'>
+    <div className="flex flex-col gap-3 animate-pulse">
       <div className="grid grid-cols-12 gap-4 px-4">
         <div className="col-span-5 h-4 w-1/4 rounded bg-gray-700"></div>
         <div className="col-span-3 h-4 w-1/2 rounded bg-gray-700"></div>
         <div className="col-span-4 h-4 w-1/2 rounded bg-gray-700"></div>
       </div>
-      
+
       <SkeletonRow />
       <SkeletonRow />
       <SkeletonRow />
       <SkeletonRow />
       <SkeletonRow />
     </div>
-  )
-}
+  );
+};
 
-export default ProductTableSkeleton
+export default ProductTableSkeleton;

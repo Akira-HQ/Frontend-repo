@@ -4,58 +4,61 @@ import { useAppContext } from "../AppContext";
 
 interface ApiHook {
   callApi: (
-    endpoint:string,
-    method?: 'GET' | "POST" | "PUT" | "PATCH" | "DELETE",
-    body?: any
-  ) => Promise<any>
+    endpoint: string,
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+    body?: any,
+  ) => Promise<any>;
 }
 
 export const UseAPI = (): ApiHook => {
-  const router = useRouter()
-  const { setUser, addToast} = useAppContext()
+  const router = useRouter();
+  const { setUser, addToast } = useAppContext();
 
-  const callApi = useCallback(async (
-    endpoint: string,
-    method: 'GET' | 'POST' | "PUT" | "PATCH" | "DELETE" = "GET",
-    body: any = null
-  ) => {
-    const token = localStorage.getItem("token")
+  const callApi = useCallback(
+    async (
+      endpoint: string,
+      method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",
+      body: any = null,
+    ) => {
+      const token = localStorage.getItem("token");
 
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    }
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
-
-    const options: RequestInit = {
-      method,
-      headers
-    }
-    if (body) {
-      options.body = JSON.stringify(body)
-    }
-
-    const response = await fetch(`http://localhost:8000${endpoint}`, options)
-
-    const newToken = response.headers.get('X-New-Token')
-    if (newToken) {
-      localStorage.setItem('token', newToken.replace('Bearer ', ''))
-    }
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('token')
-        setUser(null)
-        router.push('/register/sign-in')
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'An API error occured')
-      addToast(errorData.message || 'An API error occured', "error")
-    }
 
-    return response.json()
-  }, [router, setUser])
+      const options: RequestInit = {
+        method,
+        headers,
+      };
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
 
-  return {callApi}
-}
+      const response = await fetch(`http://localhost:8000${endpoint}`, options);
+
+      const newToken = response.headers.get("X-New-Token");
+      if (newToken) {
+        localStorage.setItem("token", newToken.replace("Bearer ", ""));
+      }
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          setUser(null);
+          router.push("/register/sign-in");
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || "An API error occured");
+        addToast(errorData.message || "An API error occured", "error");
+      }
+
+      return response.json();
+    },
+    [router, setUser],
+  );
+
+  return { callApi };
+};

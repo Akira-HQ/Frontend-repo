@@ -5,7 +5,7 @@ export const validatePassword = (password: string) => {
     minLength: password.length < 8,
     maxLength: password.length > 24,
     hasLowercase: !/[a-z]/.test(password),
-    specialChar: !/[^a-zA-Z0-9]/.test(password)
-  }
-  return errors
-}
+    specialChar: !/[^a-zA-Z0-9]/.test(password),
+  };
+  return errors;
+};

@@ -7,7 +7,7 @@ import PageTracker from "@/components/hooks/PageTracker";
 import Footer from "@/components/Footer";
 import BannerAlert from "@/components/notifications/AlertNotifications";
 import NotificationContainer from "@/components/notifications/ToastContainer";
-import {  Header, ThemeProvider } from "@/components/Header";
+import { Header, ThemeProvider } from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Akira AI",
@@ -21,20 +21,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`w-screen overflow-x-hidden relative antialiased`}
-      >
-       <AppProvider>
-        <PageTracker />
-        <ThemeProvider>
-          <Header />
+      <body className={`w-screen overflow-x-hidden relative antialiased`}>
+        <AppProvider>
+          <PageTracker />
+          <ThemeProvider>
+            <Header />
 
-          {/* <BannerAlert /> */}
-          <ToastContainer />
-          {children}
-          {/* <Footer /> */}
-        </ThemeProvider>
-       </AppProvider>
+            {/* <BannerAlert /> */}
+            <ToastContainer />
+            {children}
+            {/* <Footer /> */}
+          </ThemeProvider>
+        </AppProvider>
       </body>
     </html>
   );

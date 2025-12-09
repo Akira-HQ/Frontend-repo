@@ -2,9 +2,19 @@ import { BarChart, Brain, LucideIcon, MessageCircle } from "lucide-react";
 import React from "react";
 // Note: Assuming ProcessStep is imported from './ProcessStep' or defined locally
 
-export type ProcessStepProps = { step: number; title: string; description: string; icon: LucideIcon };
+export type ProcessStepProps = {
+  step: number;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
 
-export const ProcessStep: React.FC<ProcessStepProps> = ({ step, title, description, icon: Icon }) => (
+export const ProcessStep: React.FC<ProcessStepProps> = ({
+  step,
+  title,
+  description,
+  icon: Icon,
+}) => (
   <div className="flex flex-col items-center text-center relative z-10 w-full md:w-1/3">
     <div className="w-16 h-16 rounded-full bg-white/5 backdrop-blur-sm border-2 border-[#A500FF] flex items-center justify-center shadow-xl shadow-purple-900/50 mb-4 transition duration-500 group-hover:shadow-orange-900/50 group-hover:border-[#FFB300]">
       <Icon className="w-8 h-8 text-[#FFB300] transition duration-500 group-hover:text-[#A500FF]" />
@@ -15,16 +25,32 @@ export const ProcessStep: React.FC<ProcessStepProps> = ({ step, title, descripti
   </div>
 );
 
-
 export const HowItWorksAnimation: React.FC = () => {
   const processData = [
-    { title: "Customer Initiates", description: "Customer sends a message via Web, WhatsApp, or IG DM.", icon: MessageCircle },
-    { title: "Intent & Context Mapping", description: "Akira identifies customer intent (Buy, Ask, Complain) using product memory and deep learning.", icon: Brain },
-    { title: "Convert & Optimize", description: "Akira executes the sales sequence (answers, recommends, up-sells) and logs the conversion.", icon: BarChart },
+    {
+      title: "Customer Initiates",
+      description: "Customer sends a message via Web, WhatsApp, or IG DM.",
+      icon: MessageCircle,
+    },
+    {
+      title: "Intent & Context Mapping",
+      description:
+        "Akira identifies customer intent (Buy, Ask, Complain) using product memory and deep learning.",
+      icon: Brain,
+    },
+    {
+      title: "Convert & Optimize",
+      description:
+        "Akira executes the sales sequence (answers, recommends, up-sells) and logs the conversion.",
+      icon: BarChart,
+    },
   ];
 
   return (
-    <section id="how-it-works" className="container mx-auto px-4 py-20 max-w-7xl">
+    <section
+      id="how-it-works"
+      className="container mx-auto px-4 py-20 max-w-7xl"
+    >
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
         The Three-Step Conversion Loop
       </h2>
