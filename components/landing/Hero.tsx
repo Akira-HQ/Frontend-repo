@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "../Button";
+import Link from "next/link";
 
 // Assuming you have a component that handles CTA clicks passed as a prop
 // Renamed prop type to match your preferred format (onCta)
@@ -100,12 +101,15 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
 
         {/* CTA Button Group */}
         <div className="flex justify-center space-x-4 mb-20">
-          <PrimaryButton onClick={() => onCta("Growth")}>
+          <PrimaryButton onClick={() => onCta("Free")}>
             Start Free Trial
           </PrimaryButton>
-          <SecondaryButton onClick={() => onCta("See Plans")}>
-            See Plans
+          <SecondaryButton >
+            <Link href={'#pricing'}>
+              See Plans
+            </Link>
           </SecondaryButton>
+          
         </div>
 
         {/* Integrations Bar
