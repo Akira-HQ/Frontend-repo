@@ -1,4 +1,5 @@
-"use client";
+// --- RegisterContent.tsx (MODIFIED) ---
+
 import { NEON_GRADIENT } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppContext } from "./AppContext";
@@ -16,23 +17,23 @@ import {
   User,
 } from "lucide-react";
 import Button from "./Button";
-// Assuming these components are now imported from a stable path
 import {
   InputField,
   PasswordRequirement,
   PlatformButton,
 } from "../components/functions/Helper";
 
+// ⚡ IMPORT NEW COMPONENT ⚡
+import StoreConnector from "./onboarding/StoreConnector";
+
 const RegisterContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Accessing both addToast and setAlertMessage from context
   const { addToast, setUser, setAlertMessage } = useAppContext();
   const { callApi } = UseAPI();
 
   const [nextStep, setNextStep] = useState(1);
   const [loading, setLoading] = useState(false);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,115 +56,61 @@ const RegisterContent = () => {
     return Object.values(passwordErrors).every((value) => value === false);
   }, [passwordErrors]);
 
+  // ⚠️ MODIFIED: handleRegistration only validates, the final API call is deferred to StoreConnector
   const handleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clear previous banner errors before starting
     setAlertMessage("");
     setLoading(true);
 
     try {
       if (nextStep === 1) {
-        if (!name || !email || !password || !confirmPassword) {
-          // Use banner alert for high-level validation error
-          setAlertMessage("Please fill in all account fields.", "error");
-          addToast("Please fill in all account fields.", "error");
+        // --- Step 1: Validation and Account Creation ---
+        if (!name || !email || !password || !confirmPassword || !isPasswordStrong || !terms) {
+          setAlertMessage("Please correct account details and accept terms.", "error");
           return;
         }
         if (password !== confirmPassword) {
-          // Use toast for immediate, temporary feedback
           addToast("Passwords do not match.", "error");
           return;
         }
-        if (!isPasswordStrong) {
-          // Use banner alert for high-level password strength failure
-          setAlertMessage(
-            "Password does not meet all security requirements.",
-            "error",
-          );
-          addToast(
-            "Password does not meet all security requirements.",
-            "error",
-          );
-          return;
-        }
-        if (!terms) {
-          setAlertMessage("You must accept the Terms & Service.", "error");
-          addToast("You must accept the Terms & Service.", "error");
-          return;
-        }
 
-        // --- API Call Start ---
+        // API Call: Create User
         setAlertMessage("Creating your account...", "loading");
-        addToast("Creating your account...", "loading");
-
         const response = await callApi("/user/signup", "POST", {
           name,
           email,
           password,
           plan: selectedPlan,
         });
+
         localStorage.setItem("token", response.token);
         setUser(response.data);
 
-        // Success for step 1, show success banner and move to step 2
-        setAlertMessage(
-          "Account created successfully. Now connect your store.",
-          "success",
-        );
-        addToast(
-          "Account created successfully. Now connect your store.",
-          "success",
-        );
-        setNextStep(2);
-      }
+        setAlertMessage("Account created successfully. Now connect your store.", "success");
+        setNextStep(2); // Move to Step 2
 
-      if (nextStep === 2) {
+      } else if (nextStep === 2) {
+        // ⚠️ Step 2: Validation is now just checking inputs, the actual connection logic is in the child component.
         if (!url || !platform) {
-          setAlertMessage(
-            "You must select a platform and provide a URL.",
-            "error",
-          );
+          setAlertMessage("You must select a platform and provide a URL.", "error");
           addToast("You must select a platform and provide a URL.", "error");
           return;
         }
-
-        // --- API Call Start ---
-        setAlertMessage("Connecting your store...", "loading");
-        addToast("Connecting your store...", "loading");
-
-        const response = await callApi("/create-store", "POST", {
-          url,
-          platform,
-        });
-        setUser(response.data);
-
-        // Final success message before redirect
-        setAlertMessage(
-          "Store connected. Redirecting to AI training.",
-          "success",
-        );
-        addToast("Store connected. Redirecting to AI training.", "success");
-        router.push(`/dashboard?view=ai-training`);
+        // Logic handled by StoreConnector component via the onSubmit prop.
       }
     } catch (error: any) {
-      // Use banner alert for critical API failure
       setAlertMessage(
-        error.message || "An unexpected error occurred during setup.",
-        "error",
-      );
-      addToast(
         error.message || "An unexpected error occurred during setup.",
         "error",
       );
     } finally {
       setLoading(false);
-      // If the process succeeded (not caught by error), setAlertMessage clears itself after 4s (as defined in AppProvider.tsx).
-      // We don't need to manually clear it here.
     }
   };
 
   const Step1 = (
+    // ... (JSX for Step 1 remains unchanged)
     <>
       <h1 className="text-3xl font-extrabold text-center mb-6 text-white">
         Create Akira Account
@@ -282,10 +229,9 @@ const RegisterContent = () => {
 
       <div className="pt-4">
         <label className="text-sm font-medium text-gray-400 block mb-3">
-          Select Platform (Placeholder)
+          Select Platform
         </label>
         <div className="flex flex-wrap justify-center gap-4">
-          {/* Using Lucide icons as placeholders for external logos */}
           <PlatformButton
             name="Shopify"
             icon={Store}
@@ -302,6 +248,12 @@ const RegisterContent = () => {
             name="Custom Site"
             icon={Code}
             onClick={() => setPlatform("custom")}
+            platform={platform}
+          />
+          <PlatformButton
+            name="Wix"
+            icon={Star}
+            onClick={() => setPlatform("wix")}
             platform={platform}
           />
         </div>
@@ -332,13 +284,14 @@ const RegisterContent = () => {
         </button>
       </div>
 
-      <Button
-        type="submit"
-        className="w-full font-semibold mt-6"
-        disabled={loading || !platform || !url}
-      >
-        {loading ? "Connecting..." : "Finalize & Launch Akira"}
-      </Button>
+      {/* ⚡ Replaced Button with Connector Component ⚡ */}
+      <StoreConnector
+        platform={platform}
+        url={url}
+        loading={loading}
+        setLoading={setLoading}
+        onValidatedSubmit={handleRegistration}
+      />
     </>
   );
 

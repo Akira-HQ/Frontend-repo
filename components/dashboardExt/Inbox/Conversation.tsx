@@ -4,11 +4,41 @@ import React, { useState } from "react";
 import { MessageCircle, X, Send, Zap, ChevronRight } from "lucide-react";
 // NOTE: Assuming alias resolution for common types and utilities
 import { ReportData } from "@/types";
+import ConfirmModal from "@/components/notifications/CTAAlerts";
 
-interface PanelProps {
-  conversationId: string;
-  onClose: () => void;
+// ⚠️ NOTE: You must place your actual ConfirmModal component definition here,
+// or import it from its location (e.g., import ConfirmModal from '../components/ConfirmModal';)
+
+// --- Mock ConfirmModal Definition (Placeholder for functionality) ---
+// Since the user provided the interface earlier, we use a mock.
+interface ConfirmModalProps {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }
+
+// NOTE: You MUST replace this mock with your actual component
+// const ConfirmModal: React.FC<ConfirmModalProps> = ({ title, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel" }) => (
+//   <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-950/80 backdrop-blur-sm p-4">
+//     <div className="w-full max-w-sm bg-gray-900 rounded-lg p-6 shadow-xl border border-gray-700">
+//       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
+//       <p className="text-sm text-gray-400">{message}</p>
+//       <div className="mt-6 flex justify-end space-x-3">
+//         <button onClick={onCancel} className="px-4 py-2 text-sm rounded bg-gray-700 text-gray-300">
+//           {cancelText}
+//         </button>
+//         <button onClick={onConfirm} className="px-4 py-2 text-sm rounded bg-purple-600 text-white font-semibold">
+//           {confirmText}
+//         </button>
+//       </div>
+//     </div>
+//   </div>
+// );
+// // --- END Mock ConfirmModal Definition ---
+
 
 // Mock chat data for review (Simulating the full transcript pulled from PostgreSQL)
 const mockChat = [
@@ -32,28 +62,37 @@ const mockChat = [
   },
 ];
 
+interface PanelProps {
+  conversationId: string;
+  onClose: () => void;
+}
+
 const ConversationReviewPanel: React.FC<PanelProps> = ({
   conversationId,
   onClose,
 }) => {
   const [correctionInput, setCorrectionInput] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // ⚡ NEW STATE
   const NEON_PURPLE = "#A500FF";
 
-  // NOTE: Replace alert() with a proper Toast or Modal notification in the final application.
-  const handleCorrection = () => {
-    if (!correctionInput.trim()) return;
-
-    // This is where the RL feedback loop sends the data to the backend
+  // ⚡ HANDLES CONFIRMATION AND SUBMISSION ⚡
+  const handleConfirmSubmit = () => {
+    // 1. Send data to the backend (Actual RL Loop)
     console.log(`[RL FEEDBACK SUBMITTED] Conversation ID: ${conversationId}`);
     console.log(`Correction: ${correctionInput}`);
 
-    // MOCK: Use alert for mock action feedback
-    alert(
-      `Correction Sent! Akira will use this to refine future sales scripts.`,
-    );
-
+    // 2. Cleanup
     setCorrectionInput("");
-    onClose(); // Close the panel after feedback is submitted
+    setShowConfirmModal(false); // Close the modal
+    onClose(); // Close the panel
+  };
+
+  // ⚡ OPENS THE CONFIRMATION MODAL ⚡
+  const handleCorrection = () => {
+    if (!correctionInput.trim()) return;
+
+    // Show modal instead of alert()
+    setShowConfirmModal(true);
   };
 
   return (
@@ -86,13 +125,12 @@ const ConversationReviewPanel: React.FC<PanelProps> = ({
               className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[85%] p-3 rounded-xl shadow-md ${
-                  isCustomer
+                className={`max-w-[85%] p-3 rounded-xl shadow-md ${isCustomer
                     ? "bg-[#A500FF]/50 text-white rounded-br-none"
                     : isSystem
                       ? "bg-yellow-900/40 text-yellow-100 border border-yellow-700/50 text-sm italic rounded-xl" // Insight style
                       : "bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700" // Akira style
-                }`}
+                  }`}
               >
                 <p className="font-medium text-xs mb-1">
                   {isSystem ? (
@@ -151,13 +189,25 @@ const ConversationReviewPanel: React.FC<PanelProps> = ({
         </div>
       </div>
 
+      {/* ⚡ CONFIRM MODAL RENDERING ⚡ */}
+      {showConfirmModal && (
+        <ConfirmModal
+          title="Submit AI Correction?"
+          message={`You are submitting this feedback: "${correctionInput}". This data will be used by the Reinforcement Learning loop to refine Akira's future sales strategies for conversation #${conversationId}.`}
+          onConfirm={handleConfirmSubmit}
+          onCancel={() => setShowConfirmModal(false)}
+          confirmText="Send Correction"
+          cancelText="Review Again"
+        />
+      )}
+
       {/* Custom Scrollbar CSS (Included locally for this modal) */}
       <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
-            `}</style>
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+            `}</style>
     </div>
   );
 };

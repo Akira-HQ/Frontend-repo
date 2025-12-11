@@ -18,6 +18,7 @@ export interface User {
     storeUrl: string;
     storeId: string;
     snippetToken: string;
+    platform: string;
   };
 }
 
