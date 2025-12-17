@@ -25,14 +25,15 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
   onValidatedSubmit
 }) => {
   const router = useRouter();
-  const { addToast, setUser } = useAppContext();
+  // ⚡ Ensure 'user' is destructured from context ⚡
+  const { addToast, setUser, user } = useAppContext();
   const { callApi } = UseAPI();
 
   const handleConnection = async (e: React.FormEvent) => {
-    // Prevent the parent form's default submission side-effects
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
 
-    // Manual validation (since we bypass the parent form's submit handler)
     if (!platform || !url) {
       addToast("Please select a platform and enter the URL.", "error");
       return;
@@ -45,11 +46,9 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
     try {
       if (platform.toLowerCase() === 'shopify') {
 
-        // --- SHOPIFY: REDIRECT TO AUTHENTICATION ---
-
+        // --- SHOPIFY FLOW (Auth initiated) ---
         addToast("Initiating Shopify connection...", "loading");
 
-        // ⚡ MODIFIED: Endpoint is now just /shopify/auth ⚡
         const response = await callApi("/shopify/auth", "POST", {
           url: normalizedUrl,
           platform: 'SHOPIFY',
@@ -65,10 +64,8 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
       } else {
 
         // --- CUSTOM SITE / OTHERS: DIRECT API CALL ---
-
         addToast("Creating custom store record...", "loading");
 
-        // ⚡ MODIFIED: Endpoint is now just /create-store ⚡
         const response = await callApi("/create-store", "POST", {
           url: normalizedUrl,
           platform: platform.toUpperCase(),
@@ -76,8 +73,18 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
 
         setUser(response.data);
 
-        addToast("Store connected. Redirecting to Integration Hub.", "success");
-        router.push(`/dashboard?view=integrations`);
+        // ⚡ CHECK FOR FREE PLAN BEFORE REDIRECTING TO PAYMENT ⚡
+        const userPlan = response.data?.plan || user?.plan || 'basic';
+
+        if (userPlan.toLowerCase() === 'free') {
+          // DIRECT TO DASHBOARD: Skip payment wall for free users
+          addToast("Free plan activated! Welcome to your dashboard.", "success");
+          router.push(`/dashboard?view=integrations`);
+        } else {
+          // REDIRECT TO PAYMENT: Paid plan requires payment wall
+          addToast("Store connected. Redirecting to billing.", "success");
+          router.push(`/register/payment-wall?plan=${userPlan}&store=${normalizedUrl}`);
+        }
       }
     } catch (error: any) {
       addToast(error.message || `Failed to connect ${platform} store.`, "error");
@@ -98,7 +105,7 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
       <Button
         type="submit"
         className="w-full font-semibold mt-6"
-        onClick={() => handleConnection}
+        onClick={() => handleConnection({} as React.FormEvent)}
         disabled={loading || !isInputReady}
       >
         {buttonText}
