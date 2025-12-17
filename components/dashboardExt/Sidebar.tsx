@@ -15,7 +15,7 @@ import { FaBell } from "react-icons/fa";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import Notify from "../notifications/Notify";
 import notificationsData from "../../contract.json";
-import { Notification } from "@/types";
+import { NEON_ORANGE, NEON_PURPLE, Notification } from "@/types";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -104,6 +104,43 @@ const Sidebar = ({
     router.push(`/dashboard?view=${view}`);
   };
 
+  const NavItemContent = ({ isActive, Icon, label }: { isActive: boolean, Icon: React.ElementType, label: string }) => (
+    <div
+      className={`rounded-lg py-2 px-3 flex gap-3 items-center cursor-pointer w-full transition-all duration-200 
+          ${isActive ? "bg-[#181c21] shadow-inner shadow-black/30" : "bg-transparent hover:bg-gray-800/50"}`}
+    >
+      <Icon className={`text-xl flex-shrink-0 transition-colors duration-200 ml-[-2px]
+          ${isActive ? `text-[${NEON_PURPLE}]` : `text-gray-400 group-hover:text-[${NEON_ORANGE}]`}`}
+      />
+      {!isCollapsed && <span className={`text-lg font-medium transition-colors duration-200 ${isActive ? `` : 'text-gray-400'}`}>{label}</span>}
+    </div>
+  );
+
+  const NavItem = ({ id, viewName, Icon, label }: { id: number, viewName: string, Icon: React.ElementType, label: string }) => {
+    const isActive = state === id;
+
+    const content = <NavItemContent isActive={isActive} Icon={Icon} label={label} />;
+
+    return (
+      <div
+        className="group"
+        onClick={() => navigate(id, viewName)}
+      >
+        {isActive ? (
+          // Gradient Border Wrapper
+          <div className={`p-[1px] rounded-lg bg-gradient-to-r from-[${NEON_PURPLE}] to-[${NEON_ORANGE}] overflow-hidden transition-all duration-200`}>
+            {content}
+          </div>
+        ) : (
+          // Standard Item
+          <div className="rounded-lg">
+            {content}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div
       className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12]  fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`}
@@ -149,13 +186,13 @@ const Sidebar = ({
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="pt-2 text-[15px] text-gray-400 hover:underline truncate block"
+                    className="pt-1 text-[14px] text-gray-400 hover:text-[#00A7FF] hover:underline truncate block"
                     title={user.store.storeName}
                   >
                     {user.store.storeName}
                   </a>
                 ) : (
-                  <p className="pt-2 text-[15px] text-gray-500">
+                  <p className="pt-1 text-[14px] text-red-400">
                     No store connected
                   </p>
                 )}
@@ -165,7 +202,7 @@ const Sidebar = ({
 
           <hr className="border-gray-700 border w-full  mt-4" />
 
-          <div className="navigations mt-5 flex flex-col gap-2">
+          {/* <div className="navigations mt-5 flex flex-col gap-2">
             <div
               className={`${state === 1 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
               onClick={() => navigate(1, "ai-training")}
@@ -199,12 +236,18 @@ const Sidebar = ({
               <IoBarChart className="text-xl" />
               {!isCollapsed && <span className="text-xl">Analytics</span>}
             </div>
+          </div> */}
+          <div className="navigations mt-6 flex flex-col gap-1.5 ml-[-8px]">
+            <NavItem id={1} viewName="ai-training" Icon={FaBrain} label="AI Training Center" />
+            <NavItem id={2} viewName="inbox" Icon={IoChatbubbleOutline} label="Inbox" />
+            <NavItem id={3} viewName="integrations" Icon={IoGitNetworkOutline} label="Integrations" />
+            <NavItem id={4} viewName="analytics" Icon={IoBarChart} label="Analytics" />
           </div>
         </div>
 
         <div className="others fixed right-4 left-4 bottom-4">
           <div className="flex w-full flex-col gap-1">
-            <div className="rounded-md py-1 px-2 flex gap-3 items-center mb-1">
+            <div className="rounded-md py-1 px-2 flex gap-3 items-center mb-1 ml-[-5px]">
               {isCollapsed && (
                 <div className="bg-[#181c21] p-2 rounded-md shadow-xl -ml-2 relative">
                   <FaBell className="text-xl" />
@@ -226,28 +269,21 @@ const Sidebar = ({
               )}
             </div>
 
-            <div
-              className={`${state === 5 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer w-full`}
-              onClick={() => navigate(5, "settings")}
-            >
-              <IoSettingsSharp className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Settings</span>}
+           
+
+           
+            <div className="ml-[-8px]">
+              <NavItem id={5} viewName="settings" Icon={IoSettingsSharp} label="Settings" />
+              <NavItem id={6} viewName="help-center" Icon={MdSupportAgent} label="Help Center" />
             </div>
 
             <div
-              className={`${state === 6 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
-              onClick={() => navigate(6, "help-center")}
-            >
-              <MdSupportAgent className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Help Center</span>}
-            </div>
-
-            <div
-              className={`rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
+              className={`group rounded-lg py-2 px-3 flex gap-3 items-center cursor-pointer ml-[-8px]
+                transition-colors duration-200 text-gray-400 hover:bg-red-900/30 hover:text-red-400`}
               onClick={logout}
             >
-              <FaArrowRightFromBracket className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Logout</span>}
+              <FaArrowRightFromBracket className="text-xl flex-shrink-0 group-hover:text-red-400" />
+              {!isCollapsed && <span className="text-lg font-medium transition-colors duration-200">Logout</span>}
             </div>
           </div>
         </div>

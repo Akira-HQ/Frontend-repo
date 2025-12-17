@@ -172,7 +172,7 @@ const QuotaMonitor: React.FC = () => {
             degradation.
           </p>
           <a
-            href="/pricing"
+            href="/register/upgrade-plan"
             className={`px-4 py-2 text-sm font-bold rounded-lg text-white 
                             bg-gradient-to-r from-[#0066FF] to-[#A500FF] hover:from-[#A500FF] hover:to-[#FFB300] transition shadow-md shadow-purple-900/50`}
           >

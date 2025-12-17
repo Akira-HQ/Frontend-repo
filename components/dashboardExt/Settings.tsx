@@ -25,7 +25,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("usage");
 
   return (
-    <div className="py-4 px-2 w-full h-full text-white pt-10 ml-6">
+    <div className="py-4 px-2 w-full h-full text-white pt-10 ml-6 relative">
       <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
 
       {/* Settings Navigation Tabs */}

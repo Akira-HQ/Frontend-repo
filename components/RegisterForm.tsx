@@ -192,7 +192,7 @@ const RegisterContent = () => {
           />
           <label htmlFor="terms" className="ml-2 text-gray-300 text-sm">
             I accept the{" "}
-            <a href="#" className="text-[#00A7FF] hover:underline">
+            <a href="/terms-of-service" className="text-[#00A7FF] hover:underline">
               Terms & Service
             </a>
           </label>

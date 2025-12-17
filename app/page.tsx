@@ -176,7 +176,7 @@ const Home: React.FC = () => {
           ],
         },
         {
-          title: "Growth",
+          title: "Basic",
           basePrice: 79,
           isFeatured: true,
           features: [

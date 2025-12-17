@@ -5,6 +5,7 @@ import DashboardContent from "@/components/dashboardExt/DashboardContent";
 import RenderActiveContent from "@/components/dashboardExt/RenderActiveContent";
 import { useResizable } from "@/components/hooks/Resizable";
 import AuthGuard from "@/components/hooks/AuthGuard";
+import { AkiraStarsBackground } from "@/components/Stars";
 
 const COLLAPSED_WIDTH = 65;
 const DEFAULT_EXPANDED_WIDTH = 280;
@@ -61,6 +62,7 @@ const Page = () => {
       className={`pt-10 main-bg h-screen w-screen relative ${isResizing ? "cursor-col-resize select-none" : ""}`}
     >
       <AuthGuard>
+        <AkiraStarsBackground density={200} />
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={toggleSidebar}
