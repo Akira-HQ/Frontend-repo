@@ -174,7 +174,7 @@ const Sidebar = ({
                     {user?.name}
                   </h1>
                   <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md">
-                    {user?.plan}
+                    {user?.plan.toUpperCase()}
                   </span>
                 </div>
                 {user?.store ? (

@@ -21,10 +21,20 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
       try {
         const response = await callApi("/verify-session");
-        console.log("AuthGuard:", response);
-        setUser(response.user);
+        const verifiedUser = response.user;
+        setUser(verifiedUser);
+
+        // ⚡ Safety Net: Redirect if they try to access /dashboard without completing steps
+        if (verifiedUser.onboardingStep === "CONNECT_STORE") {
+          // Use 'connect-store' to match the useEffect logic above
+          router.replace("/register?step=connect-store");
+        } else if (verifiedUser.onboardingStep === "PAYMENT_WALL") {
+          router.replace(`/register/payment-wall?plan=${verifiedUser.plan}&store=${verifiedUser.store?.storeUrl}`);
+        }
       } catch (error) {
         console.error("Session validation failed:", error);
+        localStorage.removeItem("token");
+        router.push("/register/sign-in");
       } finally {
         setIsLoading(false);
       }
@@ -33,6 +43,12 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     if (!user) {
       verifySession();
     } else {
+      // Check state even if user object exists in context
+      if (user.onboardingStep === "CONNECT_STORE") {
+        router.replace("/register?step=connect-store");
+      } else if (user.onboardingStep === "PAYMENT_WALL") {
+        router.replace(`/register/payment-wall?plan=${user.plan}&store=${user.store?.storeUrl}`);
+      }
       setIsLoading(false);
     }
   }, [user, setUser, router, callApi]);

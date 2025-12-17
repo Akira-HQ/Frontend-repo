@@ -4,7 +4,7 @@ import { NEON_GRADIENT } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppContext } from "./AppContext";
 import { UseAPI } from "./hooks/UseAPI";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { validatePassword } from "./hooks/validatePassword";
 import {
   Code,
@@ -29,7 +29,7 @@ import StoreConnector from "./onboarding/StoreConnector";
 const RegisterContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addToast, setUser, setAlertMessage } = useAppContext();
+  const { addToast, setUser, setAlertMessage, user } = useAppContext();
   const { callApi } = UseAPI();
 
   const [nextStep, setNextStep] = useState(1);
@@ -43,6 +43,15 @@ const RegisterContent = () => {
 
   const [platform, setPlatform] = useState("");
   const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    const urlStep = searchParams.get("step");
+
+    // If the URL says connect-store OR the user object exists in context
+    if (urlStep === "connect-store" || (user && user.id)) {
+      setNextStep(2);
+    }
+  }, [user, searchParams]);
 
   const selectedPlan = searchParams.get("plan") || "free";
 

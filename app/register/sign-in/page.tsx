@@ -59,6 +59,23 @@ const LoginContent: React.FC = () => {
         password,
       });
 
+      // ⚡ NEW: Gating Logic based on onboardingStep
+      localStorage.setItem("token", response.token);
+      const { onboardingStep, plan, store } = response.data;
+
+      if (onboardingStep === "CONNECT_STORE") {
+        addToast("Almost there! Please connect your Shopify store.", "info");
+        router.push("/register?step=connect-store");
+        return;
+      }
+
+      if (onboardingStep === "PAYMENT_WALL") {
+        addToast("Please complete your subscription to continue.", "info");
+        // Redirect to payment wall with existing parameters
+        router.push(`/register/payment-wall?plan=${plan}&store=${store?.storeUrl || ""}`);
+        return;
+      }
+
       localStorage.setItem("token", response.token);
       setUser(response.data);
 

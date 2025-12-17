@@ -20,6 +20,7 @@ export interface User {
     snippetToken: string;
     platform: string;
   };
+  onboardingStep: "CONNECT_STORE" | "PAYMENT_WALL" | "COMPLETED";
 }
 
 export interface ContextProps {
