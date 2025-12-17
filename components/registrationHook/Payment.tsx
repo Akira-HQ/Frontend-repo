@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, Zap, CheckCircle, Store, Lock, Loader2 } from "lucide-react";
+import { CreditCard, CheckCircle, Lock, Loader2 } from "lucide-react";
 import { useAppContext } from "../AppContext";
 import { UseAPI } from "@/components/hooks/UseAPI";
-import { PLAN_CONFIG } from "@/utils/checkPlan"; // Central source for $10/$20 pricing
+import { PLAN_CONFIG } from "@/utils/checkPlan";
 
 const PaymentWall: React.FC = () => {
   const router = useRouter();
@@ -16,20 +16,29 @@ const PaymentWall: React.FC = () => {
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvc: '', name: '' });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Map 'pro' from the landing page URL to the 'PREMIUM' key in your config
+  // ⚡ GUARD: Prevents the "Maximum update depth exceeded" error
+  const hasToasted = useRef(false);
+
+  // Determine plan from URL (e.g., ?plan=pro -> PREMIUM)
   const planQuery = (searchParams.get("plan") || "basic").toLowerCase();
   const selectedPlanKey = planQuery === "pro" ? "PREMIUM" : planQuery.toUpperCase();
   const storeUrl = searchParams.get("store");
 
-  // Fetch details directly from your central config
+  // Get plan details from your central config
   const plan = PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG] || PLAN_CONFIG.BASIC;
 
   useEffect(() => {
+    // If we've already shown the success toast for this session, stop.
+    if (hasToasted.current) return;
+
     if (!user || !user.id) {
       addToast("Please log in to continue.", "error");
     }
+
     if (storeUrl) {
       addToast(`Store ${storeUrl} successfully connected!`, "success");
+      // Mark as done so re-renders don't trigger another toast
+      hasToasted.current = true;
     }
   }, [user, storeUrl, addToast]);
 
@@ -38,7 +47,7 @@ const PaymentWall: React.FC = () => {
     setLoading(true);
     setAlertMessage("Processing payment...", "loading");
 
-    // Skip payment for free tier based on central config
+    // Skip payment for free tier
     if (plan.price <= 0) {
       addToast("Free plan selected. Skipping payment.", "info");
       handleFinalizeSubscription();
@@ -46,7 +55,8 @@ const PaymentWall: React.FC = () => {
     }
 
     try {
-      const paymentResponse = await callApi("/billing/process-payment", "POST", {
+      // ⚠️ Note: This is a placeholder for your future Paystack integration
+      const paymentResponse = await callApi("/process-payment", "POST", {
         plan: selectedPlanKey,
         storeUrl: storeUrl,
         cardDetails: cardDetails,
@@ -67,15 +77,15 @@ const PaymentWall: React.FC = () => {
   };
 
   const handleFinalizeSubscription = () => {
-    setAlertMessage("Subscription active! Redirecting...", "success");
+    setAlertMessage("Subscription active! Redirecting to dashboard...", "success");
     setTimeout(() => {
       router.push('/dashboard');
-    }, 1500);
+    }, 2000);
   };
 
   if (paymentSuccess) {
     return (
-      <div className="w-full max-w-lg mx-auto p-10 bg-gray-900 rounded-3xl text-center border border-green-600/50 shadow-xl">
+      <div className="w-full max-w-lg mx-auto p-10 bg-gray-900 rounded-3xl text-center border border-green-600/50 shadow-xl relative z-10">
         <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h2 className="text-3xl font-bold text-white mb-2">Payment Confirmed!</h2>
         <p className="text-gray-400">Your {selectedPlanKey} plan is now active.</p>
@@ -87,12 +97,13 @@ const PaymentWall: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-gray-900/80 rounded-3xl border border-gray-800 backdrop-blur-md shadow-2xl">
+    <div className="w-full max-w-2xl mx-auto p-8 bg-gray-900/80 rounded-3xl border border-gray-800 backdrop-blur-md shadow-2xl relative z-10">
       <h1 className="text-3xl font-extrabold text-center text-white mb-3 flex items-center justify-center gap-2">
         <CreditCard className="w-7 h-7 text-[#FFB300]" /> Final Step: Activate
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        {/* Plan Overview */}
         <div className="space-y-4 p-4 rounded-xl bg-gray-800 border border-gray-700 h-fit">
           <h2 className="text-2xl font-bold text-[#A500FF] uppercase">{planQuery} Plan</h2>
           <p className="text-4xl font-extrabold text-white">${plan.price} <span className="text-lg text-gray-500">/mo</span></p>
@@ -105,6 +116,7 @@ const PaymentWall: React.FC = () => {
           </ul>
         </div>
 
+        {/* Payment Form */}
         <form onSubmit={handlePaymentSubmit} className="space-y-4">
           <div className="p-3 bg-blue-900/20 text-sm text-blue-300 rounded-lg flex items-center gap-2">
             <Lock className="w-4 h-4" /> Secure SSL Encryption
