@@ -13,6 +13,8 @@ interface ApiHook {
 export const UseAPI = (): ApiHook => {
   const router = useRouter();
   const { setUser, addToast } = useAppContext();
+  // const backendUrl = process.env.LOCAL_URL;
+  const backendUrl = process.env.BACKEND_URI;
 
   const callApi = useCallback(
     async (
@@ -36,8 +38,9 @@ export const UseAPI = (): ApiHook => {
       if (body) {
         options.body = JSON.stringify(body);
       }
-
-      const response = await fetch(`http://localhost:8000${endpoint}`, options);
+      console.log("backend url:", backendUrl)
+      console.log("endpoint url:", endpoint)
+      const response = await fetch(`${backendUrl}${endpoint}`, options);
 
       const newToken = response.headers.get("X-New-Token");
       if (newToken) {
