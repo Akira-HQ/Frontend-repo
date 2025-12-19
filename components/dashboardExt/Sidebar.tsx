@@ -14,7 +14,6 @@ import {
 import { FaBell } from "react-icons/fa";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import Notify from "../notifications/Notify";
-import notificationsData from "../../contract.json";
 import { NEON_ORANGE, NEON_PURPLE, Notification } from "@/types";
 
 interface SidebarProps {
@@ -34,8 +33,11 @@ const Sidebar = ({
   const { isDarkMode, user, logout } = useAppContext();
   const initial = user?.name ? user?.name.charAt(0).toUpperCase() : "?";
   const [state, setState] = useState<number | null>(null);
-  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
+
+  // Track IDs that have been dismissed so they don't reappear on re-render
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const [view, setView] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -72,21 +74,58 @@ const Sidebar = ({
     }
   }, [view]);
 
-  useEffect(() => {
-    setAllNotifications(notificationsData as Notification[]);
-  }, []);
-
+  // Generate notifications dynamically but filter out dismissed ones
   const unReadNotifications = useMemo(() => {
-    return allNotifications.filter((n) => !n.read);
-  }, [allNotifications]);
+    const dynamicNotifs: Notification[] = [];
+    if (!user) return [];
+
+    const currentAuditBalance = user?.daily_audit_limit || 0;
+    const maxAudit = user?.plan === "Pro" ? 500 : user?.plan === "Basic" ? 50 : 5;
+
+    // 1. Quota Alert Logic
+    const quotaId = `quota-alert-logic`; // Constant ID for the logic
+    if (currentAuditBalance <= (maxAudit * 0.2) && !dismissedIds.includes(quotaId)) {
+      dynamicNotifs.push({
+        id: quotaId,
+        type: "USAGE_ALERT",
+        read: false,
+        timestamp: new Date(),
+        data: {
+          title: currentAuditBalance === 0 ? "Battery Depleted" : "Energy Low",
+          message: currentAuditBalance === 0
+            ? "I've used all my deep-thinking power for today. I'll recharge at midnight!"
+            : `I only have {value} audits left in my tank. Use them wisely!`,
+          progress: {
+            value: currentAuditBalance,
+            max: maxAudit,
+            unit: "Audits"
+          }
+        }
+      });
+    }
+
+    // 2. Add other dynamic notifications here if needed, filtering by !dismissedIds.includes(id)
+
+    return dynamicNotifs;
+  }, [user, dismissedIds]);
 
   const notificationToShow = unReadNotifications[currentIndex];
 
+  // If the currentIndex becomes invalid (e.g. notifications were dismissed), reset it
+  useEffect(() => {
+    if (currentIndex >= unReadNotifications.length && unReadNotifications.length > 0) {
+      setCurrentIndex(unReadNotifications.length - 1);
+    } else if (unReadNotifications.length === 0) {
+      setCurrentIndex(0);
+    }
+  }, [unReadNotifications.length, currentIndex]);
+
   const handleDismiss = (id: string) => {
-    setAllNotifications((currentNotifications) =>
-      currentNotifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-    setCurrentIndex(0);
+    setDismissedIds((prev) => [...prev, id]);
+    // Move to previous index if we are dismissing the last item
+    if (currentIndex > 0 && currentIndex === unReadNotifications.length - 1) {
+      setCurrentIndex(currentIndex - 1);
+    }
   };
 
   const handleNext = () => {
@@ -107,10 +146,10 @@ const Sidebar = ({
   const NavItemContent = ({ isActive, Icon, label }: { isActive: boolean, Icon: React.ElementType, label: string }) => (
     <div
       className={`rounded-lg py-2 px-3 flex gap-3 items-center cursor-pointer w-full transition-all duration-200 
-          ${isActive ? "bg-[#181c21] shadow-inner shadow-black/30" : "bg-transparent hover:bg-gray-800/50"}`}
+          ${isActive ? "bg-[#181c21] shadow-inner shadow-black/30" : "bg-transparent hover:bg-gray-800/50"}`}
     >
       <Icon className={`text-xl flex-shrink-0 transition-colors duration-200 ml-[-2px]
-          ${isActive ? `text-[${NEON_PURPLE}]` : `text-gray-400 group-hover:text-[${NEON_ORANGE}]`}`}
+          ${isActive ? `text-[${NEON_PURPLE}]` : `text-gray-400 group-hover:text-[${NEON_ORANGE}]`}`}
       />
       {!isCollapsed && <span className={`text-lg font-medium transition-colors duration-200 ${isActive ? `` : 'text-gray-400'}`}>{label}</span>}
     </div>
@@ -118,24 +157,16 @@ const Sidebar = ({
 
   const NavItem = ({ id, viewName, Icon, label }: { id: number, viewName: string, Icon: React.ElementType, label: string }) => {
     const isActive = state === id;
-
     const content = <NavItemContent isActive={isActive} Icon={Icon} label={label} />;
 
     return (
-      <div
-        className="group"
-        onClick={() => navigate(id, viewName)}
-      >
+      <div className="group" onClick={() => navigate(id, viewName)}>
         {isActive ? (
-          // Gradient Border Wrapper
           <div className={`p-[1px] rounded-lg bg-gradient-to-r from-[${NEON_PURPLE}] to-[${NEON_ORANGE}] overflow-hidden transition-all duration-200`}>
             {content}
           </div>
         ) : (
-          // Standard Item
-          <div className="rounded-lg">
-            {content}
-          </div>
+          <div className="rounded-lg">{content}</div>
         )}
       </div>
     );
@@ -143,11 +174,11 @@ const Sidebar = ({
 
   return (
     <div
-      className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12]  fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`}
+      className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12] fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`}
       style={{ width: `${width}px` }}
     >
       <span
-        className="p-0! absolute right-3 z-10 grid h-6 place-items-center  text-white shadow-2xl cursor-grab text-2xl transition-all duration-300 "
+        className="p-0! absolute right-3 z-10 grid h-6 place-items-center text-white shadow-2xl cursor-grab text-2xl transition-all duration-300 "
         onClick={onToggle}
         onMouseDown={onMouseDown}
       >
@@ -168,22 +199,16 @@ const Sidebar = ({
             {!isCollapsed && (
               <div className="w-full">
                 <div className="flex w-full justify-between items-center">
-                  <h1
-                    className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl`}
-                  >
+                  <h1 className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl`}>
                     {user?.name}
                   </h1>
-                  <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md">
+                  <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md text-xs font-bold">
                     {user?.plan.toUpperCase()}
                   </span>
                 </div>
                 {user?.store ? (
                   <a
-                    href={
-                      user.store.storeUrl.startsWith("http")
-                        ? user.store.storeUrl
-                        : `https://${user.store.storeUrl}`
-                    }
+                    href={user.store.storeUrl.startsWith("http") ? user.store.storeUrl : `https://${user.store.storeUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pt-1 text-[14px] text-gray-400 hover:text-[#00A7FF] hover:underline truncate block"
@@ -192,51 +217,14 @@ const Sidebar = ({
                     {user.store.storeName}
                   </a>
                 ) : (
-                  <p className="pt-1 text-[14px] text-red-400">
-                    No store connected
-                  </p>
+                  <p className="pt-1 text-[14px] text-red-400">No store connected</p>
                 )}
               </div>
             )}
           </div>
 
-          <hr className="border-gray-700 border w-full  mt-4" />
+          <hr className="border-gray-700 border w-full mt-4" />
 
-          {/* <div className="navigations mt-5 flex flex-col gap-2">
-            <div
-              className={`${state === 1 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
-              onClick={() => navigate(1, "ai-training")}
-            >
-              <FaBrain className="text-xl" />
-              {!isCollapsed && (
-                <span className="text-xl">AI Training Center</span>
-              )}
-            </div>
-
-            <div
-              className={`${state === 2 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
-              onClick={() => navigate(2, "inbox")}
-            >
-              <IoChatbubbleOutline className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Inbox</span>}
-            </div>
-
-            <div
-              className={`${state === 3 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
-              onClick={() => navigate(3, "integrations")}
-            >
-              <IoGitNetworkOutline className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Integrations</span>}
-            </div>
-
-            <div
-              className={`${state === 4 ? "bg-[#181c21] shadow-xl " : "bg-transparent"} rounded-md py-1 px-2 flex gap-3 items-center cursor-pointer`}
-              onClick={() => navigate(4, "analytics")}
-            >
-              <IoBarChart className="text-xl" />
-              {!isCollapsed && <span className="text-xl">Analytics</span>}
-            </div>
-          </div> */}
           <div className="navigations mt-6 flex flex-col gap-1.5 ml-[-8px]">
             <NavItem id={1} viewName="ai-training" Icon={FaBrain} label="AI Training Center" />
             <NavItem id={2} viewName="inbox" Icon={IoChatbubbleOutline} label="Inbox" />
@@ -248,17 +236,17 @@ const Sidebar = ({
         <div className="others fixed right-4 left-4 bottom-4">
           <div className="flex w-full flex-col gap-1">
             <div className="rounded-md py-1 px-2 flex gap-3 items-center mb-1 ml-[-5px]">
-              {isCollapsed && (
+              {isCollapsed && unReadNotifications.length > 0 && (
                 <div className="bg-[#181c21] p-2 rounded-md shadow-xl -ml-2 relative">
-                  <FaBell className="text-xl" />
+                  <FaBell className="text-xl text-blue-500" />
                   <span className="badge absolute -top-1 -right-1 flex justify-center items-center h-5 w-5 text-xs font-bold text-white bg-blue-500 rounded-full">
                     {unReadNotifications.length}
                   </span>
                 </div>
               )}
-              {!isCollapsed && unReadNotifications.length > 0 && (
+              {!isCollapsed && unReadNotifications.length > 0 && notificationToShow && (
                 <Notify
-                  key={notificationToShow?.id}
+                  key={notificationToShow.id}
                   notification={notificationToShow}
                   onDismiss={() => handleDismiss(notificationToShow.id)}
                   onNext={handleNext}
@@ -269,9 +257,6 @@ const Sidebar = ({
               )}
             </div>
 
-           
-
-           
             <div className="ml-[-8px]">
               <NavItem id={5} viewName="settings" Icon={IoSettingsSharp} label="Settings" />
               <NavItem id={6} viewName="help-center" Icon={MdSupportAgent} label="Help Center" />
@@ -279,7 +264,7 @@ const Sidebar = ({
 
             <div
               className={`group rounded-lg py-2 px-3 flex gap-3 items-center cursor-pointer ml-[-8px]
-                transition-colors duration-200 text-gray-400 hover:bg-red-900/30 hover:text-red-400`}
+                transition-colors duration-200 text-gray-400 hover:bg-red-900/30 hover:text-red-400`}
               onClick={logout}
             >
               <FaArrowRightFromBracket className="text-xl flex-shrink-0 group-hover:text-red-400" />

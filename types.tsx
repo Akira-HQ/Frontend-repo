@@ -3,7 +3,7 @@ import { ReactNode, createContext, useContext } from "react";
 export interface Toast {
   id: string;
   message: string;
-  type: "success" | "error" | "info" | "loading";
+  type: "success" | "error" | "info" | "loading" | "warning";
 }
 
 // User Types
@@ -21,6 +21,7 @@ export interface User {
     platform: string;
   };
   onboardingStep: "CONNECT_STORE" | "PAYMENT_WALL" | "COMPLETED";
+  daily_audit_limit?: number;
 }
 
 export interface ContextProps {
@@ -39,12 +40,16 @@ export interface ContextProps {
   toasts: Toast[];
   addToast: (
     message: string,
-    type: "success" | "error" | "info" | "loading",
+    type: "success" | "error" | "info" | "loading" | "warning",
   ) => void;
   removeToast: (id: string) => void;
   user: User | null;
   setUser: (user: User | null) => void;
   logout: () => void;
+  isChatOpen: boolean;
+  setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  chatContextProduct: any; // or a specific Product type if you have one
+  openChat: (product?: any) => void;
 }
 
 // PageTracker Types
@@ -84,15 +89,25 @@ interface DashboardProps {
   collasped?: boolean;
 }
 
-//Notification Types
 export interface UsageAlertData {
   title: string;
   message: string;
   progress: {
-    value: number;
-    max: number;
-    unit: string;
+    value: number; // Changed to number for math (e.g., 4)
+    max: number;   // The plan limit (e.g., 5, 50, or 500)
+    unit: string;  // e.g., "Audits" or "Enhancements"
+    percentage?: number; // Optional: can be pre-calculated
   };
+}
+
+export type NotificationType = "USAGE_ALERT" | "ANNOUNCEMENT" | "SECURITY_TIP" | "SYNC_STATUS";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  read: boolean;
+  timestamp: Date;
+  data: UsageAlertData; // Or a Union type if other types have different data structures
 }
 
 export interface AnnoucementData {
@@ -110,15 +125,15 @@ export interface SecurityTipData {
   };
 }
 
-export type Notification = {
-  id: string;
-  timestamp: string;
-  read: boolean;
-} & (
-  | { type: "USAGE_ALERT"; data: UsageAlertData }
-  | { type: "ANNOUNCEMENT"; data: AnnoucementData }
-  | { type: "SECURITY_TIP"; data: SecurityTipData }
-);
+// export type Notification = {
+//   id: string;
+//   timestamp: string;
+//   read: boolean;
+// } & (
+//   | { type: "USAGE_ALERT"; data: UsageAlertData }
+//   | { type: "ANNOUNCEMENT"; data: AnnoucementData }
+//   | { type: "SECURITY_TIP"; data: SecurityTipData }
+// );
 
 export type ThemeContextType = {
   isDarkMode: boolean;

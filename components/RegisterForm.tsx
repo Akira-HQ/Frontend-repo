@@ -49,7 +49,8 @@ const RegisterContent = () => {
 
     // If the URL says connect-store OR the user object exists in context
     if (urlStep === "connect-store" || (user && user.id)) {
-      setNextStep(2);
+      // setNextStep(2);
+      router.push('/register/sign-in')
     }
   }, [user, searchParams]);
 

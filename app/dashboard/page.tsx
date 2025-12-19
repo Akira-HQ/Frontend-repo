@@ -6,6 +6,9 @@ import RenderActiveContent from "@/components/dashboardExt/RenderActiveContent";
 import { useResizable } from "@/components/hooks/Resizable";
 import AuthGuard from "@/components/hooks/AuthGuard";
 import { AkiraStarsBackground } from "@/components/Stars";
+import AkiraChat from "@/components/chatTools/AkiraChat";
+import { useAppContext } from "@/components/AppContext";
+import { IoChatbubbleOutline } from "react-icons/io5";
 
 const COLLAPSED_WIDTH = 65;
 const DEFAULT_EXPANDED_WIDTH = 280;
@@ -13,6 +16,7 @@ const DEFAULT_EXPANDED_WIDTH = 280;
 const Page = () => {
   const [isSidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const lastExpandedWidth = useRef(DEFAULT_EXPANDED_WIDTH);
+  const {isChatOpen, openChat, setIsChatOpen, chatContextProduct} = useAppContext()
 
   const {
     width: sidebarWidth,
@@ -71,6 +75,23 @@ const Page = () => {
         />
         <DashboardContent sidebarWidth={sidebarWidth}>
           <RenderActiveContent />
+          {/* FLOATING GLOBAL CHAT TRIGGER */}
+          {!isChatOpen && (
+            <button
+              onClick={() => openChat(null)}
+              className="fixed bottom-10 right-10 z-50 p-4 bg-amber-500 text-black rounded-full shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-110 transition-all active:scale-95 group"
+            >
+              <IoChatbubbleOutline size={28} />
+              <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#0b0b0b] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Ask Akira
+              </span>
+            </button>
+          )}
+          <AkiraChat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            activeProduct={chatContextProduct}
+          />
         </DashboardContent>
       </AuthGuard>
     </section>
