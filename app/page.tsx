@@ -19,6 +19,7 @@ import Footer from "@/components/Footer";
 
 // Import the source of truth
 import { PLAN_CONFIG } from "@/utils/checkPlan";
+import { LandingChat } from "@/components/chatTools/ChatWindow";
 
 const Home: React.FC = () => {
   const [isMonthly, setIsMonthly] = useState(true);
@@ -138,6 +139,8 @@ const Home: React.FC = () => {
         <TestimonialPlaceholder />
         <FinalCTA onStart={() => handleCtaClick("premium")} onSeePlans={() => handleCtaClick("basic")} />
       </main>
+
+      <LandingChat />
       <Footer />
     </div>
   );

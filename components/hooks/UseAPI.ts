@@ -38,8 +38,6 @@ export const UseAPI = (): ApiHook => {
       if (body) {
         options.body = JSON.stringify(body);
       }
-      console.log("backend url:", backendUrl)
-      console.log("endpoint url:", endpoint)
       const response = await fetch(`${backendUrl}${endpoint}`, options);
 
       const newToken = response.headers.get("X-New-Token");

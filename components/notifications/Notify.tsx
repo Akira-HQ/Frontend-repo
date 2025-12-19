@@ -8,6 +8,7 @@ import {
   IoChevronBack,
   IoChevronForward,
 } from "react-icons/io5";
+import { useAppContext } from "../AppContext";
 
 interface NotifyProps {
   notification: Notification;
@@ -42,6 +43,7 @@ export default function Notify({
 }: NotifyProps) {
   const showControls = totalUnread > 1;
   const [isExisting, setIsExisting] = useState<boolean>(false);
+  const { user } = useAppContext();
 
   const handleLocalDismiss = () => {
     setIsExisting(true);
@@ -72,7 +74,8 @@ export default function Notify({
               dangerouslySetInnerHTML={{
                 __html: notification?.data.message.replace(
                   "{value}",
-                  `<b>${(notification.data as any).progress?.value || ""}</b>`,
+                  // If it's a quota alert, show the actual number, otherwise blank
+                  `<b>${notification.id.includes('quota') ? (user?.daily_audit_limit || 0) : ""}</b>`,
                 ),
               }}
             />
