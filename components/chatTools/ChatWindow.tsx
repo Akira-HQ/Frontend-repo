@@ -65,7 +65,7 @@ export const LandingChat: React.FC = () => {
       setMessages([
         {
           role: "akira",
-          content: "Hi! I'm Akira. Your autonomous sales partner. I've been watching your store—want to know how we can scale your conversions today?",
+          content: "Hi! I'm Akira. Your autonomous sales partner. Want to know how we can scale your conversions today?",
           isNew: true // This triggers the Typewriter
         }
       ]);
