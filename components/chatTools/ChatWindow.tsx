@@ -53,7 +53,7 @@ export const LandingChat: React.FC = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         role: "cliva",
-        content: "Hi! I'm **Cliva**. Welcome to the future of **Shopify Scaling**. Want to secure **early access** to our launch? Drop your email below.",
+        content: "Hi! I'm **Cliva**. Welcome to the future of **E-commerce**. Want to secure **early access** to our launch? Drop your email below.",
         isNew: true
       }]);
     }
