@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 
-// Section 1: Akira Capabilities Grid
+// Section 1: Cliva Capabilities Grid
 export type Capability = { icon: LucideIcon; title: string };
 
 export const CapabilityGrid: React.FC<{ capabilities: Capability[] }> = ({
@@ -9,10 +9,10 @@ export const CapabilityGrid: React.FC<{ capabilities: Capability[] }> = ({
   <section id="capacity" className="container mx-auto px-4 py-20 max-w-7xl">
     <div className="text-center mb-16">
       <h2 className="text-3xl md:text-4xl font-bold mb-4">
-        Akira's Core Capabilities
+        Cliva's Core Capabilities
       </h2>
       <p className="text-lg text-gray-400 max-w-4xl mx-auto">
-        Go beyond simple chat. Akira is a comprehensive AI sales engine built on
+        Go beyond simple chat. Cliva is a comprehensive AI sales engine built on
         real-time data and predictive modeling.
       </p>
     </div>

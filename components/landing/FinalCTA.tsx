@@ -17,7 +17,7 @@ export const FinalCTA: React.FC<{
         Ready to automate your entire sales workflow?
       </h2>
       <p className="text-xl text-gray-100 max-w-3xl mx-auto mb-10">
-        Akira works 24/7. No salary. No break. Instant response.
+        Cliva works 24/7. No salary. No break. Instant response.
       </p>
 
       <div className="flex justify-center space-x-4">

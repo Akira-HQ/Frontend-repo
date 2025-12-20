@@ -8,7 +8,7 @@ import { UseAPI } from '@/components/hooks/UseAPI';
 // 🛑 FIX: Changed import name from PLAN_DETAILS to PLAN_CONFIG 
 // and adjusted the assumed path to the shared config file.
 import { PLAN_CONFIG } from '@/utils/checkPlan';
-import { AkiraStarsBackground } from '@/components/Stars';
+import { ClivaStarsBackground } from '@/components/Stars';
 
 interface PlanCardProps {
   planKey: string;
@@ -113,7 +113,7 @@ const UpgradePlanPage: React.FC = () => {
 
   return (
     <div className="py-20 px-4 bg-[#050505] relative">
-      <AkiraStarsBackground density={200} />
+      <ClivaStarsBackground density={200} />
       <div className="relative">
         <h1 className="text-4xl font-extrabold text-white text-center mb-2 flex items-center justify-center gap-3 relative">
           <Zap className="w-8 h-8 text-[#A500FF]" /> Upgrade Your Plan

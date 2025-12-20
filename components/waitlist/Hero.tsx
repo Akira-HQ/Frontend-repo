@@ -9,11 +9,11 @@ export default function Hero() {
       </div>
 
       <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40">
-        Meet Akira. <br /> Your AI Sales Manager.
+        Meet Cliva. <br /> Your AI Sales Manager.
       </h1>
 
       <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-12 leading-relaxed">
-        Akira understands buyer intent, automates complex sales conversations,
+        Cliva understands buyer intent, automates complex sales conversations,
         and scales your store intelligently while you focus on brand.
       </p>
 

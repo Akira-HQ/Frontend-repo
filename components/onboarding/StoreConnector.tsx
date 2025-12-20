@@ -98,7 +98,7 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
     ? "Connecting..."
     : platform === 'shopify'
       ? "Connect with Shopify"
-      : "Finalize & Launch Akira";
+      : "Finalize & Launch Cliva";
 
   return (
     <>

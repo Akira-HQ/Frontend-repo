@@ -17,7 +17,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load theme from localStorage on first mount
   useEffect(() => {
-    const storedTheme = localStorage.getItem("akira-theme");
+    const storedTheme = localStorage.getItem("cliva-theme");
     if (storedTheme) {
       setIsDarkMode(storedTheme === "dark");
       document.documentElement.classList.toggle("dark", storedTheme === "dark");
@@ -29,7 +29,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     setIsDarkMode((prev) => {
       const newTheme = !prev;
       document.documentElement.classList.toggle("dark", newTheme);
-      localStorage.setItem("akira-theme", newTheme ? "dark" : "light");
+      localStorage.setItem("cliva-theme", newTheme ? "dark" : "light");
       return newTheme;
     });
   };

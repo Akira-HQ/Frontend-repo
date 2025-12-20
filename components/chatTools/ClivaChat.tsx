@@ -6,7 +6,7 @@ import { UseAPI } from "@/components/hooks/UseAPI";
 import { useAppContext } from "@/components/AppContext";
 import { useSearchParams } from "next/navigation";
 
-const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
+const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
   const { callApi } = UseAPI();
   const { addToast } = useAppContext();
   const searchParams = useSearchParams();
@@ -24,13 +24,13 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
 
   // --- 2. PERSISTENCE & MULTI-THREAD LOGIC ---
   useEffect(() => {
-    const savedData = localStorage.getItem("akira_threaded_chats");
+    const savedData = localStorage.getItem("cliva_threaded_chats");
     if (savedData) {
       const { timestamp, threads } = JSON.parse(savedData);
       const isExpired = Date.now() - timestamp > 24 * 60 * 60 * 1000;
 
       if (isExpired) {
-        localStorage.removeItem("akira_threaded_chats");
+        localStorage.removeItem("cliva_threaded_chats");
         setAllThreads({});
       } else {
         setAllThreads(threads);
@@ -41,7 +41,7 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
   // Save all threads to localStorage whenever any update happens
   useEffect(() => {
     if (Object.keys(allThreads).length > 0) {
-      localStorage.setItem("akira_threaded_chats", JSON.stringify({
+      localStorage.setItem("cliva_threaded_chats", JSON.stringify({
         timestamp: Date.now(),
         threads: allThreads,
       }));
@@ -57,7 +57,7 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
       ? `I'm focused on **${activeProduct.name}**. I've got the audit data ready—what would you like to tweak or understand about this product?`
       : `I see we're in the **${currentView.replace('-', ' ')}** section. How can I assist with your store strategy here?`;
 
-    return [{ role: "akira", content: greeting }];
+    return [{ role: "cliva", content: greeting }];
   }, [allThreads, contextKey, activeProduct, currentView]);
 
   useEffect(() => {
@@ -82,16 +82,16 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
         message: messageToSend,
         context: currentView,
         productId: activeProduct?.id || null,
-        // We pass the full product data so Akira understands instructions like "Add more flair to this"
+        // We pass the full product data so Cliva understands instructions like "Add more flair to this"
         productData: activeProduct || null,
         history: currentMessages.slice(-6)
       });
 
       if (res?.data) {
-        const akiraMsg = { role: "akira", content: res.data.reply };
+        const clivaMsg = { role: "cliva", content: res.data.reply };
         setAllThreads(prev => ({
           ...prev,
-          [contextKey]: [...updatedHistory, akiraMsg]
+          [contextKey]: [...updatedHistory, clivaMsg]
         }));
       }
     } catch (error: any) {
@@ -114,7 +114,7 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
 
     if (currentView === "integrations") return [
       { label: "Check API Health", value: "Are my external store connections working correctly?" },
-      { label: "Shopify Sync Help", value: "How do I ensure my latest inventory is synced with Akira?" }
+      { label: "Shopify Sync Help", value: "How do I ensure my latest inventory is synced with Cliva?" }
     ];
 
     return [
@@ -134,7 +134,7 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
             <HiSparkles size={20} className="animate-pulse" />
           </div>
           <div>
-            <h3 className="font-bold text-white tracking-tight leading-none mb-1">Akira's Lounge</h3>
+            <h3 className="font-bold text-white tracking-tight leading-none mb-1">Cliva's Lounge</h3>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               <p className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Contextual Assistant</p>
@@ -187,7 +187,7 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
               <span className="w-1 h-1 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
               <span className="w-1 h-1 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
             </div>
-            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Akira is thinking...</span>
+            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Cliva is thinking...</span>
           </div>
         )}
       </div>
@@ -217,4 +217,4 @@ const AkiraChat = ({ isOpen, onClose, activeProduct }: any) => {
   );
 };
 
-export default AkiraChat;
+export default ClivaChat;

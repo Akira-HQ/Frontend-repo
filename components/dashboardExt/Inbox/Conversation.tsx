@@ -44,7 +44,7 @@ interface ConfirmModalProps {
 const mockChat = [
   { sender: "customer", text: "Is the leather backpack available in blue?" },
   {
-    sender: "akira",
+    sender: "cliva",
     text: "Yes! We have the Vintage Leather Backpack in Midnight Blue. It's currently in low stock (only 3 left). Would you like me to reserve one for you now? 🛍️",
   },
   {
@@ -52,13 +52,13 @@ const mockChat = [
     text: "3 left? Ah, I'll think about it. Too expensive right now.",
   },
   {
-    sender: "akira",
+    sender: "cliva",
     text: "I understand! We also have the **Portable Espresso Maker** on sale this week. It's a fantastic value at $25,000. Can I tell you more about it? ☕",
   },
   // AI INSIGHT injected by the system, not visible to the customer
   {
     sender: "system_insight",
-    text: "Insight: Customer hit **Price Objection**. Akira attempted cross-sell with the Espresso Maker but failed. Conversion likelihood: Medium.",
+    text: "Insight: Customer hit **Price Objection**. Cliva attempted cross-sell with the Espresso Maker but failed. Conversion likelihood: Medium.",
   },
 ];
 
@@ -129,18 +129,18 @@ const ConversationReviewPanel: React.FC<PanelProps> = ({
                     ? "bg-[#A500FF]/50 text-white rounded-br-none"
                     : isSystem
                       ? "bg-yellow-900/40 text-yellow-100 border border-yellow-700/50 text-sm italic rounded-xl" // Insight style
-                      : "bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700" // Akira style
+                    : "bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700" // Cliva style
                   }`}
               >
                 <p className="font-medium text-xs mb-1">
                   {isSystem ? (
                     <span className="flex items-center text-yellow-300 gap-1">
-                      <Zap className="w-3 h-3" /> Akira Analysis:
+                      <Zap className="w-3 h-3" /> Cliva Analysis:
                     </span>
                   ) : isCustomer ? (
                     "Customer"
                   ) : (
-                    "Akira Response:"
+                    "Cliva Response:"
                   )}
                 </p>
                 <p
@@ -148,7 +148,7 @@ const ConversationReviewPanel: React.FC<PanelProps> = ({
                   dangerouslySetInnerHTML={{ __html: msg.text }}
                 />
 
-                {/* Highlight the specific message Akira responded to */}
+                {/* Highlight the specific message Cliva responded to */}
                 {!isSystem &&
                   index > 0 &&
                   mockChat[index - 1].sender === "customer" && (
@@ -193,7 +193,7 @@ const ConversationReviewPanel: React.FC<PanelProps> = ({
       {showConfirmModal && (
         <ConfirmModal
           title="Submit AI Correction?"
-          message={`You are submitting this feedback: "${correctionInput}". This data will be used by the Reinforcement Learning loop to refine Akira's future sales strategies for conversation #${conversationId}.`}
+          message={`You are submitting this feedback: "${correctionInput}". This data will be used by the Reinforcement Learning loop to refine Cliva's future sales strategies for conversation #${conversationId}.`}
           onConfirm={handleConfirmSubmit}
           onCancel={() => setShowConfirmModal(false)}
           confirmText="Send Correction"

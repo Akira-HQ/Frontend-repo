@@ -68,7 +68,7 @@ const InboxContent = () => {
     reportFeedRef.current?.scrollTo(0, reportFeedRef.current.scrollHeight);
   }, [reports]);
 
-  const handleAskAkira = (e: React.FormEvent) => {
+  const handleAskCliva = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commandInput.trim()) return;
 
@@ -79,7 +79,7 @@ const InboxContent = () => {
       type: "DIGEST",
       title: `Query: ${userQuery}`,
       message:
-        "Akira is processing your request for strategic insight. This usually takes 10-20 seconds...",
+        "Cliva is processing your request for strategic insight. This usually takes 10-20 seconds...",
       time: "Just now",
     };
 
@@ -89,9 +89,9 @@ const InboxContent = () => {
     // Simulate AI response delay (This is where the real API call and prediction logic lives)
     setTimeout(() => {
       const insight: ReportData = {
-        id: "akira_" + Date.now(),
+        id: "cliva_" + Date.now(),
         type: "QUERY_RESPONSE", // Updated type for specific query response
-        title: "Akira Insight: Prediction Result",
+        title: "Cliva Insight: Prediction Result",
         message: `Based on a deep dive into the ${userQuery.includes("product") ? "product" : "store"} data, I predict a 15% increase in conversion if you run a 'Low Stock Alert' campaign via WhatsApp tomorrow.`,
         time: "Just now",
       };
@@ -133,7 +133,7 @@ const InboxContent = () => {
   return (
     <div className={`py-0 px-2 w-full h-full text-white pt-5 ml-6 relative`}>
       {/* KPI Overview Cards */}
-      <h1 className="text-3xl font-bold mb-4">Akira Command Center</h1>
+      <h1 className="text-3xl font-bold mb-4">Cliva Command Center</h1>
       {/* RENDER INBOX KPIS */}
       <InboxKPIs metrics={MOCK_KPIS} />
 
@@ -191,22 +191,22 @@ const InboxContent = () => {
           ))}
           {filteredReports.length === 0 && (
             <p className="text-center text-gray-500 pt-10">
-              No reports match the current filters. Akira is awaiting new
+              No reports match the current filters. Cliva is awaiting new
               insights!
             </p>
           )}
         </div>
 
-        {/* Command Bar (Owner -> Akira) */}
+        {/* Command Bar (Owner -> Cliva) */}
         <form
-          onSubmit={handleAskAkira}
+          onSubmit={handleAskCliva}
           className="mt-4 pt-4 border-t border-gray-800 flex gap-3 flex-shrink-0"
         >
           <input
             type="text"
             value={commandInput}
             onChange={(e) => setCommandInput(e.target.value)}
-            placeholder="Ask Akira for strategic insights, predictions, or business reports..."
+            placeholder="Ask Cliva for strategic insights, predictions, or business reports..."
             className="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-1 focus:ring-[#A500FF] focus:border-[#A500FF]"
           />
           <button

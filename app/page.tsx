@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Capability, CapabilityGrid } from "@/components/landing/Capability";
-import { AkiraStarsBackground } from "@/components/Stars";
+import { ClivaStarsBackground } from "@/components/Stars";
 import { HeroSection } from "@/components/landing/Hero";
 import { FeatureCard, FeatureCardProps } from "@/components/landing/FeatureCard";
 import { HowItWorksAnimation } from "@/components/landing/HowItWorks";
@@ -35,9 +35,9 @@ const Home: React.FC = () => {
       planParam = "premium"; // Matches the key in PLAN_CONFIG
     }
 
-    // router.push(`/register?plan=${planParam}`);
+    router.push(`/register?plan=${planParam}`);
     // development route for now
-    router.push("/waitlist");
+    // router.push("/waitlist");
   };
 
   const pricingData = useMemo(() => {
@@ -77,10 +77,10 @@ const Home: React.FC = () => {
 
   // Static Data remains same as your design
   const featureData = [
-    { icon: MessageCircle, title: "Intelligent Q&A", description: "Akira instantly handles complex customer questions and objections." },
+    { icon: MessageCircle, title: "Intelligent Q&A", description: "Cliva instantly handles complex customer questions and objections." },
     { icon: Tag, title: "Proactive Recommendation", description: "Utilizes real-time behavior data to recommend products." },
     { icon: ShoppingCart, title: "Cart Recovery", description: "Automatically engages customers who abandon carts." },
-    { icon: Link, title: "Seamless Integration", description: "Connect Akira to your e-commerce platform in minutes." },
+    { icon: Link, title: "Seamless Integration", description: "Connect Cliva to your e-commerce platform in minutes." },
   ];
 
   const capabilityData: Capability[] = [
@@ -96,7 +96,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="relative min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden">
-      <AkiraStarsBackground density={200} />
+      <ClivaStarsBackground density={200} />
 
       <main className="relative z-10 pt-16 pb-24 text-white">
         <HeroSection onCta={handleCtaClick} />
@@ -110,13 +110,13 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section id="why-akira" className="container mx-auto px-4 py-20 max-w-7xl">
+        <section id="why-cliva" className="container mx-auto px-4 py-20 max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Future of Sales is Here. Why Choose Akira</h2>
-            <p className="text-lg text-gray-400 max-w-4xl mx-auto">Akira acts as a proactive sales manager designed to empower store owners.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Future of Sales is Here. Why Choose Cliva</h2>
+            <p className="text-lg text-gray-400 max-w-4xl mx-auto">Cliva acts as a proactive sales manager designed to empower store owners.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-2xl bg-white/5 border border-gray-800 hover:border-[#A500FF] transition"><Zap className="text-[#A500FF] mb-3" /><h3 className="font-bold mb-2">A Partner, Not a Tool</h3><p className="text-gray-400">Akira makes autonomous decisions to maximize revenue.</p></div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-gray-800 hover:border-[#A500FF] transition"><Zap className="text-[#A500FF] mb-3" /><h3 className="font-bold mb-2">A Partner, Not a Tool</h3><p className="text-gray-400">Cliva makes autonomous decisions to maximize revenue.</p></div>
             <div className="p-6 rounded-2xl bg-white/5 border border-gray-800 hover:border-[#FFB300] transition"><TrendingUp className="text-[#A500FF] mb-3" /><h3 className="font-bold mb-2">Designed for Growth</h3><p className="text-gray-400">Every feature is tuned to boost your conversion rate.</p></div>
             <div className="p-6 rounded-2xl bg-white/5 border border-gray-800 hover:border-[#A500FF] transition"><Handshake className="text-[#A500FF] mb-3" /><h3 className="font-bold mb-2">Effortless Integration</h3><p className="text-gray-400">Go live in minutes with a single-script install.</p></div>
           </div>

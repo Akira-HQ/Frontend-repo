@@ -73,7 +73,7 @@ const MOCK_INTEGRATIONS: Integration[] = [
   },
   {
     id: "ai_core",
-    name: "Akira AI Core (Gemini)",
+    name: "Cliva AI Core (Gemini)",
     icon: Zap,
     status: "connected",
     details: "Core conversational and intent engine. Data is anonymized.",
@@ -318,7 +318,7 @@ const IntegrationsHub: React.FC = () => {
       <h1 className="text-3xl font-bold mb-4">Integrations Hub</h1>
       <p className="text-gray-400 mb-8 max-w-2xl">
         Connect your e-commerce platforms and messaging channels to activate
-        Akira's full sales potential.
+        Cliva's full sales potential.
       </p>
 
       <div className="bg-[#0b0b0b] rounded-xl p-6 shadow-2xl border border-gray-800">

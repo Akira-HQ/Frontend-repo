@@ -10,10 +10,10 @@ const ScriptInstallerTool: React.FC<ScriptInstallerToolProps> = ({ storeId }) =>
   const [copied, setCopied] = useState(false);
   const [verified, setVerified] = useState<null | boolean>(null);
 
-  const akiraScript = `<script src="https://akira.ai/widget.js" data-store-id="${storeId}" async></script>`;
+  const clivaScript = `<script src="https://cliva.ai/widget.js" data-store-id="${storeId}" async></script>`;
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(akiraScript);
+    navigator.clipboard.writeText(clivaScript);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -32,7 +32,7 @@ const ScriptInstallerTool: React.FC<ScriptInstallerToolProps> = ({ storeId }) =>
 
   return (
     <div className="w-full mt-10">
-      <h2 className="text-xl font-semibold text-[#FFB02E] mb-3">Akira Script Installer</h2>
+      <h2 className="text-xl font-semibold text-[#FFB02E] mb-3">Cliva Script Installer</h2>
 
       <p className="text-white mb-3">
         Copy and paste the following script into your store's &lt;head&gt; section:
@@ -42,7 +42,7 @@ const ScriptInstallerTool: React.FC<ScriptInstallerToolProps> = ({ storeId }) =>
         <input
           type="text"
           readOnly
-          value={akiraScript}
+          value={clivaScript}
           className="flex-1 px-4 py-2 rounded-lg bg-[#0E0E0F] text-white border border-[#2A2A2D] focus:outline-none"
         />
         <button

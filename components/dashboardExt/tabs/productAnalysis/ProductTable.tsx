@@ -89,7 +89,7 @@ const ProductTable = ({
               className="p-3 bg-amber-500/50 text-amber-500 rounded-2xl border border-amber-500/20 
                 opacity-20 group-hover:opacity-100 transition-all duration-300 hover:bg-amber-500/20 
                 active:scale-90 shadow-lg shadow-amber-500/5"
-              title="Discuss with Akira"
+              title="Discuss with Cliva"
             >
               <IoChatbubblesOutline size={18} />
             </button>

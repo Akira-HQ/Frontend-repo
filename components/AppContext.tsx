@@ -41,7 +41,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // --- Auth State ---
   const [user, setUserState] = useState<User | null>(null);
 
-  // --- Akira Chat State ---
+  // --- Cliva Chat State ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatContextProduct, setChatContextProduct] = useState<any>(null);
 

@@ -100,7 +100,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: ProductAuditProps
   if (!product) return (
     <div className="h-[500px] border-2 border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center text-gray-500 p-10 text-center animate-in fade-in zoom-in-95 duration-500">
       <div className="mb-4 opacity-20"><HiSparkles size={56} /></div>
-      <p className="text-lg font-medium tracking-tight">Select a product to let <br /> Akira run a diagnostic.</p>
+      <p className="text-lg font-medium tracking-tight">Select a product to let <br /> Cliva run a diagnostic.</p>
     </div>
   );
 
@@ -125,7 +125,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: ProductAuditProps
       <div className="bg-[#0b0b0b] border border-white/10 rounded-[2.5rem] p-10 sticky top-24 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar audit-entrance">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-white tracking-tight mb-2">Akira's Audit</h3>
+            <h3 className="text-2xl font-bold text-white tracking-tight mb-2">Cliva's Audit</h3>
             <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${product.status === 'Strong' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
               {product.status || 'Weak'}
             </span>
@@ -143,7 +143,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: ProductAuditProps
         {/* Intelligence Card with Discussion Button */}
         <div className="mb-8 p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl transition-all duration-500 hover:border-amber-500/20">
           <div className="flex items-center gap-2 mb-2 text-amber-500 text-[10px] font-black uppercase tracking-[0.2em]">
-            <HiSparkles className="animate-pulse" /> Akira's Intelligence
+            <HiSparkles className="animate-pulse" /> Cliva's Intelligence
           </div>
           <p className="text-[17px] text-gray-200 leading-relaxed italic font-medium mb-4">
             "{product.thinking_process || "Let me take a look at the fine print here..."}"
@@ -219,7 +219,7 @@ const ProductAudit = ({ product, onSelect, onProductUpdated }: ProductAuditProps
                 ${isLocked ? 'bg-white/5 text-gray-600' : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/30 shadow-lg shadow-amber-500/5'}`}
             >
               {isLocked ? <IoLockClosed /> : <HiSparkles className={isEnhancing ? 'animate-spin' : ''} />}
-              {isEnhancing ? "Akira is drafting..." : "Enhance Full Copy"}
+              {isEnhancing ? "Cliva is drafting..." : "Enhance Full Copy"}
             </button>
           </div>
 

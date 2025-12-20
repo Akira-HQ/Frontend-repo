@@ -41,7 +41,7 @@ const ExplanationPanel: React.FC = () => (
       <Zap className="w-4 h-4" /> Actionable Personas
     </h4>
     <p className="text-sm text-gray-400 mb-4">
-      Akira automatically classifies store visitors based on their chat history
+      Cliva automatically classifies store visitors based on their chat history
       and purchase intent. Use these insights for targeted marketing.
     </p>
 
@@ -98,7 +98,7 @@ const CustomerSegmentsChart: React.FC = () => {
         AI Customer Segmentation
       </h3>
       <p className="text-sm text-gray-400 mb-6">
-        Akira classifies customers by persona, optimizing sales strategies for
+        Cliva classifies customers by persona, optimizing sales strategies for
         each group.
       </p>
 

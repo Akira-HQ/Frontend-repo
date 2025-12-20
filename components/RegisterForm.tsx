@@ -123,7 +123,7 @@ const RegisterContent = () => {
     // ... (JSX for Step 1 remains unchanged)
     <>
       <h1 className="text-3xl font-extrabold text-center mb-6 text-white">
-        Create Akira Account
+        Create Cliva Account
       </h1>
       <p className="text-center text-gray-400 mb-6">
         You're signing up for the{" "}
@@ -234,7 +234,7 @@ const RegisterContent = () => {
       </h1>
       <p className="text-center text-gray-400 mb-6">
         Select your e-commerce platform and provide the primary URL to begin
-        syncing product data with Akira.
+        syncing product data with Cliva.
       </p>
 
       <div className="pt-4">

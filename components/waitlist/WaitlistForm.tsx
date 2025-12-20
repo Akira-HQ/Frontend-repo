@@ -42,7 +42,7 @@ export default function WaitlistForm() {
           <ArrowRight className="text-black w-6 h-6" />
         </div>
         <h2 className="text-2xl font-bold mb-2">You're on the list.</h2>
-        <p className="text-gray-500">We'll notify you when Akira is ready for your store.</p>
+        <p className="text-gray-500">We'll notify you when Cliva is ready for your store.</p>
       </div>
     );
   }

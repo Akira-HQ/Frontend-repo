@@ -100,7 +100,7 @@ const ownerData: TableData[] = [
   {
     category: "Billing & Payment Data",
     examples:
-      "Billing history, payment method details (tokenized and processed by a third-party payment provider, not stored directly by Akira AI).",
+      "Billing history, payment method details (tokenized and processed by a third-party payment provider, not stored directly by Cliva AI).",
     purpose:
       "Processing subscription fees, managing billing cycles, and providing invoices.",
   },
@@ -124,14 +124,14 @@ const customerData: TableData[] = [
   {
     category: "Conversation Logs",
     examples:
-      "Transcripts of chat sessions between your customers and the Akira AI Chat Widget, including timestamps, customer inputs, and AI responses.",
+      "Transcripts of chat sessions between your customers and the Cliva AI Chat Widget, including timestamps, customer inputs, and AI responses.",
     purpose:
       "Service Improvement & Dashboard Reporting: To review AI performance, generate the metrics seen in your Admin Dashboard, and continually refine the conversational model.",
   },
   {
     category: "Customer Interaction Data",
     examples:
-      "Customer names, emails, order history, and cart contents (only when shared with Akira via the integration).",
+      "Customer names, emails, order history, and cart contents (only when shared with Cliva via the integration).",
     purpose:
       "Proactive Sales & Personalization: To enable the AI to make intelligent product recommendations and follow up on abandoned carts.",
   },
@@ -157,7 +157,7 @@ const usagePurposeData: TableData[] = [
   {
     category: "Service Delivery",
     examples:
-      "To operate, maintain, and manage the core features of Akira AI, including the Admin Dashboard and the live chat widget.",
+      "To operate, maintain, and manage the core features of Cliva, including the Admin Dashboard and the live chat widget.",
     purpose: "All data types in Sections 1A, 1B, and 1C.",
   },
   {
@@ -204,7 +204,7 @@ const page: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-extrabold mb-2 leading-tight">
             {/* Gradient Title matching the Hero Section style */}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#A500FF] to-[#FFB300]">
-              Akira AI Privacy Policy
+              Cliva Privacy Policy
             </span>
           </h1>
           <p className="text-lg text-gray-300">
@@ -223,7 +223,7 @@ const page: React.FC = () => {
 
         <section className="space-y-6">
           <p className="text-base leading-relaxed">
-            This Privacy Policy explains how <strong>Akira</strong> collects,
+            This Privacy Policy explains how <strong>Cliva</strong> collects,
             uses, protects, and discloses information when you use our
             AI-powered e-commerce manager SaaS platform ("Service") and related
             services.
@@ -236,8 +236,7 @@ const page: React.FC = () => {
           <ul className="list-disc list-inside ml-4 space-y-1">
             <li>
               <strong className="text-white">Owner Data:</strong> Personal and
-              business information you provide to set up and manage your Akira
-              AI account.
+              business information you provide to set up and manage your Cliva account.
             </li>
             <li>
               <strong className="text-white">Customer Data:</strong> Information
@@ -271,10 +270,10 @@ const page: React.FC = () => {
             </h3>
             <p>
               This data is ingested from your integrated e-commerce platform
-              (e.g., Shopify) to power Akira's core AI functions (RAG system,
+              (e.g., Shopify) to power Cliva's core AI functions (RAG system,
               recommendations, sales). You are the{" "}
               <strong className="text-white">Data Controller</strong> of this
-              information, and Akira AI is the{" "}
+              information, and Cliva is the{" "}
               <strong className="text-white">Data Processor</strong>.
             </p>
             <DataTable title="Customer Data Categories" data={customerData} />
@@ -316,7 +315,7 @@ const page: React.FC = () => {
                 3.1. AI Capability Service Providers (Critical for Function)
               </h4>
               <p>
-                Akira AI relies on external generative artificial intelligence
+                Cliva relies on external generative artificial intelligence
                 (AI) services to provide its core capabilities, such as product
                 explanations and conversational sales engagement.
               </p>
@@ -328,7 +327,7 @@ const page: React.FC = () => {
                   For the MVP phase, we utilize AI capabilities provided by
                   **Google (e.g., Gemini API)** to process conversational inputs
                   and generate human-like responses, effectively serving as
-                  Akira’s conversational engine.
+                  Cliva’s conversational engine.
                 </li>
                 <li>
                   <strong className="text-white">
@@ -394,7 +393,7 @@ const page: React.FC = () => {
                   Comply with a legal obligation or request (e.g., subpoena or
                   court order).
                 </li>
-                <li>Protect and defend the rights or property of Akira AI.</li>
+                <li>Protect and defend the rights or property of Cliva.</li>
                 <li>
                   Prevent or investigate possible wrongdoing in connection with
                   the Service.
@@ -479,7 +478,7 @@ const page: React.FC = () => {
               <p>
                 You have certain rights regarding the personal data we hold
                 about you. These rights apply primarily to your **Owner Data**
-                (Section 1A) where Akira AI acts as the Data Controller.
+                (Section 1A) where Cliva acts as the Data Controller.
               </p>
 
               <h4 className="text-lg font-bold text-gray-300">
@@ -524,7 +523,7 @@ const page: React.FC = () => {
                 <li>
                   <strong className="text-white">Admin Dashboard:</strong> Most
                   contact and configuration data can be accessed, reviewed, and
-                  updated directly within the Akira AI Admin Dashboard.
+                  updated directly within the Cliva Admin Dashboard.
                 </li>
                 <li>
                   <strong className="text-white">Contact Request:</strong> For
@@ -541,7 +540,7 @@ const page: React.FC = () => {
                 For **Customer Data** (Section 1B), we act only as a Data
                 Processor on your behalf. If one of your customers submits a
                 data rights request (e.g., a "Right to Delete") related to the
-                data processed by Akira AI, you, the shop owner, are responsible
+                data processed by Cliva, you, the shop owner, are responsible
                 for handling that request. You must forward the request to us,
                 and we will assist in fulfilling your obligations, subject to
                 the terms of our Data Processing Addendum (DPA).
@@ -564,7 +563,7 @@ const page: React.FC = () => {
                   associated with your Owner Account.
                 </li>
                 <li>
-                  Placing a prominent notice within the Akira AI Admin Dashboard
+                  Placing a prominent notice within the Cliva  Admin Dashboard
                   prior to the change becoming effective.
                 </li>
                 <li>
@@ -609,10 +608,10 @@ const page: React.FC = () => {
                     Email for Privacy Requests:
                   </strong>{" "}
                   <a
-                    href="mailto:privacy@akira-ai.com"
+                    href="mailto:privacy@cliva-ai.com"
                     className="text-[#A500FF] hover:underline"
                   >
-                    privacy@akira-ai.com
+                    privacy@cliva.com
                   </a>{" "}
                   (Recommended for all data rights requests)
                 </li>
@@ -633,7 +632,7 @@ const page: React.FC = () => {
             laws.
           </p>
           <p className="mt-1">
-            &copy; {new Date().getFullYear()} Akira AI. All rights reserved.
+            &copy; {new Date().getFullYear()} Cliva. All rights reserved.
           </p>
         </footer>
       </div>

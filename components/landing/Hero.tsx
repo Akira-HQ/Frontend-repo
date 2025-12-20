@@ -86,7 +86,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
 
         {/* Hero Title (Using your preferred text structure) */}
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-          AKIRA: Your Personal
+          CLIVA: Your Personal
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#A500FF] to-[#FFB300] ml-3">
             AI Sales Manager.
           </span>
@@ -94,7 +94,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
 
         {/* Sub-text (Using your preferred text) */}
         <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10">
-          Akira is an intelligent, automated assistant that engages customers,
+          Cliva is an intelligent, automated assistant that engages customers,
           proactively interacts with customers, and drives sales for your
           e-commerce business.
         </p>
@@ -127,10 +127,10 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
         {/* Panel 1 — Simple Definition */}
         <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-orange-900/40">
           <h3 className="text-xl font-bold text-[#FFB300] mb-3">
-            What Akira Really Does
+            What Cliva Really Does
           </h3>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Akira works like a{" "}
+            Cliva works like a{" "}
             <span className="text-white font-semibold">24/7 sales manager</span>
             for your online store. It chats with customers, answers questions,
             recommends products, handles objections, and follows up —
@@ -155,7 +155,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
         {/* Panel 2 — Live Sales Scenario */}
         <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-purple-900/40">
           <h3 className="text-xl font-bold text-[#A500FF] mb-3">
-            Akira in Real Action
+            Cliva in Real Action
           </h3>
 
           <div className="space-y-4">
@@ -167,7 +167,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
               <p className="text-xs text-gray-500 mt-1">Customer • 9:42 AM</p>
             </div>
 
-            {/* Akira */}
+            {/* Cliva */}
             <div className="text-left">
               <span className="inline-block px-4 py-2 bg-white/10 text-white rounded-2xl rounded-tl-none text-sm leading-relaxed">
                 Yes, it does! 🎉
@@ -179,7 +179,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
                 <span className="underline">Click here</span> to see available
                 colors.
               </span>
-              <p className="text-xs text-gray-500 mt-1">Akira • 9:42 AM</p>
+              <p className="text-xs text-gray-500 mt-1">Cliva • 9:42 AM</p>
             </div>
 
             {/* Intent */}
@@ -199,7 +199,7 @@ export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
             How It Grows Your Business
           </h3>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Every conversation is analyzed. Akira learns what customers like,
+            Every conversation is analyzed. Cliva learns what customers like,
             when they buy, and what makes them hesitate — then improves itself
             automatically.
           </p>

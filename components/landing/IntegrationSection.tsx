@@ -76,10 +76,10 @@ export const IntegrationGrid: React.FC = () => {
     >
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-          Akira For Your Stack
+          Cliva For Your Stack
         </h2>
         <p className="text-lg text-gray-400 max-w-4xl mx-auto">
-          Deploy Akira wherever your customers are. Seamless integration with
+          Deploy Cliva wherever your customers are. Seamless integration with
           all major e-commerce platforms and messaging channels.
         </p>
       </div>

@@ -5,7 +5,6 @@ import ProductsAnalysisCom from "./tabs/productAnalysis/ProductsAnalysisCom";
 import ProductOverview from "./tabs/productOverview/ProductOverview";
 import { HiLightningBolt } from "react-icons/hi";
 import { IoChatbubblesOutline } from "react-icons/io5"; // Added for the bubble icon
-import AkiraChat from "../chatTools/AkiraChat";
 
 const AiTrainingContent = () => {
   const { isDarkMode, user, isChatOpen, chatContextProduct, setIsChatOpen, openChat } = useAppContext();
@@ -47,7 +46,7 @@ const AiTrainingContent = () => {
         <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">Akira Energy</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">Cliva Energy</span>
               <HiLightningBolt className="text-amber-500 animate-pulse" size={14} />
             </div>
             <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">

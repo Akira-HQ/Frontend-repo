@@ -20,7 +20,7 @@ import { useAppContext } from "../AppContext";
 import { UseAPI } from "../hooks/UseAPI";
 import { validatePassword } from "../hooks/validatePassword";
 import { PrimaryButton } from "../Button";
-import { AkiraStarsBackground } from "../Stars";
+import { ClivaStarsBackground } from "../Stars";
 import { useRouter } from "next/navigation";
 
 const ForgotPasswordContent: React.FC = () => {
@@ -292,7 +292,7 @@ const ForgotPasswordContent: React.FC = () => {
 
   return (
     <div className="min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden relative flex items-center justify-center p-4">
-      <AkiraStarsBackground density={200} />
+      <ClivaStarsBackground density={200} />
       <div className="py-12 w-full max-w-xl relative z-10">
         <div
           className={`

@@ -28,7 +28,7 @@ const ReportItem: React.FC<ReportItemProps> = ({ report, onReviewClick }) => {
       icon = <MessageCircle className="w-5 h-5 text-red-400" />;
       colorClass = "border-red-500/50";
       break;
-    case "QUERY_RESPONSE": // For owner's Ask Akira command response
+    case "QUERY_RESPONSE": // For owner's Ask Cliva command response
       icon = <Send className="w-5 h-5 text-green-400" />;
       colorClass = "border-green-500/50";
       break;

@@ -95,7 +95,7 @@ const OnboardingFlow: React.FC = () => {
           <div className="flex flex-col items-center justify-center h-[400px] text-center p-8 bg-[#1A1A1C] rounded-2xl">
             <CheckCircle2 className="w-12 h-12 text-green-500 mb-4" />
             <h3 className="text-3xl font-bold text-white mb-2">Setup Complete!</h3>
-            <p className="text-[#CFCFCF]">Akira is now tracking events and syncing products for your **{detectedPlatform}** store.</p>
+            <p className="text-[#CFCFCF]">Cliva is now tracking events and syncing products for your **{detectedPlatform}** store.</p>
             {mappingResult && (
               <p className="text-xs text-gray-400 mt-2">Product Mapping Saved: {Object.keys(mappingResult).length} selectors confirmed.</p>
             )}
@@ -109,7 +109,7 @@ const OnboardingFlow: React.FC = () => {
       <div className="w-full max-w-4xl">
         <header className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-[#FFB02E] flex items-center justify-center gap-3">
-            <Zap className="w-8 h-8" /> Akira AI Onboarding Wizard
+            <Zap className="w-8 h-8" /> Cliva AI Onboarding Wizard
           </h1>
           <p className="text-[#CFCFCF] mt-2">A simple path to activating your store's AI intelligence.</p>
         </header>
