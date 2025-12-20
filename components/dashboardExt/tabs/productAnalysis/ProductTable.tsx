@@ -3,6 +3,7 @@ import React from "react";
 import { Product } from "./ProductsAnalysisCom";
 import { IoChatbubblesOutline, IoCubeOutline } from "react-icons/io5";
 import { useAppContext } from "../../../AppContext";
+import { Sparkles } from "lucide-react";
 
 interface ProductTableProps {
   products: Product[] | null;
@@ -57,15 +58,20 @@ const ProductTable = ({
           </div>
 
           {/* Status Badge */}
-          <div className="col-span-2 flex justify-center">
-            <span
-              className={`px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-full border
-                ${product.status === "Strong"
-                  ? "bg-green-500/10 text-green-500 border-green-500/20"
-                  : "bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]"}`}
-            >
+          <div className="col-span-2 flex flex-col items-center gap-2">
+            <span className={`px-3 py-1 text-[10px] font-black uppercase rounded-full border 
+    ${product.status === "Strong" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"}`}>
               {product.status}
             </span>
+
+            {product.is_ai_audit ? (
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-md animate-pulse">
+                <Sparkles size={10} className="text-purple-400" />
+                <span className="text-[8px] text-purple-400 font-bold uppercase">Deep Audit</span>
+              </div>
+            ) : (
+              <span className="text-[8px] text-gray-600 font-bold uppercase">Standard Check</span>
+            )}
           </div>
 
           {/* Health Bar */}

@@ -27,6 +27,7 @@ export type Product = {
   price: number;
   suggestion?: string;
   daily_enhance_limit?: number;
+  is_ai_audit?: boolean;
 };
 
 type AnalysisSummary = {
