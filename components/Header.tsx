@@ -173,8 +173,8 @@ export const Header = () => {
             </button>
 
             <a
-              href="#pricing"
-              // href="/waitlist"
+              // href="#pricing"
+              href="/waitlist"
               className="hidden sm:block px-4 py-2 rounded-xl text-white text-sm font-semibold
                 bg-gradient-to-r from-[#00A7FF] to-[#A500FF]
                 shadow-[0_0_12px_rgba(165,0,255,0.4)]
