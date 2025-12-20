@@ -22,6 +22,8 @@ export interface User {
   };
   onboardingStep: "CONNECT_STORE" | "PAYMENT_WALL" | "COMPLETED";
   daily_audit_limit?: number;
+  daily_enhance_limit?: number;
+  daily_chat_limit?: number;
 }
 
 export interface ContextProps {
@@ -50,6 +52,7 @@ export interface ContextProps {
   setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
   chatContextProduct: any; // or a specific Product type if you have one
   openChat: (product?: any) => void;
+  syncQuotas: () => Promise<void>;
 }
 
 // PageTracker Types

@@ -65,12 +65,12 @@ const ProductTable = ({
             </span>
 
             {product.is_ai_audit ? (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-md animate-pulse">
-                <Sparkles size={10} className="text-purple-400" />
-                <span className="text-[8px] text-purple-400 font-bold uppercase">Deep Audit</span>
+              <div className="flex items-center gap-1 px-2 py-0.5  rounded-md">
+                <Sparkles size={10} className="text-indigo-400 animate-pulse" />
+                <span className="text-[8px] text-indigo-400 font-bold uppercase">Deep Audit</span>
               </div>
             ) : (
-              <span className="text-[8px] text-gray-600 font-bold uppercase">Standard Check</span>
+              <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Standard Check</span>
             )}
           </div>
 

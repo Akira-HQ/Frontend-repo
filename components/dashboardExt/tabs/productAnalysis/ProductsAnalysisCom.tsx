@@ -46,23 +46,37 @@ const ProductsAnalysisCom = () => {
 
   const { callApi } = UseAPI();
 
-  useEffect(() => {
-    const fetchAndAnalyzeProducts = async () => {
-      setIsLoading(true);
-      try {
-        const response = await callApi("/products/analyze");
-        if (response?.data) {
-          setAnalysisSummary(response.data.analysisSummary);
-          setAnalyzedProducts(response.data.analyzedProducts);
-        }
-      } catch (error) {
-        console.error("Failed to fetch and analyze products:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchAndAnalyzeProducts = async (showLoading = true) => {
+    if (showLoading) setIsLoading(true);
+    try {
+      const response = await callApi("/products/analyze");
+      if (response?.data) {
+        setAnalysisSummary(response.data.analysisSummary);
+        setAnalyzedProducts(response.data.analyzedProducts);
       }
-    };
-    fetchAndAnalyzeProducts();
-  }, [callApi]);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchAndAnalyzeProducts(true);
+  }, []);
+
+  useEffect(() => {
+    // Check if any product is still waiting for a Deep Audit badge
+    const hasPendingAiAudits = analyzedProducts.some(p => !p.is_ai_audit);
+
+    if (hasPendingAiAudits && !isLoading) {
+      const interval = setInterval(() => {
+        fetchAndAnalyzeProducts(false); // Silent update (no loading spinner)
+      }, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [analyzedProducts, isLoading]);
 
   const handleProductUpdated = (updated: Product) => {
     setAnalyzedProducts((prev) =>
