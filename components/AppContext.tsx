@@ -7,6 +7,7 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 
 const AppContext = createContext<ContextProps | undefined>(undefined);
@@ -44,6 +45,28 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // --- Cliva Chat State ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatContextProduct, setChatContextProduct] = useState<any>(null);
+
+  // --- 1. SYNC QUOTAS LOGIC ---
+  // This fetches the latest energy levels (chat, audit, enhance) from the DB
+  const syncQuotas = useCallback(async () => {
+    if (!user) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch(`${process.env.LOCAL_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update user state with fresh database values
+        setUserState(data.user);
+      }
+    } catch (error) {
+      console.error("Failed to sync quotas:", error);
+    }
+  }, [user]);
 
   // --- Helper Functions ---
   const openChat = (product = null) => {
@@ -105,7 +128,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setAlertMessageState("");
     setAlertType(null);
     setToasts([]);
-    setIsChatOpen(false); // Close chat on logout
+    setIsChatOpen(false);
 
     if (typeof window !== "undefined") {
       localStorage.removeItem("user");
@@ -136,7 +159,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       isChatOpen,
       setIsChatOpen,
       chatContextProduct,
-      openChat
+      openChat,
+      syncQuotas, // Now properly defined and memoized
     }),
     [
       isDarkMode,
@@ -147,7 +171,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       user,
       initialLoadCompleteInternal,
       isChatOpen,
-      chatContextProduct
+      chatContextProduct,
+      syncQuotas,
     ],
   );
 
