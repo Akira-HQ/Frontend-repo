@@ -70,7 +70,7 @@ export const LandingChat: React.FC = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         role: "cliva",
-        content: "Hi! I'm Kliva Agent. Your autonomous sales partner. Ready to unlock hidden revenue in your store today?",
+        content: "Hi! I'm Cliva Agent. Your autonomous sales partner. Ready to unlock hidden revenue in your store today?",
         isNew: true
       }]);
     }
