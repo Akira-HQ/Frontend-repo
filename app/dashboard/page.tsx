@@ -5,10 +5,10 @@ import DashboardContent from "@/components/dashboardExt/DashboardContent";
 import RenderActiveContent from "@/components/dashboardExt/RenderActiveContent";
 import { useResizable } from "@/components/hooks/Resizable";
 import AuthGuard from "@/components/hooks/AuthGuard";
-import { AkiraStarsBackground } from "@/components/Stars";
-import AkiraChat from "@/components/chatTools/AkiraChat";
+import { ClivaStarsBackground } from "@/components/Stars";
 import { useAppContext } from "@/components/AppContext";
 import { IoChatbubbleOutline } from "react-icons/io5";
+import ClivaChat from "@/components/chatTools/ClivaChat";
 
 const COLLAPSED_WIDTH = 65;
 const DEFAULT_EXPANDED_WIDTH = 280;
@@ -66,7 +66,7 @@ const Page = () => {
       className={`pt-10 main-bg h-screen w-screen relative ${isResizing ? "cursor-col-resize select-none" : ""}`}
     >
       <AuthGuard>
-        <AkiraStarsBackground density={200} />
+        <ClivaStarsBackground density={200} />
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={toggleSidebar}
@@ -83,11 +83,11 @@ const Page = () => {
             >
               <IoChatbubbleOutline size={28} />
               <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#0b0b0b] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Ask Akira
+                Ask Cliva
               </span>
             </button>
           )}
-          <AkiraChat
+          <ClivaChat
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
             activeProduct={chatContextProduct}

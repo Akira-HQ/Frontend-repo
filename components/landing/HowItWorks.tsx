@@ -35,13 +35,13 @@ export const HowItWorksAnimation: React.FC = () => {
     {
       title: "Intent & Context Mapping",
       description:
-        "Akira identifies customer intent (Buy, Ask, Complain) using product memory and deep learning.",
+        "Cliva identifies customer intent (Buy, Ask, Complain) using product memory and deep learning.",
       icon: Brain,
     },
     {
       title: "Convert & Optimize",
       description:
-        "Akira executes the sales sequence (answers, recommends, up-sells) and logs the conversion.",
+        "Cliva executes the sales sequence (answers, recommends, up-sells) and logs the conversion.",
       icon: BarChart,
     },
   ];

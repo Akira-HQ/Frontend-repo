@@ -13,7 +13,7 @@ import { UseAPI } from "@/components/hooks/UseAPI";
 import { PrimaryButton } from "@/components/Button";
 import { validatePassword } from "@/components/hooks/validatePassword";
 import { InputField } from "@/components/functions/Helper";
-import { AkiraStarsBackground } from "@/components/Stars";
+import { ClivaStarsBackground } from "@/components/Stars";
 import { useRouter } from "next/navigation";
 
 const LoginContent: React.FC = () => {
@@ -123,7 +123,7 @@ const LoginContent: React.FC = () => {
       `}
     >
       <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center mb-6">
-        Welcome Back to Akira
+        Welcome Back to Cliva
       </h1>
 
       <div className="space-y-4">
@@ -197,7 +197,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden relative flex items-center justify-center p-4">
       {/* 1. Nebula Background Effect */}
-      <AkiraStarsBackground density={200} />
+      <ClivaStarsBackground density={200} />
 
       {/* 2. Main Content Wrapper */}
       <div className="py-12 w-full max-w-xl">

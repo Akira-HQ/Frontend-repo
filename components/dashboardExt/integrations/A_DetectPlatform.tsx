@@ -46,7 +46,7 @@ const DetectPlatform: React.FC<DetectPlatformProps> = ({ onDetected }) => {
       </h2>
 
       <p className="text-[#CFCFCF] text-sm mb-4">
-        Enter your website URL and Akira will automatically detect whether
+        Enter your website URL and Cliva will automatically detect whether
         you're using Shopify, WooCommerce, WordPress, or a custom site.
       </p>
 

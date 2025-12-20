@@ -36,7 +36,7 @@ const Analytics = () => {
   // NOTE: This component does not need useAppContext if it's placed inside a themed provider
   return (
     <div className="py-4 px-2 w-full h-full text-white pt-10 ml-6 relative">
-      <h1 className="text-3xl font-bold mb-6">Akira Performance Analytics</h1>
+      <h1 className="text-3xl font-bold mb-6">Cliva Performance Analytics</h1>
       <p className="text-gray-400 mb-8 max-w-2xl">
         Review the impact of the AI sales manager on your core business metrics,
         user behavior, and revenue trends.

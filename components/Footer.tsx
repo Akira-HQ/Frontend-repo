@@ -48,7 +48,7 @@ const ShimmerTitle: React.FC = () => (
       }
     `}</style>
     <div className="shimmer-text-footer text-2xl font-extrabold tracking-wider">
-      Akira AI
+      Cliva
     </div>
   </>
 );
@@ -92,22 +92,22 @@ const Footer: React.FC = () => {
   const socialIcons = [
     {
       icon: Linkedin,
-      href: "https://linkedin.com/company/akira-ai",
+      href: "https://linkedin.com/company/cliva",
       label: "LinkedIn",
       hoverColor: NEON_ORANGE,
     },
     {
       icon: Twitter,
-      href: "https://twitter.com/akira-ai",
+      href: "https://twitter.com/cliva",
       label: "X (Twitter)",
       hoverColor: NEON_PURPLE,
     },
-    {
-      icon: Github,
-      href: "https://github.com/akira-ai",
-      label: "GitHub",
-      hoverColor: NEON_ORANGE,
-    },
+    // {
+    //   icon: Github,
+    //   href: "https://github.com/cliva-ai",
+    //   label: "GitHub",
+    //   hoverColor: NEON_ORANGE,
+    // },
   ];
 
   // Helper Component for a Link Column
@@ -175,7 +175,7 @@ const Footer: React.FC = () => {
                       hover:text-[${social.hoverColor}] 
                       hover:drop-shadow-[0_0_8px_${social.hoverColor}F0]
                     `}
-                    aria-label={`Akira AI on ${social.label}`}
+                    aria-label={`Cliva on ${social.label}`}
                   >
                     <Icon className="w-5 h-5" />
                   </a>
@@ -205,7 +205,7 @@ const Footer: React.FC = () => {
           <div className="pt-8 flex justify-center text-center">
             {/* Applying subtle drop shadow to text, using the purple color */}
             <p className="text-xs text-gray-500 drop-shadow-[0_0_5px_rgba(165,0,255,0.3)]">
-              &copy; {new Date().getFullYear()} Akira AI. All rights reserved.
+              &copy; {new Date().getFullYear()} Cliva. All rights reserved.
             </p>
           </div>
         </div>

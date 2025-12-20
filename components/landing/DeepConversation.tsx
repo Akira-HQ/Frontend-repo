@@ -43,7 +43,7 @@ export const DeepConversionSection: React.FC<{
         Designed for Conversion, Built for Revenue
       </h2>
       <p className="text-lg text-gray-400 max-w-4xl mx-auto">
-        Akira uses sophisticated AI models specifically trained on e-commerce
+        Cliva uses sophisticated AI models specifically trained on e-commerce
         transaction data to optimize every single touchpoint.
       </p>
     </div>

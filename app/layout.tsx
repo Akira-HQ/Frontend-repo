@@ -10,8 +10,8 @@ import NotificationContainer from "@/components/notifications/ToastContainer";
 import { Header, ThemeProvider } from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "Akira - Your Personal Sales Manager",
-  description: "Akira is an AI-powered sales management tool designed to help you track leads, manage customer relationships, and boost your sales performance with ease.",
+  title: "Cliva - Your Personal Sales Manager",
+  description: "Cliva is an AI-powered sales management tool designed to help you track leads, manage customer relationships, and boost your sales performance with ease.",
 };
 
 export default function RootLayout({

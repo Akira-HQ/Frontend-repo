@@ -83,7 +83,7 @@ const ProductsAnalysisCom = () => {
                 <HiSparkles className="text-amber-500 text-2xl animate-pulse" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Akira Strategic Audit</h3>
+                <h3 className="text-lg font-bold text-white tracking-tight">Cliva Strategic Audit</h3>
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">WWG Compliance: {analysisSummary.healthScore}%</p>
               </div>
             </div>

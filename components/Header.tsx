@@ -52,7 +52,7 @@ const ShimmerTitle: React.FC = () => (
       }
     `}</style>
     <div className="shimmer-text text-xl md:text-2xl font-extrabold tracking-wider cursor-pointer">
-      Akira AI
+      Cliva
     </div>
   </>
 );
@@ -72,7 +72,7 @@ export const Header = () => {
   const navLinks = [
     { id: "hero", label: "Hero" },
     { id: "features", label: "Features" },
-    { id: "why-akira", label: "Why Akira" },
+    { id: "why-cliva", label: "Why Cliva" },
     { id: "capacity", label: "Capacity" },
     { id: "how-it-works", label: "How It Works" },
     { id: "conversation", label: "Conversation" },
@@ -117,9 +117,8 @@ export const Header = () => {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/10 backdrop-blur-xl shadow-lg">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href={"/"}>
-          <ShimmerTitle />
-        </Link>
+
+        <ShimmerTitle />
 
         {/* Desktop Nav (Hidden in minimal mode) */}
         {!isMinimalHeader && (
@@ -200,11 +199,10 @@ export const Header = () => {
               <button
                 key={link.id}
                 onClick={() => handleScroll(link.id)}
-                className={`block w-full text-left px-4 py-2 mb-2 rounded-lg ${
-                  active === link.id
+                className={`block w-full text-left px-4 py-2 mb-2 rounded-lg ${active === link.id
                     ? "bg-gradient-to-r from-[#A500FF] to-[#FFB300] text-white"
                     : "text-gray-300 hover:bg-white/10"
-                } transition`}
+                  } transition`}
               >
                 {link.label}
               </button>

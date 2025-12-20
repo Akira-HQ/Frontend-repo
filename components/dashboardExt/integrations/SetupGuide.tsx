@@ -20,7 +20,7 @@ interface SetupGuidePanelProps {
 // Finalized, universal JS code structure - CLEANED FOR TYPESCRIPT ERRORS
 const SNIPPET_TEMPLATE = `
 <script>
-  window.akiraConfig = {
+  window.clivaConfig = {
     storeId: '{{STORE_ID_PLACEHOLDER}}',
     snippetToken: '{{SNIPPET_TOKEN_PLACEHOLDER}}',
     apiHost: 'http://localhost:8000', // adjust for prod
@@ -31,17 +31,17 @@ const SNIPPET_TEMPLATE = `
 
 <script>
 (function () {
-    const config = window.akiraConfig;
+    const config = window.clivaConfig;
     if (!config || !config.storeId) {
-        console.error('Akira AI: Configuration missing. Monitoring not active.');
+        console.error('Cliva AI: Configuration missing. Monitoring not active.');
         return;
     }
 
     const STORE_ID = config.storeId;
-    let USER_ID = localStorage.getItem('akira_user_id');
+    let USER_ID = localStorage.getItem('cliva_user_id');
     if (!USER_ID) {
         USER_ID = 'anon_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        localStorage.setItem('akira_user_id', USER_ID);
+        localStorage.setItem('cliva_user_id', USER_ID);
     }
     
     // --- CORE EVENT SENDER FUNCTION (Exposed Globally) ---
@@ -54,24 +54,24 @@ const SNIPPET_TEMPLATE = `
             payload: payload
         };
         
-        console.log('[AKIRA LOG - ' + eventType + ']', eventData); 
+        console.log('[Cliva LOG - ' + eventType + ']', eventData);
 
         // HTTP POST Request for Event Ingestion
         fetch(config.apiHost + '/api/v1/events/capture', { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Akira-Token': config.snippetToken 
+                'X-Cliva-Token': config.snippetToken
             },
             body: JSON.stringify(eventData)
         })
         .then(response => {
             if (response.status !== 202) {
-                response.text().then(text => console.error('[AKIRA ERROR] Event failed: ' + text));
+                response.text().then(text => console.error('[Cliva ERROR] Event failed: ' + text));
             }
         })
         .catch(error => {
-            console.error('[AKIRA ERROR] Network issue during event capture:', error);
+            console.error('[Cliva ERROR] Network issue during event capture:', error);
         });
     }
 
@@ -82,15 +82,15 @@ const SNIPPET_TEMPLATE = `
         });
 
         socket.on('connect', () => {
-            console.log('[AKIRA WS] Connected as User: ' + USER_ID); // Fixed interpolation
+            console.log('[Cliva WS] Connected as User: ' + USER_ID); // Fixed interpolation
             socket.emit('registerStore', { storeId: STORE_ID, snippetToken: config.snippetToken });
         });
 
-        // Listener for Real-Time Actions pushed from the Akira Brain
-        socket.on('akiraAction', (data) => {
-            console.log('[AKIRA INTERVENTION] Received action: ' + data.action.type); // Fixed interpolation
+        // Listener for Real-Time Actions pushed from the Cliva Brain
+        socket.on('clivaAction', (data) => {
+            console.log('[Cliva INTERVENTION] Received action: ' + data.action.type); // Fixed interpolation
             if (data.action.type === 'DISPLAY_POPUP_OFFER') {
-                alert('AKIRA OFFER: ' + data.action.data.message + ' | Code: ' + data.action.data.code); // Fixed interpolation
+                alert('Cliva OFFER: ' + data.action.data.message + ' | Code: ' + data.action.data.code); // Fixed interpolation
             }
         });
     }
@@ -105,9 +105,9 @@ const SNIPPET_TEMPLATE = `
     });
 
     // 2. Generic Click Listener for Add to Cart 
-    // User must use class 'akira-track-add-to-cart' AND include 'data-product-id'
+    // User must use class 'cliva-track-add-to-cart' AND include 'data-product-id'
     document.addEventListener('click', (event) => {
-        const element = event.target.closest('.akira-track-add-to-cart, button[data-product-id]'); 
+        const element = event.target.closest('.cliva-track-add-to-cart, button[data-product-id]'); 
         
         if (element) {
              const productId = element.dataset.productId; 
@@ -116,15 +116,15 @@ const SNIPPET_TEMPLATE = `
              if (productId) {
                  sendEvent('add_to_cart', { productName: productName }, productId);
              } else {
-                 console.warn("Akira AI: Clicked button is missing data-product-id. Event skipped.");
+                 console.warn("Cliva AI: Clicked button is missing data-product-id. Event skipped.");
              }
         }
     });
 
     // --- C. EXPOSED GLOBAL API ---
-    window.akiraTrack = sendEvent;
+    window.clivaTrack = sendEvent;
 
-    console.log('Akira AI: Monitoring initialized for Store ID ' + STORE_ID); // Fixed interpolation
+    console.log('Cliva AI: Monitoring initialized for Store ID ' + STORE_ID); // Fixed interpolation
 })();
 </script>
 

@@ -34,10 +34,10 @@ export const LandingChat: React.FC = () => {
   // Initialize Visitor and History
   // 1. Initialize Visitor & Load Data
   useEffect(() => {
-    let id = localStorage.getItem("akira_visitor_id");
+    let id = localStorage.getItem("cliva_visitor_id");
     if (!id) {
       id = `vis_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem("akira_visitor_id", id);
+      localStorage.setItem("cliva_visitor_id", id);
     }
     setVisitorId(id);
 
@@ -64,8 +64,8 @@ export const LandingChat: React.FC = () => {
     if (isOpen && messages.length === 0) {
       setMessages([
         {
-          role: "akira",
-          content: "Hi! I'm Akira. Your autonomous sales partner. Want to know how we can scale your conversions today?",
+          role: "cliva",
+          content: "Hi! I'm Cliva. Your autonomous sales partner. Want to know how we can scale your conversions today?",
           isNew: true // This triggers the Typewriter
         }
       ]);
@@ -87,14 +87,14 @@ export const LandingChat: React.FC = () => {
     setIsApiLoading(true);
 
     try {
-      const res = await callApi("/akira-info", "POST", {
+      const res = await callApi("/cliva-info", "POST", {
         message: userMsg,
         visitorId,
         history: messages.map(({ role, content }) => ({ role, content })).slice(-5)
       });
 
       if (res?.data?.reply) {
-        setMessages(prev => [...prev, { role: "akira", content: res.data.reply, isNew: true }]);
+        setMessages(prev => [...prev, { role: "cliva", content: res.data.reply, isNew: true }]);
       }
     } catch (err) {
       addToast("Connection error", "error");
@@ -116,7 +116,7 @@ export const LandingChat: React.FC = () => {
             <div className="flex items-center gap-3">
               <Sparkles className="text-[#A500FF] animate-pulse" />
               <div>
-                <h3 className="text-white font-bold text-sm">Akira Agent</h3>
+                  <h3 className="text-white font-bold text-sm">Cliva Agent</h3>
                 <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Active Now</p>
               </div>
             </div>
@@ -127,7 +127,7 @@ export const LandingChat: React.FC = () => {
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-4 rounded-3xl text-[14px] leading-relaxed shadow-xl border ${m.role === 'user' ? 'bg-white text-black font-semibold rounded-tr-none' : 'bg-white/5 text-gray-200 border-white/5 rounded-tl-none'}`}>
-                  {m.role === 'akira' && m.isNew ? (
+                  {m.role === 'cliva' && m.isNew ? (
                     <TypewriterMessage
                       text={m.content}
                       onComplete={() => {
@@ -156,7 +156,7 @@ export const LandingChat: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask Akira anything..."
+                  placeholder="Ask Cliva anything..."
               />
               <button onClick={handleSend} className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-[#A500FF] text-white rounded-xl active:scale-90 transition-transform"><Send size={18} /></button>
             </div>

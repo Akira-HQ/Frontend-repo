@@ -49,9 +49,9 @@ class Particle {
   }
 }
 
-type AkiraStarsBackgroundProps = { density?: number };
+type ClivaStarsBackgroundProps = { density?: number };
 
-export const AkiraStarsBackground: React.FC<AkiraStarsBackgroundProps> = ({
+export const ClivaStarsBackground: React.FC<ClivaStarsBackgroundProps> = ({
   density = 200,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);

@@ -1,6 +1,6 @@
 
 import Footer from "@/components/Footer";
-import { AkiraStarsBackground } from "@/components/Stars";
+import { ClivaStarsBackground } from "@/components/Stars";
 import Features from "@/components/waitlist/Features";
 import Hero from "@/components/waitlist/Hero";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
@@ -8,7 +8,7 @@ import WaitlistForm from "@/components/waitlist/WaitlistForm";
 export default function WaitlistPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-amber-500/30 selection:text-amber-200 overflow-hidden font-sans">
-      <AkiraStarsBackground density={200} />
+      <ClivaStarsBackground density={200} />
       {/* Dynamic Background: Subtle Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px]" />
