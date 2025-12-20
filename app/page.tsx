@@ -135,6 +135,7 @@ const Home: React.FC = () => {
             ))}
           </div>
         </section>
+        {/* <DeepConversionSection features={featureData}  /> */}
 
         <TestimonialPlaceholder />
         <FinalCTA onStart={() => handleCtaClick("premium")} onSeePlans={() => handleCtaClick("basic")} />

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { IoSend, IoClose, IoChatbubblesOutline } from "react-icons/io5";
+import { IoSend, IoClose } from "react-icons/io5";
 import { HiSparkles } from "react-icons/hi2";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { useAppContext } from "@/components/AppContext";
@@ -12,8 +12,6 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
   const searchParams = useSearchParams();
 
   // 1. DETERMINE UNIQUE CONTEXT KEY
-  // If a product is selected, the "ID" is the product ID. 
-  // If no product is selected, the "ID" is the sidebar view (e.g. settings).
   const currentView = searchParams.get("view") || "general";
   const contextKey = activeProduct ? `product-${activeProduct.id}` : `view-${currentView}`;
 
@@ -38,7 +36,6 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     }
   }, []);
 
-  // Save all threads to localStorage whenever any update happens
   useEffect(() => {
     if (Object.keys(allThreads).length > 0) {
       localStorage.setItem("cliva_threaded_chats", JSON.stringify({
@@ -48,11 +45,37 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     }
   }, [allThreads]);
 
-  // Extract the specific conversation for the current context
+  // --- 3. QUICK ACTIONS LOGIC ---
+  const getQuickActions = () => {
+    if (activeProduct) {
+      const actions = [
+        { label: "What's holding this back?", value: "Explain the main friction points for this product and how to fix them." },
+        { label: "Analyze Score", value: `Why did you give this product a health score of ${activeProduct.health}?` }
+      ];
+      // Add Deep Audit only if it hasn't been done yet
+      if (!activeProduct.is_ai_audit) {
+        actions.unshift({ label: "✨ Run Deep AI Audit (1 Left)", value: "DEEP_AUDIT_REQUEST" });
+      }
+      return actions;
+    }
+
+    if (currentView === "integrations") {
+      return [
+        { label: "Check API Health", value: "Are my external store connections working correctly?" },
+        { label: "Shopify Sync Help", value: "How do I ensure my latest inventory is synced with Cliva?" }
+      ];
+    }
+
+    return [
+      { label: "General Audit", value: "Give me a summary of my entire inventory's health." },
+      { label: "Conversion Tips", value: "What are 3 things I can do right now to increase sales?" }
+    ];
+  };
+
+  // --- 4. MESSAGE HANDLING ---
   const currentMessages = useMemo(() => {
     if (allThreads[contextKey]) return allThreads[contextKey];
 
-    // Initial Greeting if thread is new
     const greeting = activeProduct
       ? `I'm focused on **${activeProduct.name}**. I've got the audit data ready—what would you like to tweak or understand about this product?`
       : `I see we're in the **${currentView.replace('-', ' ')}** section. How can I assist with your store strategy here?`;
@@ -68,21 +91,37 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     const messageToSend = overrideMessage || input.trim();
     if (!messageToSend || isTyping) return;
 
+    // INTERCEPT: Handle Deep Audit Command
+    if (messageToSend === "DEEP_AUDIT_REQUEST") {
+      setIsTyping(true);
+      try {
+        const res = await callApi("/products/deep-audit", "POST", { productId: activeProduct.id });
+        if (res?.data?.success || res?.success) {
+          addToast("Deep Audit Complete!", "success");
+          // Add a system message to the chat
+          const systemMsg = { role: "cliva", content: "✨ I've finished the Deep AI Audit. I've updated the friction points and health score based on high-conversion standards." };
+          setAllThreads(prev => ({ ...prev, [contextKey]: [...currentMessages, systemMsg] }));
+        }
+      } catch (err) {
+        addToast("Audit failed. Credits preserved.", "error");
+      } finally {
+        setIsTyping(false);
+      }
+      return;
+    }
+
     const userMsg = { role: "user", content: messageToSend };
     const updatedHistory = [...currentMessages, userMsg];
 
-    // Optimistically update UI
     setAllThreads(prev => ({ ...prev, [contextKey]: updatedHistory }));
     setInput("");
     setIsTyping(true);
 
     try {
-      // THE BRAIN CALL
       const res = await callApi("/products/chat", "POST", {
         message: messageToSend,
         context: currentView,
         productId: activeProduct?.id || null,
-        // We pass the full product data so Cliva understands instructions like "Add more flair to this"
         productData: activeProduct || null,
         history: currentMessages.slice(-6)
       });
@@ -95,33 +134,13 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
         }));
       }
     } catch (error: any) {
-      addToast("Connection flickering. Let me try to reconnect.", "warning");
-      // Optional: remove the user message if failed
+      addToast("Connection flickering. Trying to reconnect...", "warning");
     } finally {
       setIsTyping(false);
     }
   };
 
-  // --- 3. ACTION BUTTON LOGIC ---
   const showActionButtons = currentMessages.length === 1 && input.length === 0;
-
-  const getQuickActions = () => {
-    if (activeProduct) return [
-      { label: "What's holding this back?", value: "Explain the main friction points for this product and how to fix them." },
-      { label: "Rewrite description", value: "Give me a high-converting, punchy rewrite of this description." },
-      { label: "Analyze Score", value: `Why did you give this product a health score of ${activeProduct.health}?` }
-    ];
-
-    if (currentView === "integrations") return [
-      { label: "Check API Health", value: "Are my external store connections working correctly?" },
-      { label: "Shopify Sync Help", value: "How do I ensure my latest inventory is synced with Cliva?" }
-    ];
-
-    return [
-      { label: "General Audit", value: "Give me a summary of my entire inventory's health." },
-      { label: "Conversion Tips", value: "What are 3 things I can do right now to increase sales?" }
-    ];
-  };
 
   if (!isOpen) return null;
 
@@ -141,7 +160,9 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
             </div>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors hover:text-white"><IoClose size={24} /></button>
+        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors hover:text-white">
+          <IoClose size={24} />
+        </button>
       </div>
 
       {/* Context Banner */}
@@ -157,8 +178,8 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
         {currentMessages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-4 rounded-2xl text-[14px] leading-relaxed shadow-xl border ${m.role === 'user'
-                ? 'bg-white text-black font-semibold rounded-tr-none border-white'
-                : 'bg-white/5 text-gray-200 border-white/5 rounded-tl-none backdrop-blur-sm'
+              ? 'bg-white text-black font-semibold rounded-tr-none border-white'
+              : 'bg-white/5 text-gray-200 border-white/5 rounded-tl-none backdrop-blur-sm'
               }`}>
               {m.content}
             </div>
