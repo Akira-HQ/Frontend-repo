@@ -6,118 +6,135 @@ import ProductOverview from "./tabs/productOverview/ProductOverview";
 import { HiLightningBolt } from "react-icons/hi";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { User } from "@/types";
+import { IoSyncOutline, IoCloseCircleOutline, IoCloudOfflineOutline } from "react-icons/io5";
 
 const AiTrainingContent = () => {
-  const { isDarkMode, user, setUser } = useAppContext();
+  const { isDarkMode, user, setUser, addToast } = useAppContext();
   const { callApi } = UseAPI();
   const [activeTab, setActiveTab] = useState<number>(1);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
 
-  // --- QUOTA SYNC LOGIC ---
+  useEffect(() => {
+    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
+
   const syncQuotas = async () => {
+    if (!navigator.onLine) return;
     try {
       const res = await callApi("/products/analyze", "GET");
+      if (res?.data && setUser && user) {
+        const { quotas, analyzedProducts } = res.data;
 
-      // Safety check: Ensure data exists and setUser is available
-      if (res?.data?.quotas && setUser && user) {
-        // FIX: If your Context Provider's setState doesn't support functional updates,
-        // we construct the new object using the current 'user' from the hook scope.
-        const updatedUser: User = {
+        setUser({
           ...user,
-          daily_audit_limit: res.data.quotas.audit,
-          daily_enhance_limit: res.data.quotas.enhance
-        };
+          daily_audit_limit: quotas.audit,
+          daily_enhance_limit: quotas.enhance
+        });
 
-        setUser(updatedUser);
+        const total = analyzedProducts.length;
+        const finished = analyzedProducts.filter((p: any) => p.is_ai_audit).length;
+        setProgress({ current: finished, total });
+
+        // Sticky Loading logic
+        setIsAnalyzing(finished < total && quotas.audit > 0);
       }
-    } catch (err) {
-      console.error("Quota Sync Failed", err);
-    }
+    } catch (err) { console.error("Sync Failed", err); }
   };
 
-  // Run on mount and every 15 seconds
   useEffect(() => {
     syncQuotas();
-    const interval = setInterval(syncQuotas, 15000);
+    const interval = setInterval(syncQuotas, 5000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]); // Re-run if user identity changes
+  }, [user?.id]);
 
-  // UI calculations
-  const maxAudit = user?.plan?.toLowerCase() === "pro" ? 500 : user?.plan?.toLowerCase() === "basic" ? 50 : 2;
-  const currentAudit = Math.max(0, user?.daily_audit_limit ?? 0); // Ensures min is 0
-  const auditPercentage = Math.min(100, (currentAudit / maxAudit) * 100);
+  const handleCancel = async () => {
+    try {
+      await callApi("/products/cancel-audit", "POST");
+      setIsAnalyzing(false);
+      addToast("Analysis halted.", "info");
+    } catch (e) { addToast("Failed to cancel", "error"); }
+  }
+
+  const maxLimit = user?.plan?.toLowerCase() === "pro" ? 500 : 50;
+  const currentAudit = user?.daily_audit_limit || 0;
+  const auditPerc = Math.min(100, (currentAudit / maxLimit) * 100);
 
   return (
-    <div className={`py-4 px-2 w-full h-full ${isDarkMode ? "text-white" : "relative"} relative shadow-2xl`}>
-      {/* HEADER SECTION WITH TABS & ENERGY */}
-      <div className="tabs fixed right-10 left-[300px] z-20 py-4 px-6 bg-[#0b0b0b]/80 backdrop-blur-xl border border-white/5 rounded-2xl flex justify-between items-center ml-10 shadow-2xl">
+    <div className={`py-4 px-2 w-full h-full ${isDarkMode ? "text-white" : ""} relative`}>
+
+      {/* 1. FIXED HEADER (Tabs & Energy) */}
+      <div className="tabs fixed top-16 right-10 left-[310px] z-50 py-4 px-6 bg-[#0b0b0b]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex justify-between items-center shadow-2xl">
         <div className="flex gap-4">
           <div
-            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all duration-300 font-bold text-sm tracking-tight ${activeTab === 1
-              ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-              : "bg-white/5 text-gray-400 hover:bg-white/10"
-              }`}
+            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all font-bold text-sm ${activeTab === 1 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
             onClick={() => setActiveTab(1)}
           >
             Products Analysis
           </div>
-
           <div
-            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all duration-300 font-bold text-sm tracking-tight ${activeTab === 2
-              ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-              : "bg-white/5 text-gray-400 hover:bg-white/10"
-              }`}
+            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all font-bold text-sm ${activeTab === 2 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
             onClick={() => setActiveTab(2)}
           >
             Overview
           </div>
         </div>
 
-        {/* ENERGY BAR SECTION */}
         <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">Cliva Energy</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Cliva Energy</span>
               <HiLightningBolt className="text-amber-500 animate-pulse" size={14} />
             </div>
             <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(245,158,11,0.3)]"
-                style={{ width: `${auditPercentage}%` }}
-              />
+              <div className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000" style={{ width: `${auditPerc}%` }} />
             </div>
           </div>
-
-          {/* <div className="text-right">
-            <div className="text-[14px] font-black text-white leading-none">
-              {currentAudit}<span className="text-gray-600 text-[10px] ml-1">/ {maxAudit}</span>
-            </div>
-            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Deep Audits Left</p>
-          </div> */}
           <div className="text-right">
             <div className="text-[14px] font-black text-white leading-none">
-              {currentAudit}<span className="text-gray-600 text-[10px] ml-1">/ {maxAudit}</span>
+              {currentAudit}<span className="text-gray-600 text-[10px] ml-1">/ {maxLimit}</span>
             </div>
-            {currentAudit === 0 ? (
-              <p className="text-[8px] font-bold text-red-500 uppercase tracking-tighter mt-1 animate-pulse">
-                Recharging at Midnight
-              </p>
-            ) : (
-              <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">
-                Deep Audits Left
-              </p>
-            )}
+            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Deep Audits Left</p>
           </div>
         </div>
       </div>
 
-      <div className="TabContents mt-24">
-        {activeTab === 1 && <ProductsAnalysisCom />}
-        {activeTab === 2 && (
-          <div className="mt-26">
-            <ProductOverview />
+      {/* 2. BACKGROUND ANALYSIS BANNER (Positioned below header) */}
+      {isAnalyzing && (
+        <div className="fixed top-40 left-[340px] right-10 z-40 animate-in slide-in-from-top-4 duration-500">
+          <div className={`backdrop-blur-md border p-4 rounded-2xl flex items-center justify-between shadow-2xl ${isOffline ? 'bg-red-500/10 border-red-500/20' : 'bg-[#A500FF]/10 border-[#A500FF]/20'}`}>
+            <div className="flex items-center gap-4">
+              <div className={`p-2 rounded-lg ${isOffline ? 'bg-red-500' : 'bg-[#A500FF]'}`}>
+                {isOffline ? <IoCloudOfflineOutline className="text-white" size={18} /> : <IoSyncOutline className="text-white animate-spin" size={18} />}
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase text-white">{isOffline ? "Sync Interrupted" : "Cliva Deep Intelligence"}</p>
+                <p className="text-[10px] text-[#A500FF] font-bold">{progress.current} / {progress.total} Products Checked</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="w-48 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full bg-[#A500FF] transition-all duration-700" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
+              </div>
+              <button onClick={handleCancel} className="flex items-center gap-2 text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-all">
+                <IoCloseCircleOutline size={16} /> Cancel
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* 3. MAIN CONTENT (Responsive Margins) */}
+      <div className={`TabContents ${isAnalyzing ? 'mt-48' : 'mt-28'} transition-all duration-500 ease-in-out`}>
+        {activeTab === 1 && <ProductsAnalysisCom />}
+        {activeTab === 2 && <ProductOverview />}
       </div>
     </div>
   );

@@ -1,17 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { BiChevronDown, BiChevronUp } from "react-icons/bi";
 import { HiSparkles } from "react-icons/hi2";
 import ProductTable from "./ProductTable";
 import ProductAudit from "./ProductAudit";
 import ProductTableSkeleton from "./ProductTableSkeleton";
 import { UseAPI } from "@/components/hooks/UseAPI";
-
-export type AuditCheck = {
-  id: string;
-  met: boolean;
-  text: string;
-};
 
 export type Product = {
   id: string;
@@ -22,11 +16,8 @@ export type Product = {
   health: number;
   thinking_process?: string;
   reasons: string[];
-  auditChecklist: AuditCheck[];
   stock: number;
   price: number;
-  suggestion?: string;
-  daily_enhance_limit?: number;
   is_ai_audit?: boolean;
 };
 
@@ -44,6 +35,11 @@ const ProductsAnalysisCom = () => {
   const [analyzedProducts, setAnalyzedProducts] = useState<Product[]>([]);
   const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null);
 
+  // NEW: Quota & Background Tracking States
+  const [enhanceQuota, setEnhanceQuota] = useState(0);
+  const [isBgAnalyzing, setIsBgAnalyzing] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
   const { callApi } = UseAPI();
 
   const fetchAndAnalyzeProducts = async (showLoading = true) => {
@@ -51,14 +47,11 @@ const ProductsAnalysisCom = () => {
     try {
       const response = await callApi("/products/analyze");
       if (response?.data) {
-        setAnalysisSummary(response.data.analysisSummary);
         setAnalyzedProducts(response.data.analyzedProducts);
+        setAnalysisSummary(response.data.analysisSummary);
+        setEnhanceQuota(response.data.quotas.enhance); // LIVE FETCH FROM DB
       }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (error) { console.error(error); } finally { setIsLoading(false); }
   };
 
   // Initial load
@@ -66,17 +59,21 @@ const ProductsAnalysisCom = () => {
     fetchAndAnalyzeProducts(true);
   }, []);
 
+  // Background Polling Logic: Refreshes data while Cliva is auditing
   useEffect(() => {
-    // Check if any product is still waiting for a Deep Audit badge
-    const hasPendingAiAudits = analyzedProducts.some(p => !p.is_ai_audit);
+    let interval: NodeJS.Timeout;
 
-    if (hasPendingAiAudits && !isLoading) {
-      const interval = setInterval(() => {
-        fetchAndAnalyzeProducts(false); // Silent update (no loading spinner)
-      }, 15000);
-      return () => clearInterval(interval);
+    if (isBgAnalyzing && !isLoading) {
+      interval = setInterval(() => {
+        // Silent update to catch newly audited products
+        fetchAndAnalyzeProducts(false);
+      }, 10000); // Poll every 10 seconds
     }
-  }, [analyzedProducts, isLoading]);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isBgAnalyzing, isLoading]);
 
   const handleProductUpdated = (updated: Product) => {
     setAnalyzedProducts((prev) =>
@@ -88,6 +85,7 @@ const ProductsAnalysisCom = () => {
 
   return (
     <div className="mt-20 px-6 max-w-[1600px] mx-auto pb-20">
+      {/* 1. Header Summary Card */}
       {analysisSummary && (
         <div className={`mb-10 p-6 bg-[#0b0b0b] border border-white/5 rounded-3xl transition-all duration-500 overflow-hidden shadow-2xl
           ${analysisView === 'closed' ? 'max-h-20' : 'max-h-[500px]'}`}>
@@ -104,7 +102,7 @@ const ProductsAnalysisCom = () => {
             </div>
             <button
               onClick={() => setAnalysisView(analysisView === 'closed' ? 'summary' : 'closed')}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors border border-white/5"
+              className="p-2 hover:bg-white/5 rounded-full transition-colors border border-white/5 text-gray-400"
             >
               {analysisView === "closed" ? <BiChevronDown size={24} /> : <BiChevronUp size={24} />}
             </button>
@@ -121,16 +119,19 @@ const ProductsAnalysisCom = () => {
                   <div className="h-full bg-gradient-to-r from-amber-600 to-green-500 transition-all duration-1000" style={{ width: `${analysisSummary.healthScore}%` }} />
                 </div>
                 <p className="text-sm text-gray-400 leading-relaxed italic border-l-2 border-amber-500/30 pl-4">
-                  "I've analyzed {analysisSummary.totalProducts} data points. We have {analysisSummary.weakCount} products currently falling below global sales standards."
+                  "I've analyzed {analysisSummary.totalProducts} products. {analysisSummary.weakCount} units currently fall below conversion standards."
                 </p>
               </div>
 
               <div className="flex flex-col justify-center gap-4">
                 <button
                   onClick={() => setAnalysisView("weak")}
-                  className="group flex items-center justify-between px-6 py-4 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 rounded-2xl transition-all"
+                  className="group flex items-center justify-between px-6 py-4 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 rounded-2xl transition-all text-left"
                 >
-                  <span className="text-white font-semibold">Review Weak Points</span>
+                  <div>
+                    <span className="text-white font-semibold block">Review Weak Points</span>
+                    <span className="text-[10px] text-gray-500 uppercase font-black">Requires Optimization</span>
+                  </div>
                   <div className="px-2 py-1 bg-amber-500 text-black text-[10px] font-black rounded-md">{analysisSummary.weakCount}</div>
                 </button>
               </div>
@@ -139,9 +140,19 @@ const ProductsAnalysisCom = () => {
         </div>
       )}
 
+      {/* 2. Main content area */}
       <div className="grid grid-cols-12 gap-8 items-start">
         <div className="col-span-12 lg:col-span-8">
-          <h2 className="text-xl font-bold text-white mb-6 px-2">Live Inventory</h2>
+          <div className="flex justify-between items-end mb-6 px-2">
+            <h2 className="text-xl font-bold text-white tracking-tight">Live Inventory</h2>
+            {isBgAnalyzing && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#A500FF]/10 border border-[#A500FF]/20 rounded-full animate-pulse">
+                <div className="w-1.5 h-1.5 bg-[#A500FF] rounded-full" />
+                <span className="text-[10px] font-bold text-[#A500FF] uppercase tracking-widest">AI Auditing Active</span>
+              </div>
+            )}
+          </div>
+
           {isLoading ? <ProductTableSkeleton /> :
             <ProductTable
               products={analyzedProducts}
@@ -151,11 +162,14 @@ const ProductsAnalysisCom = () => {
           }
         </div>
 
+        {/* 3. The Sticky Audit Panel */}
         <div className="col-span-12 lg:col-span-4 sticky top-24">
           <ProductAudit
             product={selectedProduct}
             onSelect={setSelectedProduct}
             onProductUpdated={handleProductUpdated}
+            enhanceQuota={enhanceQuota} // PASS LIVE QUOTA
+            setEnhanceQuota={setEnhanceQuota}
           />
         </div>
       </div>

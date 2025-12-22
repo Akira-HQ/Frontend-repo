@@ -10,7 +10,8 @@ import {
   XCircle,
   CheckCircle,
 } from "lucide-react";
-import QuotaMonitor from "./Settings/QuotaManager";
+import {QuotaMonitor} from "./Settings/QuotaManager";
+import { useAppContext } from "../AppContext";
 
 const NEON_PURPLE = "#A500FF";
 const NEON_ORANGE = "#FFB300";
@@ -23,6 +24,7 @@ const ACCENT_BLUE = "#00A7FF";
 const Settings = () => {
   // Using query params to manage the 'page' for deep linking, but using local state for simplicity in this component
   const [activeTab, setActiveTab] = useState("usage");
+  const {user} = useAppContext()
 
   return (
     <div className="py-4 px-2 w-full h-full text-white pt-10 ml-6 relative">
