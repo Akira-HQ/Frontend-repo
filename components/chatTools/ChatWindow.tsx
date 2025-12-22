@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, X, MessageSquare, Sparkles, Loader2, ThumbsUp } from "lucide-react";
+import { Send, X, MessageSquare, Sparkles, Loader2, ThumbsUp, Lock } from "lucide-react";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { useAppContext } from "../AppContext";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 
 const TypewriterMessage = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -40,10 +41,15 @@ export const LandingChat: React.FC = () => {
     setVisitorId(id);
 
     const loadData = async () => {
-      const res = await callApi(`/chat-history?visitorId=${id}`, "GET");
-      if (res?.messages) {
-        setMessages(res.messages.map((m: any) => ({ ...m, isNew: false })));
-        setRemaining(res.remaining);
+      try {
+        const res = await callApi(`/chat-history?visitorId=${id}`, "GET");
+        const data = res?.data || res;
+        if (data?.messages) {
+          setMessages(data.messages.map((m: any) => ({ ...m, isNew: false })));
+          setRemaining(data.remaining);
+        }
+      } catch (err) {
+        console.error("Cliva History Error:", err);
       }
     };
     loadData();
@@ -53,18 +59,18 @@ export const LandingChat: React.FC = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         role: "cliva",
-        content: "Hi! I'm **Cliva**. Welcome to the future of **E-commerce**. Want to secure **early access** to our launch? Drop your email below.",
+        content: "Hi! I'm **Cliva**. Welcome to the future of **Shopify Scaling**. Want to secure **early access** to our launch? Drop your email below.",
         isNew: true
       }]);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isApiLoading]);
 
   const handleSend = async () => {
-    if (!input.trim() || isApiLoading) return;
+    if (!input.trim() || isApiLoading || remaining === 0) return;
     const userMsg = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMsg, isNew: false }]);
@@ -72,9 +78,10 @@ export const LandingChat: React.FC = () => {
 
     try {
       const res = await callApi("/cliva-info", "POST", { message: userMsg, visitorId });
-      if (res?.reply) {
-        setMessages(prev => [...prev, { role: "cliva", content: res.reply, isNew: true }]);
-        setRemaining(res.remaining);
+      const data = res?.data || res;
+      if (data?.reply) {
+        setMessages(prev => [...prev, { role: "cliva", content: data.reply, isNew: true }]);
+        setRemaining(data.remaining);
       }
     } catch (err) {
       addToast("Connection flicker.", "error");
@@ -85,6 +92,8 @@ export const LandingChat: React.FC = () => {
     await callApi("/chat/feedback", "POST", { identifier: visitorId, sentiment: "positive", message: "User liked the landing response." });
     addToast("Strategy feedback received! 🧪", "success");
   };
+
+  const isLocked = remaining === 0;
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[100] font-inter">
@@ -105,7 +114,6 @@ export const LandingChat: React.FC = () => {
 
       {!isOpen ? (
         <div className="relative">
-          {/* Bouncing LIVE Label */}
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 animate-bounce-slow">
             <div className="bg-amber-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 border border-black/10">
               <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
@@ -117,7 +125,6 @@ export const LandingChat: React.FC = () => {
             onClick={() => setIsOpen(true)}
             className="bg-gradient-to-tr from-[#A500FF] to-[#7000FF] p-4 rounded-full shadow-2xl hover:scale-110 transition-all active:scale-95 group relative overflow-hidden"
           >
-            {/* Ambient Pulse Effect */}
             <div className="absolute inset-0 bg-white/20 animate-ping rounded-full opacity-20 group-hover:opacity-40" />
             <MessageSquare className="text-white relative z-10" />
           </button>
@@ -133,7 +140,9 @@ export const LandingChat: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-white font-bold text-sm">Cliva Agent</h3>
-                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">{remaining ?? 10}/10 Messages</p>
+                <p className={`text-[9px] font-bold uppercase tracking-wider ${isLocked ? 'text-red-500' : 'text-gray-500'}`}>
+                  {isLocked ? "Limit Reached" : `${remaining ?? 5}/5 Messages`}
+                </p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-all">
@@ -169,24 +178,39 @@ export const LandingChat: React.FC = () => {
             )}
           </div>
 
-          {/* Input */}
+          {/* Input / Lock Area */}
           <div className="p-6 border-t border-white/5 bg-black/20">
-            <div className="relative group">
-              <input
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-white text-sm outline-none focus:border-[#A500FF]/50 transition-all placeholder:text-gray-700"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask about Shopify scaling..."
-              />
-              <button
-                onClick={handleSend}
-                disabled={isApiLoading || !input.trim()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-[#A500FF] text-white rounded-xl active:scale-90 transition-all disabled:opacity-30 shadow-lg shadow-[#A500FF]/20"
-              >
-                <Send size={18} />
-              </button>
-            </div>
+            {isLocked ? (
+              <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2">
+                <div className="flex items-center justify-center gap-2 text-amber-500 py-2">
+                  <Lock size={14} />
+                  <span className="text-[11px] font-bold uppercase tracking-widest">Daily Limit Reached</span>
+                </div>
+                <Link
+                  href="/waitlist#join"
+                  className="w-full bg-[#A500FF] text-white text-center py-3 rounded-2xl font-bold text-sm hover:bg-[#8e00db] transition-all shadow-lg shadow-[#A500FF]/20"
+                >
+                  Join the Waitlist for Full Access
+                </Link>
+              </div>
+            ) : (
+              <div className="relative group">
+                <input
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-white text-sm outline-none focus:border-[#A500FF]/50 transition-all placeholder:text-gray-700"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Ask about Shopify scaling..."
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={isApiLoading || !input.trim()}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-[#A500FF] text-white rounded-xl active:scale-90 transition-all disabled:opacity-30 shadow-lg shadow-[#A500FF]/20"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
