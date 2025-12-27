@@ -99,11 +99,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 
         {/* Features - Logic for Sketch/Draft mode */}
         <div className="mt-auto">
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6 flex items-center gap-2">
             <div className="h-px flex-grow bg-white/10" />
             Features
             <div className="h-px flex-grow bg-white/10" />
-          </p>
+          </div>
 
           <ul className="space-y-4">
             {features && features.length > 0 ? (

@@ -66,7 +66,7 @@ export const Header = () => {
   const isMinimalHeader =
     pathname.startsWith("/dashboard") ||
     pathname === "/register/sign-in" ||
-    pathname === "/register" ||
+    pathname.startsWith("/register") ||
     pathname === "/waitlist";
 
   const navLinks = [

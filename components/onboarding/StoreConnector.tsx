@@ -1,7 +1,5 @@
-// --- StoreConnector.tsx (FINAL ADJUSTED CODE) ---
-
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '../AppContext';
 import { UseAPI } from '../hooks/UseAPI';
@@ -25,9 +23,30 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
   onValidatedSubmit
 }) => {
   const router = useRouter();
-  // ⚡ Ensure 'user' is destructured from context ⚡
-  const { addToast, setUser, user } = useAppContext();
+  const { addToast, setUser, user, syncQuotas } = useAppContext();
   const { callApi } = UseAPI();
+
+  // --- 1. NEURAL LINK (WebSocket) ---
+  // Listens for backend signals that the store connection is physically verified
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const token = localStorage.getItem("token");
+  //     if (!token || !user) return;
+
+  //     const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}?token=${token}&type=dashboard`);
+
+  //     ws.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       // If a Shopify webhook or auth flow completes in the background
+  //       if (data.type === "STORE_CONNECTED" || data.type === "INTEGRATION_VERIFIED") {
+  //         syncQuotas(); // Refresh user state to reflect the new store status
+  //         addToast(data.message || "Store successfully linked!", "success");
+  //       }
+  //     };
+
+  //     return () => ws.close();
+  //   }
+  // }, [user, syncQuotas, addToast]);
 
   const handleConnection = async (e: React.FormEvent) => {
     if (e && typeof e.preventDefault === 'function') {
@@ -40,13 +59,11 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
     }
 
     setLoading(true);
-
     const normalizedUrl = formatUrl(url, platform);
 
     try {
       if (platform.toLowerCase() === 'shopify') {
-
-        // --- SHOPIFY FLOW (Auth initiated) ---
+        // --- SHOPIFY FLOW ---
         addToast("Initiating Shopify connection...", "loading");
 
         const response = await callApi("/shopify/auth", "POST", {
@@ -55,6 +72,7 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
         });
 
         if (response.oauthUrl) {
+          // Redirect to Shopify App Installation page
           window.location.href = response.oauthUrl;
           return;
         } else {
@@ -62,8 +80,7 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
         }
 
       } else {
-
-        // --- CUSTOM SITE / OTHERS: DIRECT API CALL ---
+        // --- CUSTOM SITE / OTHERS ---
         addToast("Creating custom store record...", "loading");
 
         const response = await callApi("/create-store", "POST", {
@@ -71,17 +88,16 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
           platform: platform.toUpperCase(),
         });
 
+        // Update local user state with new store details
         setUser(response.data);
 
-        // ⚡ CHECK FOR FREE PLAN BEFORE REDIRECTING TO PAYMENT ⚡
-        const userPlan = response.data?.plan || user?.plan || 'basic';
+        // Aligned with Robust DB plan logic
+        const userPlan = response.data?.plan || user?.plan || 'FREE';
 
-        if (userPlan.toLowerCase() === 'free') {
-          // DIRECT TO DASHBOARD: Skip payment wall for free users
+        if (userPlan.toUpperCase() === 'FREE') {
           addToast("Free plan activated! Welcome to your dashboard.", "success");
           router.push(`/dashboard?view=integrations`);
         } else {
-          // REDIRECT TO PAYMENT: Paid plan requires payment wall
           addToast("Store connected. Redirecting to billing.", "success");
           router.push(`/register/payment-wall?plan=${userPlan}&store=${normalizedUrl}`);
         }
@@ -111,7 +127,6 @@ const StoreConnector: React.FC<StoreConnectorProps> = ({
         {buttonText}
       </Button>
 
-      {/* Optional Lock/Info */}
       {!isInputReady && (
         <p className="text-gray-500 text-sm mt-3 flex items-center justify-center gap-1">
           <Lock className="w-4 h-4" /> Select platform and enter URL to enable connection.

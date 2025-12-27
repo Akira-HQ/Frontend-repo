@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import {QuotaMonitor} from "./Settings/QuotaManager";
 import { useAppContext } from "../AppContext";
+import { GeneralSecurity } from "./Settings/GeneralSettings";
+import { PaymentHistory } from "./Settings/PaymentHistory";
 
 const NEON_PURPLE = "#A500FF";
 const NEON_ORANGE = "#FFB300";
@@ -69,23 +71,11 @@ const Settings = () => {
       {activeTab === "usage" && <QuotaMonitor />}
 
       {activeTab === "general" && (
-        <div className="p-6 bg-[#0b0b0b] rounded-xl border border-gray-800 min-h-[500px]">
-          <h2 className="text-xl font-bold">General Account Management</h2>
-          <p className="text-gray-400 mt-2">
-            Store details, password reset, and user access control go here.
-          </p>
-        </div>
+        <GeneralSecurity />
       )}
 
       {activeTab === "billing" && (
-        <div className="p-6 bg-[#0b0b0b] rounded-xl border border-gray-800 min-h-[500px]">
-          <h2 className="text-xl font-bold">
-            Payment Methods & Invoice History
-          </h2>
-          <p className="text-gray-400 mt-2">
-            Add payment methods and review past invoices.
-          </p>
-        </div>
+        <PaymentHistory />
       )}
     </div>
   );

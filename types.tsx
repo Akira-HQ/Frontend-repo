@@ -6,54 +6,7 @@ export interface Toast {
   type: "success" | "error" | "info" | "loading" | "warning";
 }
 
-// User Types
-export interface User {
-  id: string | number;
-  name: string;
-  email: string;
-  password: string;
-  plan: string;
-  store?: {
-    storeName: string;
-    storeUrl: string;
-    storeId: string;
-    snippetToken: string;
-    platform: string;
-  };
-  onboardingStep: "CONNECT_STORE" | "PAYMENT_WALL" | "COMPLETED";
-  daily_audit_limit?: number;
-  daily_enhance_limit?: number;
-  daily_chat_limit?: number;
-}
 
-export interface ContextProps {
-  isDarkMode: boolean;
-  setIsDarkMode: (theme: boolean) => void;
-  alertMessage: string;
-  setAlertMessage: (
-    message: string,
-    type?: "success" | "error" | "loading" | null,
-  ) => void;
-  alertType: "success" | "error" | "loading" | null;
-  setAlertType: (type: "success" | "error" | "loading" | null) => void;
-  initialLoadComplete: boolean;
-  getStarted: boolean;
-  setGetStarted: (start: boolean) => void;
-  toasts: Toast[];
-  addToast: (
-    message: string,
-    type: "success" | "error" | "info" | "loading" | "warning",
-  ) => void;
-  removeToast: (id: string) => void;
-  user: User | null;
-  setUser: (user: User | null) => void;
-  logout: () => void;
-  isChatOpen: boolean;
-  setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  chatContextProduct: any; // or a specific Product type if you have one
-  openChat: (product?: any) => void;
-  syncQuotas: () => Promise<void>;
-}
 
 // PageTracker Types
 export interface PageData {
@@ -128,15 +81,6 @@ export interface SecurityTipData {
   };
 }
 
-// export type Notification = {
-//   id: string;
-//   timestamp: string;
-//   read: boolean;
-// } & (
-//   | { type: "USAGE_ALERT"; data: UsageAlertData }
-//   | { type: "ANNOUNCEMENT"; data: AnnoucementData }
-//   | { type: "SECURITY_TIP"; data: SecurityTipData }
-// );
 
 export type ThemeContextType = {
   isDarkMode: boolean;
@@ -162,17 +106,7 @@ export const ACCENT_BLUE = "#00A7FF";
 export const TEXT_GRAY = "#9ca3af"; // gray-400
 export const CHART_GRID_COLOR = "#374151"; // gray-700
 
-export type Product = {
-  id: string;
-  name: string;
-  description: string | null;
-  imageUrls: string[] | null;
-  status: "Strong" | "Weak";
-  health: number;
-  stock: number;
-  price: number;
-  sku?: string;
-};
+
 
 // Shared Metrics Type
 export type Metric = {
@@ -228,3 +162,106 @@ export const MOCK_REPORTS: ReportData[] = [
     conversationId: "conv_101",
   },
 ];
+
+
+//---------New Typees
+// Updated User Interface
+export interface User {
+  id: string | number;
+  name: string;
+  email: string;
+  plan: "FREE" | "BASIC" | "PREMIUM"; // Matches DB UPPER case
+  onboarding_step: 'ACCOUNT_CREATION' | 'CONNECT_STORE' | 'PAYMENT_WALL' | 'DASHBOARD';
+  is_paid: boolean;
+  // 🔥 New Quota Structure matching buildUserFeedback
+  quotas: {
+    audits_used: number;
+    audits_limit: number;
+    enhance_used: number;
+    enhance_limit: number;
+    chats_used: number;
+    chats_limit: number;
+  };
+
+  store?: {
+    id: string;
+    name: string;
+    url: string;
+    platform: string;
+    snippetToken: string;
+    is_authorized: boolean;
+  };
+}
+
+export interface ProductAnalysis {
+  status: "Strong" | "Weak";
+  thinking_process: string;
+  reasons: string[];
+  strengths: string[];
+  suggestion?: string;
+}
+
+export type Product = {
+  id: string;
+  store_id: string;
+  external_id: string;
+  name: string;
+  description: string | null;
+  image_url: string[] | null;
+  price: number;
+  stock: number;
+  health_score: number;
+  status: "Strong" | "Weak";
+  // 🔥 Unified Analysis Object
+  analysis: ProductAnalysis;
+  is_ai_audited: boolean;
+  updated_at: string;
+};
+export interface ContextProps {
+  // UI
+  isDarkMode: boolean;
+  setIsDarkMode: (theme: boolean) => void;
+  initialLoadComplete: boolean;
+  getStarted: boolean;
+  setGetStarted: (start: boolean) => void;
+
+  // Notifications
+  alertMessage: string;
+  alertType: "success" | "error" | "loading" | null;
+  setAlertMessage: (message: string, type?: "success" | "error" | "loading" | null) => void;
+  toasts: Toast[];
+  addToast: (message: string, type: Toast["type"]) => void;
+  removeToast: (id: string) => void;
+
+  // Auth & Core
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  logout: () => void;
+  syncQuotas: () => Promise<void>;
+
+  // Chat
+  isChatOpen: boolean;
+  setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  chatContextProduct: Product | null;
+  openChat: (product?: Product | null) => void;
+
+  // --- ✅ WebSocket Events ---
+  wsEvent: WsEvent | null; // <-- add this
+}
+
+export type WsEvent =
+  | {
+      type: "AUDIT_COMPLETE";
+      message: string;
+      payload?: any;
+    }
+  | {
+      type: "QUOTA_UPDATE";
+      payload?: any;
+    }
+  | {
+      type: string;
+      [key: string]: any;
+    };
+
+

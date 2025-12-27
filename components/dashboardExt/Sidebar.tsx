@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useAppContext } from "../AppContext";
 import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import { MdSupportAgent } from "react-icons/md";
@@ -30,7 +30,7 @@ const Sidebar = ({
   onMouseDown,
 }: SidebarProps) => {
   const searchParams = useSearchParams();
-  const { isDarkMode, user, logout } = useAppContext();
+  const { isDarkMode, user, logout, syncQuotas } = useAppContext();
   const initial = user?.name ? user?.name.charAt(0).toUpperCase() : "?";
   const [state, setState] = useState<number | null>(null);
 
@@ -41,6 +41,26 @@ const Sidebar = ({
   const [view, setView] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  // --- 1. NEURAL LINK (WebSocket) for Live Notifications ---
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const token = localStorage.getItem("token");
+  //     if (!token || !user) return;
+
+  //     const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&type=dashboard`);
+
+  //     ws.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       // If an audit finishes or a quota warning is pushed, refresh user state
+  //       if (data.type === "AUDIT_COMPLETE" || data.type === "QUOTA_UPDATE" || data.type === "QUOTA_WARNING") {
+  //         syncQuotas();
+  //       }
+  //     };
+
+  //     return () => ws.close();
+  //   }
+  // }, [user?.id, syncQuotas]);
 
   useEffect(() => {
     const view = searchParams.get("view");
@@ -74,29 +94,31 @@ const Sidebar = ({
     }
   }, [view]);
 
-  // Generate notifications dynamically but filter out dismissed ones
+  // --- 2. DYNAMIC NOTIFICATION LOGIC (Aligned with Robust DB) ---
   const unReadNotifications = useMemo(() => {
     const dynamicNotifs: Notification[] = [];
-    if (!user) return [];
+    if (!user || !user.quotas) return [];
 
-    const currentAuditBalance = user?.daily_audit_limit || 0;
-    const maxAudit = user?.plan === "Pro" ? 500 : user?.plan === "Basic" ? 50 : 5;
+    // Mapping to the new nested quota structure
+    const currentAuditUsed = user.quotas.audits_used || 0;
+    const maxAudit = user.quotas.audits_limit || 50;
+    const auditsLeft = Math.max(0, maxAudit - currentAuditUsed);
 
     // 1. Quota Alert Logic
-    const quotaId = `quota-alert-logic`; // Constant ID for the logic
-    if (currentAuditBalance <= (maxAudit * 0.2) && !dismissedIds.includes(quotaId)) {
+    const quotaId = `quota-alert-logic`;
+    if (auditsLeft <= (maxAudit * 0.2) && !dismissedIds.includes(quotaId)) {
       dynamicNotifs.push({
         id: quotaId,
         type: "USAGE_ALERT",
         read: false,
         timestamp: new Date(),
         data: {
-          title: currentAuditBalance === 0 ? "Battery Depleted" : "Energy Low",
-          message: currentAuditBalance === 0
+          title: auditsLeft === 0 ? "Battery Depleted" : "Energy Low",
+          message: auditsLeft === 0
             ? "I've used all my deep-thinking power for today. I'll recharge at midnight!"
-            : `I only have {value} audits left in my tank. Use them wisely!`,
+            : `I only have ${auditsLeft} audits left in my tank. Use them wisely!`,
           progress: {
-            value: currentAuditBalance,
+            value: auditsLeft,
             max: maxAudit,
             unit: "Audits"
           }
@@ -104,14 +126,11 @@ const Sidebar = ({
       });
     }
 
-    // 2. Add other dynamic notifications here if needed, filtering by !dismissedIds.includes(id)
-
     return dynamicNotifs;
   }, [user, dismissedIds]);
 
   const notificationToShow = unReadNotifications[currentIndex];
 
-  // If the currentIndex becomes invalid (e.g. notifications were dismissed), reset it
   useEffect(() => {
     if (currentIndex >= unReadNotifications.length && unReadNotifications.length > 0) {
       setCurrentIndex(unReadNotifications.length - 1);
@@ -122,7 +141,6 @@ const Sidebar = ({
 
   const handleDismiss = (id: string) => {
     setDismissedIds((prev) => [...prev, id]);
-    // Move to previous index if we are dismissing the last item
     if (currentIndex > 0 && currentIndex === unReadNotifications.length - 1) {
       setCurrentIndex(currentIndex - 1);
     }
@@ -149,9 +167,9 @@ const Sidebar = ({
           ${isActive ? "bg-[#181c21] shadow-inner shadow-black/30" : "bg-transparent hover:bg-gray-800/50"}`}
     >
       <Icon className={`text-xl flex-shrink-0 transition-colors duration-200 ml-[-2px]
-          ${isActive ? `text-[${NEON_PURPLE}]` : `text-gray-400 group-hover:text-[${NEON_ORANGE}]`}`}
+          ${isActive ? `text-[#A500FF]` : `text-gray-400 group-hover:text-[#FFB300]`}`}
       />
-      {!isCollapsed && <span className={`text-lg font-medium transition-colors duration-200 ${isActive ? `` : 'text-gray-400'}`}>{label}</span>}
+      {!isCollapsed && <span className={`text-lg font-medium transition-colors duration-200 ${isActive ? `text-white` : 'text-gray-400'}`}>{label}</span>}
     </div>
   );
 
@@ -162,7 +180,7 @@ const Sidebar = ({
     return (
       <div className="group" onClick={() => navigate(id, viewName)}>
         {isActive ? (
-          <div className={`p-[1px] rounded-lg bg-gradient-to-r from-[${NEON_PURPLE}] to-[${NEON_ORANGE}] overflow-hidden transition-all duration-200`}>
+          <div className={`p-[1px] rounded-lg bg-gradient-to-r from-[#A500FF] to-[#FFB300] overflow-hidden transition-all duration-200`}>
             {content}
           </div>
         ) : (
@@ -174,7 +192,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12] fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out`}
+      className={`sidebar backdrop-filter backdrop-blur-md bg-[#0d0f12] fixed left-0 top-0 bottom-0 pt-16 transition-all duration-300 ease-in-out border-r border-white/5`}
       style={{ width: `${width}px` }}
     >
       <span
@@ -199,22 +217,21 @@ const Sidebar = ({
             {!isCollapsed && (
               <div className="w-full">
                 <div className="flex w-full justify-between items-center">
-                  <h1 className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl`}>
+                  <h1 className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl font-bold text-white`}>
                     {user?.name}
                   </h1>
-                  <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md text-xs font-bold">
+                  <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md text-xs font-bold border border-green-500/20">
                     {user?.plan.toUpperCase()}
                   </span>
                 </div>
-                {user?.store ? (
+                {user?.store?.url ? (
                   <a
-                    href={user.store.storeUrl.startsWith("http") ? user.store.storeUrl : `https://${user.store.storeUrl}`}
+                    href={user?.store?.url?.startsWith("http") ? user.store.url : `https://${user?.store?.url}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="pt-1 text-[14px] text-gray-400 hover:text-[#00A7FF] hover:underline truncate block"
-                    title={user.store.storeName}
                   >
-                    {user.store.storeName}
+                    {user.store.name}
                   </a>
                 ) : (
                   <p className="pt-1 text-[14px] text-red-400">No store connected</p>
@@ -223,7 +240,7 @@ const Sidebar = ({
             )}
           </div>
 
-          <hr className="border-gray-700 border w-full mt-4" />
+          <hr className="border-white/5 border w-full mt-4" />
 
           <div className="navigations mt-6 flex flex-col gap-1.5 ml-[-8px]">
             <NavItem id={1} viewName="ai-training" Icon={FaBrain} label="AI Training Center" />

@@ -1,13 +1,6 @@
 "use client";
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
-// Importing Lucide icons for input fields and UI consistency
-import { LucideIcon, User, Lock, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { User, Lock, Zap } from "lucide-react";
 import { useAppContext } from "@/components/AppContext";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { PrimaryButton } from "@/components/Button";
@@ -19,111 +12,105 @@ import { useRouter } from "next/navigation";
 const LoginContent: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  // Assuming a full password validation object is not strictly necessary for just login, but we keep the handler.
   const [passwordErrors, setPasswordErrors] = useState(validatePassword(""));
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { addToast, setUser, setAlertMessage } = useAppContext();
+  const { addToast, setUser, setAlertMessage, syncQuotas } = useAppContext();
   const router = useRouter();
   const { callApi } = UseAPI();
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = event.target.value;
     setPassword(newPassword);
-    // You might optionally run validation here for feedback, but usually not required for login
     setPasswordErrors(validatePassword(newPassword));
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAlertMessage("null", null); // Clear any previous alerts
+    setAlertMessage("", null);
     setLoading(true);
 
     try {
+      // 1. Basic Validation
       if (!email || !password) {
-        // Use the Banner Alert for critical form failure before API call
-        setAlertMessage(
-          "Email and password fields are required to sign in.",
-          "error",
-        );
-        addToast("Email and password fields are required to sign in.", "error");
+        const errorMsg = "Email and password are required.";
+        setAlertMessage(errorMsg, "error");
+        addToast(errorMsg, "error");
+        setLoading(false);
         return;
       }
 
-      // Show Loading Banner
-      setAlertMessage("Signing into your account...", "loading");
-      addToast("Signing into your account...", "loading");
+      setAlertMessage("Authenticating with Cliva...", "loading");
 
+      // 2. API Call
       const response = await callApi("/user/login", "POST", {
         email,
         password,
       });
 
-      // ⚡ NEW: Gating Logic based on onboardingStep
-      localStorage.setItem("token", response.token);
-      const { onboardingStep, plan, store } = response.data;
+      if (!response.token) {
+        throw new Error("Authentication failed: No token received.");
+      }
 
-      if (onboardingStep === "CONNECT_STORE") {
-        addToast("Almost there! Please connect your Shopify store.", "info");
+      // ⚡ 3. CRITICAL: Store Token & Hydrate State IMMEDIATELY ⚡
+      // This ensures UseAPI and syncQuotas can use the token for the next steps
+      localStorage.setItem("token", response.token);
+
+      const userData = response.data;
+      const { onboarding_step, plan, store, is_paid } = userData;
+
+      // Update global context so components like Sidebar don't crash
+      setUser(userData);
+
+      // ⚡ 4. GATING LOGIC: Enforce Store & Payment ⚡
+
+      // Check for Store Connection
+      if (onboarding_step === "CONNECT_STORE" || !store) {
+        addToast("Step 2: Connect your Shopify store to activate Cliva.", "info");
         router.push("/register?step=connect-store");
         return;
       }
 
-      if (onboardingStep === "PAYMENT_WALL") {
-        addToast("Please complete your subscription to continue.", "info");
-        // Redirect to payment wall with existing parameters
-        router.push(`/register/payment-wall?plan=${plan}&store=${store?.storeUrl || ""}`);
+      // Check for Payment (Skip for FREE plan users)
+      const needsPayment = plan?.toUpperCase() !== 'FREE' && !is_paid;
+      if (onboarding_step === "PAYMENT_WALL" || needsPayment) {
+        addToast("Almost there! Please finalize your subscription.", "info");
+        // Using store.url from our new schema
+        router.push(`/register/payment-wall?plan=${plan}&store=${store?.url || ""}`);
         return;
       }
 
-      localStorage.setItem("token", response.token);
-      setUser(response.data);
+      // ⚡ 5. Final Success Path ⚡
 
-      // Success message (will auto-clear the banner after 4s)
-      setAlertMessage(
-        "Authentication successful. Redirecting to dashboard.",
-        "success",
-      );
-      addToast(
-        "Authentication successful. Redirecting to dashboard.",
-        "success",
-      );
+      // Initialize the Neural Link / Fetch live Quotas 
+      await syncQuotas();
 
-      // Delay navigation slightly to allow success banner to show briefly
+      setAlertMessage("Identity verified. Entering dashboard...", "success");
+      addToast("Welcome back!", "success");
+
+      // 3. Final Redirect to Dashboard
       router.push("/dashboard?view=ai-training");
-      setTimeout(() => {}, 200);
-    } catch (error: any) {
-      console.error("An error occurred during sign-in:", error);
 
-      // Use the Banner Alert for critical API/Auth failure
-      setAlertMessage(
-        error.message || "Login failed. Please check your credentials.",
-        "error",
-      );
-      addToast(
-        error.message || "Login failed. Please check your credentials.",
-        "error",
-      );
+    } catch (error: any) {
+      console.error("Login error:", error);
+      const errorMsg = error.message || "Invalid credentials.";
+      setAlertMessage(errorMsg, "error");
+      addToast(errorMsg, "error");
+
+      // Clean up in case of failed login attempts
+      localStorage.removeItem("token");
+      setUser(null);
     } finally {
       setLoading(false);
-      // setAlertMessage is intentionally NOT cleared here if it's an error/success type,
-      // allowing the auto-clear logic (4s) in AppProvider to take effect.
     }
   };
-
   return (
     <form
       onSubmit={handleSignIn}
-      className={`
-        w-full max-w-lg p-6 sm:p-8 space-y-6 
-        bg-gray-900/80 rounded-3xl 
-        border border-gray-800 backdrop-blur-md 
-        shadow-2xl shadow-purple-500/20 
-        relative z-10 mx-auto transition-all duration-500
-      `}
+      className="w-full max-w-lg p-6 sm:p-8 space-y-6 bg-gray-900/80 rounded-3xl border border-gray-800 backdrop-blur-md shadow-2xl shadow-purple-500/20 relative z-10 mx-auto transition-all animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
-      <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center mb-6">
-        Welcome Back to Cliva
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-white text-center mb-6 tracking-tight">
+        Welcome Back
       </h1>
 
       <div className="space-y-4">
@@ -146,32 +133,21 @@ const LoginContent: React.FC = () => {
         />
       </div>
 
-      {/* Optional password error display (simplified for login) */}
-      {passwordErrors.minLength && password.length > 0 && (
-        <div className="text-yellow-400 text-sm">
-          • Password should meet security requirements.
-        </div>
-      )}
-
-      {/* Links: Forgot password on the right, Sign up below */}
       <div className="flex justify-end pt-1">
-        <a
-          href="/register/forgot-password"
-          className="text-sm text-[#00A7FF] hover:underline transition duration-200"
-        >
+        <a href="/register/forgot-password" className="text-sm text-[#00A7FF] hover:underline">
           Forgot Password?
         </a>
       </div>
 
       <PrimaryButton
         type="submit"
-        className={`mt-5 w-full font-bold tracking-wide`}
+        className="mt-5 w-full font-bold tracking-wide shadow-lg active:scale-95 transition-transform"
         disabled={loading}
       >
         {loading ? (
           <span className="flex items-center justify-center space-x-2">
-            <Zap className="w-5 h-5 animate-pulse" />
-            <span>Signing In...</span>
+            <Zap className="w-5 h-5 animate-pulse text-amber-500" />
+            <span>Verifying...</span>
           </span>
         ) : (
           "Sign In"
@@ -179,29 +155,20 @@ const LoginContent: React.FC = () => {
       </PrimaryButton>
 
       <p className="text-center text-gray-400 pt-2 text-sm">
-        Don't have an account?{" "}
-        <a
-          href="/register"
-          className={`text-[#A500FF] font-semibold hover:underline transition duration-200`}
-        >
-          Sign Up
+        New here?{" "}
+        <a href="/register" className="text-[#A500FF] font-semibold hover:underline">
+          Create an Account
         </a>
       </p>
     </form>
   );
 };
 
-// --- Main Page Component (Wrapper) ---
-
 const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen font-inter bg-[#050505] antialiased overflow-x-hidden relative flex items-center justify-center p-4">
-      {/* 1. Nebula Background Effect */}
       <ClivaStarsBackground density={200} />
-
-      {/* 2. Main Content Wrapper */}
       <div className="py-12 w-full max-w-xl">
-        {/* Using LoginContent here */}
         <LoginContent />
       </div>
     </div>

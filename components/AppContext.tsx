@@ -1,6 +1,5 @@
 "use client";
-import { ContextProps, Toast, User } from "@/types";
-import { useRouter } from "next/navigation";
+
 import React, {
   createContext,
   useContext,
@@ -8,91 +7,99 @@ import React, {
   useEffect,
   ReactNode,
   useCallback,
+  useRef,
 } from "react";
+import { useRouter } from "next/navigation";
+import { ContextProps, Toast, User } from "@/types";
 
 const AppContext = createContext<ContextProps | undefined>(undefined);
-
-const getLocalStorageItem = (key: string) => {
-  if (typeof window !== "undefined") {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : null;
-    } catch (error) {
-      console.error(`Error parsing localstorage "${key}":`, error);
-      localStorage.removeItem(key);
-      return null;
-    }
-  }
-  return null;
-};
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
-  // --- UI & UX State ---
+  // ================= UI / UX =================
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [initialLoadCompleteInternal, setInitialLoadCompleteInternal] = useState(false);
+  const [initialLoadCompleteInternal, setInitialLoadCompleteInternal] =
+    useState(false);
   const [getStarted, setGetStarted] = useState<boolean>(false);
 
-  // --- Notification State ---
+  // ================= Notifications =================
   const [alertMessage, setAlertMessageState] = useState<string>("");
-  const [alertType, setAlertType] = useState<"success" | "error" | "loading" | null>(null);
+  const [alertType, setAlertType] = useState<
+    "success" | "error" | "loading" | null
+  >(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // --- Auth State ---
+  // ================= Auth =================
   const [user, setUserState] = useState<User | null>(null);
 
-  // --- Cliva Chat State ---
+  // ================= Chat =================
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatContextProduct, setChatContextProduct] = useState<any>(null);
 
-  // --- 1. SYNC QUOTAS LOGIC ---
-  // This fetches the latest energy levels (chat, audit, enhance) from the DB
-  const syncQuotas = useCallback(async () => {
-    if (!user) return;
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+  // ================= WebSocket =================
+  const socketRef = useRef<WebSocket | null>(null);
+  const [wsEvent, setWsEvent] = useState<any>(null);
 
-      const response = await fetch(`${process.env.LOCAL_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+  // ================= Quota Sync =================
+  /**
+   * ⚡️ RECHARGE SYNC: 
+   * Fetches the latest user data including quotas and batteries.
+   * Hits the /me route which uses our robust mapper.
+   */
+  const syncQuotas = useCallback(async () => {
+    if (typeof window === "undefined") return;
+
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const backendBase =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    try {
+      const res = await fetch(`${backendBase}/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // Update user state with fresh database values
-        setUserState(data.user);
+      if (res.ok) {
+        const json = await res.json();
+        // json.user contains the fresh 'quotas' object from the backend mapper
+        setUserState(json.user);
+      } else if (res.status === 401) {
+        logout();
       }
-    } catch (error) {
-      console.error("Failed to sync quotas:", error);
+    } catch (err) {
+      console.error("Quota sync failed:", err);
     }
-  }, [user]);
+  }, []);
 
-  // --- Helper Functions ---
-  const openChat = (product = null) => {
-    setChatContextProduct(product);
-    setIsChatOpen(true);
-  };
+  // ⚡️ Trigger sync immediately when a user is present to check for midnight recharge
+  useEffect(() => {
+    if (user?.id) {
+      syncQuotas();
+    }
+  }, [user?.id]);
 
-  const addToast = (
-    message: string,
-    type: "success" | "error" | "loading" | "info" | "warning",
-  ) => {
-    setToasts((prevToasts) => {
-      const updatedToasts = prevToasts.length >= 3 ? prevToasts.slice(1) : prevToasts;
-      const id = Math.random().toString(36).substring(2, 9);
-      const newToast: Toast = { id, message, type };
-      return [...updatedToasts, newToast];
-    });
+  // ================= Toast Helpers =================
+  const addToast = (message: string, type: Toast["type"]) => {
+    const id = crypto.randomUUID();
+    setToasts((prev) => [...prev.slice(-2), { id, message, type }]);
   };
 
   const removeToast = (id: string) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const setAlertMessage = (message: string, type?: "success" | "error" | "loading" | null) => {
+  // ================= Alert Helper =================
+  const setAlertMessage = (
+    message: string,
+    type: "success" | "error" | "loading" | null = null
+  ) => {
     setAlertMessageState(message);
-    setAlertType(type!);
+    setAlertType(type);
+
     if (message && type !== "loading") {
       setTimeout(() => {
         setAlertMessageState("");
@@ -101,90 +108,135 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // --- Effects ---
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedTheme = getLocalStorageItem("theme");
-      const storedStarted = getLocalStorageItem("started");
-      const storedUser = getLocalStorageItem("user");
-
-      if (storedTheme !== null) setIsDarkMode(storedTheme);
-      if (storedStarted !== null) setGetStarted(storedStarted);
-      if (storedUser !== null) setUserState(storedUser);
-      setInitialLoadCompleteInternal(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (initialLoadCompleteInternal && typeof window !== "undefined") {
-      localStorage.setItem("theme", JSON.stringify(isDarkMode));
-      localStorage.setItem("started", JSON.stringify(getStarted));
-      localStorage.setItem("user", JSON.stringify(user));
-    }
-  }, [isDarkMode, getStarted, user, initialLoadCompleteInternal]);
-
+  // ================= Auth =================
   const logout = () => {
     setUserState(null);
-    setAlertMessageState("");
-    setAlertType(null);
-    setToasts([]);
-    setIsChatOpen(false);
-
     if (typeof window !== "undefined") {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      localStorage.removeItem("started");
+      localStorage.clear();
     }
     router.push("/register/sign-in");
   };
 
-  const contextValue = React.useMemo(
-    () => ({
-      isDarkMode,
-      alertMessage,
-      alertType,
-      user,
-      setUser: setUserState,
-      setIsDarkMode,
-      initialLoadComplete: initialLoadCompleteInternal,
-      setAlertMessage,
-      setAlertType,
-      getStarted,
-      setGetStarted,
-      toasts,
-      addToast,
-      removeToast,
-      logout,
-      // Chat Exports
-      isChatOpen,
-      setIsChatOpen,
-      chatContextProduct,
-      openChat,
-      syncQuotas, // Now properly defined and memoized
-    }),
-    [
-      isDarkMode,
-      alertMessage,
-      alertType,
-      getStarted,
-      toasts,
-      user,
-      initialLoadCompleteInternal,
-      isChatOpen,
-      chatContextProduct,
-      syncQuotas,
-    ],
-  );
+  // ================= Chat Helpers =================
+  const openChat = (product: any = null) => {
+    setChatContextProduct(product);
+    setIsChatOpen(true);
+  };
+
+  // ================= WebSocket Connection =================
+  useEffect(() => {
+    if (!user) return;
+
+    if (
+      socketRef.current &&
+      (socketRef.current.readyState === WebSocket.OPEN ||
+        socketRef.current.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let intentionalClose = false;
+
+    const connect = () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const wsBase =
+        process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8001";
+
+      ws = new WebSocket(
+        `${wsBase.replace(/\/$/, "")}?token=${token}&type=dashboard`
+      );
+
+      socketRef.current = ws;
+      let hasOpened = false;
+
+      ws.onopen = () => {
+        hasOpened = true;
+        console.log("📡 Neural Link Established");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          setWsEvent(payload);
+
+          // ⚡️ REAL-TIME BATTERY DRAIN:
+          // If the AI just finished a product or hit a limit, update the UI battery immediately
+          if (payload.type === "AUDIT_PROGRESS" || payload.type === "AUDIT_COMPLETE") {
+            syncQuotas();
+          }
+        } catch {
+          // silently ignore malformed payloads
+        }
+      };
+
+      ws.onclose = (e) => {
+        socketRef.current = null;
+        if (!hasOpened || intentionalClose) return;
+
+        if (e.code === 1008 && process.env.NODE_ENV === "production") {
+          logout();
+          return;
+        }
+
+        reconnectTimer = setTimeout(connect, 5000);
+      };
+
+      ws.onerror = () => {
+        ws?.close();
+      };
+    };
+
+    connect();
+
+    return () => {
+      intentionalClose = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        ws.close(1000);
+      }
+      socketRef.current = null;
+    };
+  }, [user?.id, syncQuotas]);
+
+  // ================= Context Value =================
+  const contextValue: ContextProps = {
+    isDarkMode,
+    setIsDarkMode,
+    initialLoadComplete: initialLoadCompleteInternal,
+    getStarted,
+    setGetStarted,
+    alertMessage,
+    setAlertMessage,
+    alertType,
+    toasts,
+    addToast,
+    removeToast,
+    user,
+    setUser: setUserState,
+    logout,
+    isChatOpen,
+    setIsChatOpen,
+    chatContextProduct,
+    openChat,
+    wsEvent,
+    syncQuotas,
+  };
 
   return (
-    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+    <AppContext.Provider value={contextValue}>
+      {children}
+    </AppContext.Provider>
   );
 };
 
 export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error("useAppcontext must be used within a AppProvider");
+  const ctx = useContext(AppContext);
+  if (!ctx) {
+    throw new Error("useAppContext must be used within AppProvider");
   }
-  return context;
+  return ctx;
 };
