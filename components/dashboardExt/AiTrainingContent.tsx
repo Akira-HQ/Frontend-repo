@@ -1,76 +1,96 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAppContext } from "../AppContext";
 import ProductsAnalysisCom from "./tabs/productAnalysis/ProductsAnalysisCom";
 import ProductOverview from "./tabs/productOverview/ProductOverview";
 import { HiLightningBolt } from "react-icons/hi";
 import { UseAPI } from "@/components/hooks/UseAPI";
-import { User } from "@/types";
-import { IoSyncOutline, IoCloseCircleOutline, IoCloudOfflineOutline } from "react-icons/io5";
+import { IoSyncOutline, IoCloseCircleOutline } from "react-icons/io5";
 
 const AiTrainingContent = () => {
-  const { isDarkMode, user, setUser, addToast } = useAppContext();
+  const { isDarkMode, user, addToast, syncQuotas: globalSync, wsEvent } = useAppContext();
   const { callApi } = UseAPI();
   const [activeTab, setActiveTab] = useState<number>(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  useEffect(() => {
-    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
-    };
-  }, []);
-
-  const syncQuotas = async () => {
+  // --- 1. SYNC INITIAL DATA ---
+  const syncContentData = useCallback(async () => {
     if (!navigator.onLine) return;
     try {
       const res = await callApi("/products/analyze", "GET");
-      if (res?.data && setUser && user) {
-        const { quotas, analyzedProducts } = res.data;
-
-        setUser({
-          ...user,
-          daily_audit_limit: quotas.audit,
-          daily_enhance_limit: quotas.enhance
-        });
-
+      if (res?.data) {
+        const { analyzedProducts, quotas } = res.data;
         const total = analyzedProducts.length;
-        const finished = analyzedProducts.filter((p: any) => p.is_ai_audit).length;
+        const finished = analyzedProducts.filter((p: any) => p.is_ai_audited).length;
+
         setProgress({ current: finished, total });
 
-        // Sticky Loading logic
-        setIsAnalyzing(finished < total && quotas.audit > 0);
+        // ⚡️ FIX: Only show analyzing if we haven't hit the daily limit
+        const hasEnergy = quotas.audits_used < quotas.audits_limit;
+        setIsAnalyzing(finished < total && hasEnergy);
+
+        globalSync();
       }
-    } catch (err) { console.error("Sync Failed", err); }
-  };
+    } catch (err) {
+      console.error("Sync Failed", err);
+    }
+  }, [callApi, globalSync]);
 
   useEffect(() => {
-    syncQuotas();
-    const interval = setInterval(syncQuotas, 5000);
-    return () => clearInterval(interval);
-  }, [user?.id]);
+    syncContentData();
+  }, [syncContentData]);
 
-  const handleCancel = async () => {
-    try {
-      await callApi("/products/cancel-audit", "POST");
+  // --- 2. NEURAL LINK (Handle AUDIT_PROGRESS) ---
+  useEffect(() => {
+    if (!wsEvent) return;
+
+    if (wsEvent.type === "AUDIT_PROGRESS") {
+      setIsAnalyzing(true);
+      setProgress({ current: wsEvent.current, total: wsEvent.total });
+      globalSync();
+    }
+
+    // ⚡️ FIX: Handle both completion and quota warnings
+    if (wsEvent.type === "AUDIT_COMPLETE") {
       setIsAnalyzing(false);
-      addToast("Analysis halted.", "info");
-    } catch (e) { addToast("Failed to cancel", "error"); }
-  }
+      syncContentData();
+      globalSync();
 
-  const maxLimit = user?.plan?.toLowerCase() === "pro" ? 500 : 50;
-  const currentAudit = user?.daily_audit_limit || 0;
-  const auditPerc = Math.min(100, (currentAudit / maxLimit) * 100);
+      // Distinct colors for types
+      const toastType = "success";
+      addToast(wsEvent.message, toastType);
+    }
+  }, [wsEvent, syncContentData, globalSync, addToast]);
+
+  // --- 3. CANCEL LOGIC ---
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      // ⚡️ This hits the Map.set(userId, true) on your backend
+      await callApi("/products/cancel-audit", "POST");
+      addToast("Disconnecting Neural Link...", "info");
+
+      // Optimistically hide banner
+      setIsAnalyzing(false);
+    } catch (err) {
+      addToast("Failed to stop sync.", "error");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  // --- 4. UI CALCULATIONS ---
+  const maxLimit = user?.quotas?.audits_limit || 5;
+  const used = user?.quotas?.audits_used || 0;
+  const energyLeft = Math.max(0, maxLimit - used);
+  const auditPerc = (energyLeft / maxLimit) * 100;
 
   return (
     <div className={`py-4 px-2 w-full h-full ${isDarkMode ? "text-white" : ""} relative`}>
 
-      {/* 1. FIXED HEADER (Tabs & Energy) */}
+      {/* 1. TABS & ENERGY HEADER */}
       <div className="tabs fixed top-16 right-10 left-[310px] z-50 py-4 px-6 bg-[#0b0b0b]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex justify-between items-center shadow-2xl">
         <div className="flex gap-4">
           <div
@@ -90,49 +110,59 @@ const AiTrainingContent = () => {
         <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Cliva Energy</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Cliva Battery</span>
               <HiLightningBolt className="text-amber-500 animate-pulse" size={14} />
             </div>
             <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000" style={{ width: `${auditPerc}%` }} />
+              <div
+                className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000"
+                style={{ width: `${auditPerc}%` }}
+              />
             </div>
           </div>
           <div className="text-right">
             <div className="text-[14px] font-black text-white leading-none">
-              {currentAudit}<span className="text-gray-600 text-[10px] ml-1">/ {maxLimit}</span>
+              {energyLeft}<span className="text-gray-600 text-[10px] ml-1">/ {maxLimit}</span>
             </div>
-            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Deep Audits Left</p>
+            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Daily Energy</p>
           </div>
         </div>
       </div>
 
-      {/* 2. BACKGROUND ANALYSIS BANNER (Positioned below header) */}
+      {/* 2. REAL-TIME PROGRESS BANNER */}
       {isAnalyzing && (
         <div className="fixed top-40 left-[340px] right-10 z-40 animate-in slide-in-from-top-4 duration-500">
-          <div className={`backdrop-blur-md border p-4 rounded-2xl flex items-center justify-between shadow-2xl ${isOffline ? 'bg-red-500/10 border-red-500/20' : 'bg-[#A500FF]/10 border-[#A500FF]/20'}`}>
+          <div className="backdrop-blur-md bg-[#A500FF]/10 border border-[#A500FF]/20 p-4 rounded-2xl flex items-center justify-between shadow-2xl">
             <div className="flex items-center gap-4">
-              <div className={`p-2 rounded-lg ${isOffline ? 'bg-red-500' : 'bg-[#A500FF]'}`}>
-                {isOffline ? <IoCloudOfflineOutline className="text-white" size={18} /> : <IoSyncOutline className="text-white animate-spin" size={18} />}
+              <div className="p-2 rounded-lg bg-[#A500FF]">
+                <IoSyncOutline className="text-white animate-spin" size={18} />
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase text-white">{isOffline ? "Sync Interrupted" : "Cliva Deep Intelligence"}</p>
-                <p className="text-[10px] text-[#A500FF] font-bold">{progress.current} / {progress.total} Products Checked</p>
+                <p className="text-[11px] font-black uppercase text-white">Neural Audit Active</p>
+                <p className="text-[10px] text-[#A500FF] font-bold">Progress: {progress.current} / {progress.total}</p>
               </div>
             </div>
             <div className="flex items-center gap-6">
               <div className="w-48 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-[#A500FF] transition-all duration-700" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
+                <div
+                  className="h-full bg-[#A500FF] transition-all duration-700"
+                  style={{ width: `${(progress.current / (progress.total || 1)) * 100}%` }}
+                />
               </div>
-              <button onClick={handleCancel} className="flex items-center gap-2 text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-all">
-                <IoCloseCircleOutline size={16} /> Cancel
+              <button
+                onClick={handleCancel}
+                disabled={isCancelling}
+                className="flex items-center gap-2 text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-all disabled:opacity-50"
+              >
+                <IoCloseCircleOutline size={16} /> {isCancelling ? "Stopping..." : "Stop Neural Link"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. MAIN CONTENT (Responsive Margins) */}
-      <div className={`TabContents ${isAnalyzing ? 'mt-48' : 'mt-28'} transition-all duration-500 ease-in-out`}>
+      {/* 3. CONTENT AREA */}
+      <div className={`TabContents ${isAnalyzing ? 'mt-48' : 'mt-28'} transition-all duration-500`}>
         {activeTab === 1 && <ProductsAnalysisCom />}
         {activeTab === 2 && <ProductOverview />}
       </div>

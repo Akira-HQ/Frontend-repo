@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, X, MessageSquare, Sparkles, Loader2, ThumbsUp, Lock } from "lucide-react";
 import { UseAPI } from "@/components/hooks/UseAPI";
-import { useAppContext } from "../AppContext";
+import { useAppContext } from "../AppContext"; // Corrected Hook Import
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 
@@ -32,9 +32,11 @@ export const LandingChat: React.FC = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [remaining, setRemaining] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { callApi } = UseAPI();
-  const { addToast } = useAppContext();
 
+  const { callApi } = UseAPI();
+  const { addToast } = useAppContext(); // Fixed: Calling the hook properly
+
+  // --- 1. INITIAL LOAD & HISTORY ---
   useEffect(() => {
     let id = localStorage.getItem("cliva_visitor_id") || `vis_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem("cliva_visitor_id", id);
@@ -53,8 +55,32 @@ export const LandingChat: React.FC = () => {
       }
     };
     loadData();
-  }, []);
+  }, [callApi]);
 
+  // --- 2. WEBSOCKET REAL-TIME SYNC ---
+  useEffect(() => {
+    if (!visitorId || !isOpen) return;
+
+    // Use specific 'snippet' type for visitor tracking
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?type=snippet&visitorId=${visitorId}`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      // If server pushes a real-time action (e.g. Coupon or automated reply)
+      if (data.type === "CLIVA_MESSAGE") {
+        setMessages(prev => [...prev, { role: "cliva", content: data.message, isNew: true }]);
+      }
+
+      if (data.type === "QUOTA_UPDATE") {
+        setRemaining(data.remaining);
+      }
+    };
+
+    return () => ws.close();
+  }, [visitorId, isOpen]);
+
+  // --- 3. UI LOGIC ---
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([{
@@ -150,7 +176,7 @@ export const LandingChat: React.FC = () => {
             </button>
           </div>
 
-          {/* Messages */}
+          {/* Messages Area */}
           <div ref={scrollRef} className="flex-grow p-6 overflow-y-auto space-y-5 cliva-scrollbar">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
