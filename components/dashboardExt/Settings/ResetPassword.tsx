@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Shield, Key, RefreshCw, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { UseAPI } from "@/components/hooks/UseAPI";
 
-export const ResetPasswordPage = () => {
+// ⚡️ Inner component to handle the SearchParams logic
+const ResetPasswordContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { callApi } = UseAPI();
@@ -134,3 +135,18 @@ export const ResetPasswordPage = () => {
     </div>
   );
 };
+
+// ⚡️ Main exported component with Suspense Boundary
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <RefreshCw className="text-[#A500FF] animate-spin" size={32} />
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+};
+
+export default ResetPasswordPage;
