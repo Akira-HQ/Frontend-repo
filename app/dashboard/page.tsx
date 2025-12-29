@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Sidebar from "@/components/dashboardExt/Sidebar";
 import DashboardContent from "@/components/dashboardExt/DashboardContent";
 import RenderActiveContent from "@/components/dashboardExt/RenderActiveContent";
@@ -9,14 +9,16 @@ import { ClivaStarsBackground } from "@/components/Stars";
 import { useAppContext } from "@/components/AppContext";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import ClivaChat from "@/components/chatTools/ClivaChat";
-import { useSearchParams } from "next/navigation"; // ⚡️ Import search params
+import { useSearchParams } from "next/navigation";
+import { DashboardSkeleton } from "@/components/dashboardExt/DashboardSkeleton";
 
 const COLLAPSED_WIDTH = 65;
 const DEFAULT_EXPANDED_WIDTH = 280;
 
-const Page = () => {
+// ⚡️ INTERNAL COMPONENT TO HANDLE SEARCH PARAMS SAFELY WITHIN SUSPENSE
+const DashboardShell = () => {
   const searchParams = useSearchParams();
-  const currentView = searchParams.get("view"); // ⚡️ Detect current view
+  const currentView = searchParams.get("view");
 
   // Logic to hide chat UI entirely if we are in the notification log
   const isNotificationView = currentView === "notifications";
@@ -64,12 +66,10 @@ const Page = () => {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [setSidebarWidth]);
 
   return (
-    <section
-      className={`pt-10 main-bg h-screen w-screen relative ${isResizing ? "cursor-col-resize select-none" : ""}`}
-    >
+    <div className={`flex h-full w-full ${isResizing ? "cursor-col-resize select-none" : ""}`}>
       <AuthGuard>
         <ClivaStarsBackground density={200} />
         <Sidebar
@@ -107,6 +107,17 @@ const Page = () => {
           )}
         </DashboardContent>
       </AuthGuard>
+    </div>
+  );
+};
+
+// ⚡️ MAIN PAGE COMPONENT
+const Page = () => {
+  return (
+    <section className="pt-10 main-bg h-screen w-screen relative">
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardShell />
+      </Suspense>
     </section>
   );
 };
