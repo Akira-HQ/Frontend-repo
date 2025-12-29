@@ -1,21 +1,13 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
 import {
-  CheckCircle,
-  Zap,
-  MessageSquare,
-  ShoppingCart,
-  Lock,
-  Globe,
-  RefreshCw,
-  XCircle,
+  CheckCircle, Zap, MessageSquare, ShoppingCart, Lock,
+  Globe, RefreshCw, XCircle, Copy, Terminal, Monitor, Layout
 } from "lucide-react";
 import { useAppContext } from "../AppContext";
-import SetupGuidePanel from "./integrations/SetupGuide";
 import ConfirmModal from "../notifications/CTAAlerts";
 
 const NEON_PURPLE = "#A500FF";
-const NEON_ORANGE = "#FFB300";
 const ACCENT_BLUE = "#00A7FF";
 
 type IntegrationStatus = "connected" | "error" | "pending" | "planned";
@@ -28,241 +20,187 @@ interface Integration {
   details: string;
   actionLabel: string;
   actionColor: string;
-  subStatus?: string;
 }
 
 const MOCK_INTEGRATIONS: Integration[] = [
   {
     id: "shopify",
-    name: "Shopify (Primary E-comm)",
+    name: "Shopify Store",
     icon: ShoppingCart,
     status: "connected",
-    details: "Status: Healthy.",
-    subStatus: "Last webhook received: 1m ago.",
+    details: "Neural link established. Monitoring live sales data.",
     actionLabel: "Disconnect",
     actionColor: "bg-green-600",
   },
   {
-    id: "whatsapp",
-    name: "WhatsApp Business API",
-    icon: MessageSquare,
-    status: "pending",
-    details: "Setup required to enable sales conversations.",
-    subStatus: "Not active: Setup required.",
-    actionLabel: "Setup Now",
-    actionColor: `bg-[${NEON_PURPLE}]`,
-  },
-  {
     id: "generic_web",
-    name: "Generic Web Hook",
+    name: "Custom Website",
     icon: Globe,
     status: "pending",
-    details: "For custom sites without platform plugins (requires JS snippet).",
-    subStatus: "Not active: Requires code injection.",
-    actionLabel: "Get Snippet",
+    details: "Manual injection required for tracker activation.",
+    actionLabel: "Snippet Active",
     actionColor: `bg-[${ACCENT_BLUE}]`,
   },
   {
-    id: "ai_core",
-    name: "Cliva AI Core (Gemini)",
-    icon: Zap,
-    status: "connected",
-    details: "Core conversational and intent engine. Data is anonymized.",
-    subStatus: "Security audited.",
-    actionLabel: "View Audit Logs",
+    id: "whatsapp",
+    name: "WhatsApp Business",
+    icon: MessageSquare,
+    status: "planned",
+    details: "Enable AI-driven sales conversations. Coming Soon.",
+    actionLabel: "Planned",
     actionColor: "bg-gray-800",
   },
 ];
 
-// --- Sub-Component: IntegrationItem ---
-interface IntegrationItemProps {
-  integration: Integration;
-  onAction: (id: string, status: IntegrationStatus) => void;
-  isDisabled: boolean;
-}
-
-const IntegrationItem: React.FC<IntegrationItemProps> = ({
-  integration,
-  onAction,
-  isDisabled,
-}) => {
-  const Icon = integration.icon;
-  const isActionDisabled = integration.status === "planned" || isDisabled;
-
-  const buttonClassName = isActionDisabled
-    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-    : `bg-gradient-to-r from-[${ACCENT_BLUE}] to-[${NEON_PURPLE}] hover:from-[${NEON_PURPLE}] hover:to-[${NEON_ORANGE}] shadow-md shadow-purple-900/50`;
-
-  return (
-    <div className={`p-5 bg-gray-900 rounded-xl border border-gray-800 shadow-md flex flex-col justify-between transition duration-300 ${isDisabled ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer'}`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Icon className={`w-7 h-7 ${isDisabled ? 'text-gray-500' : 'text-[#00A7FF]'}`} />
-          <h3 className={`text-lg font-semibold ${isDisabled ? 'text-gray-500' : 'text-white'}`}>{integration.name}</h3>
-        </div>
-        {isDisabled ? <Lock className="w-5 h-5 text-gray-500" /> : (
-          integration.status === "connected" ? <CheckCircle className="w-5 h-5 text-green-400" /> :
-            integration.status === "pending" ? <RefreshCw className="w-5 h-5 text-yellow-400 animate-spin" /> :
-              <XCircle className="w-5 h-5 text-red-400" />
-        )}
-      </div>
-      <p className="text-sm text-gray-400 mt-3 flex-grow">{integration.details}</p>
-      <button
-        onClick={() => !isDisabled && onAction(integration.id, integration.status)}
-        disabled={isActionDisabled}
-        className={`mt-4 w-full py-2 text-sm font-bold rounded-lg text-white transition duration-200 ${buttonClassName}`}
-      >
-        {isDisabled ? "Platform Mismatch" : integration.actionLabel}
-      </button>
-    </div>
-  );
-};
-
-// --- Main Component: IntegrationsHub ---
 const IntegrationsHub: React.FC = () => {
   const { user, addToast, syncQuotas } = useAppContext();
-  const [integrations, setIntegrations] = useState(MOCK_INTEGRATIONS);
+  const [copied, setCopied] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [setupGuideOpen, setSetupGuideOpen] = useState(false);
-  const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const userPlatform = user?.store?.platform?.toUpperCase();
-  const storeId = user?.store?.id; // Updated to match robust DB
-  const snippetToken = user?.store?.snippetToken;
+  const snippetToken = user?.store?.snippetToken || "CLIVA_NEURAL_TOKEN_001";
 
-  // --- 1. NEURAL LINK (WebSocket) ---
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (!token || !user) return;
+  const snippetCode = `<script>
+  (function(c,l,i,v,a){
+    a=l.createElement(i);a.async=1;a.src=v;
+    a.setAttribute('data-id', '${snippetToken}');
+    l.head.appendChild(a);
+  })(window, document, 'script', 'https://cdn.cliva.ai/pulse.js');
+</script>`;
 
-      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&type=dashboard`);
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        // Refresh if an integration was verified or changed in the background
-        if (data.type === "INTEGRATION_VERIFIED" || data.type === "QUOTA_UPDATE") {
-          syncQuotas(); // Re-fetch user/store state
-          addToast(data.message || "Connection Verified!", "success");
-        }
-      };
-
-      return () => ws.close();
-    }
-  }, [user?.id, syncQuotas, addToast]);
-
-  // --- 2. INTEGRATION LOCKING LOGIC ---
-  const integrationsWithStatus = useMemo(() => {
-    return MOCK_INTEGRATIONS.map(integration => {
-      let isDisabled = false;
-      let requiresPlatform = '';
-
-      switch (integration.id) {
-        case 'generic_web':
-          isDisabled = userPlatform !== 'CUSTOM';
-          requiresPlatform = 'Custom Site';
-          break;
-        case 'shopify':
-          isDisabled = userPlatform !== 'SHOPIFY';
-          requiresPlatform = 'Shopify';
-          break;
-        case 'whatsapp':
-          isDisabled = userPlatform !== 'WHATSAPP_BUSINESS';
-          requiresPlatform = 'WhatsApp Business';
-          break;
-        case 'ai_core':
-          isDisabled = false;
-          break;
-        default:
-          isDisabled = true;
-          requiresPlatform = 'Your Current Platform';
-          break;
-      }
-
-      return {
-        ...integration,
-        details: isDisabled ? `Locked: This integration is designed for the ${requiresPlatform} platform.` : integration.details,
-        actionLabel: isDisabled ? "Platform Mismatch" : integration.actionLabel,
-        isDisabled,
-      };
-    });
-  }, [userPlatform]);
-
-  const handleAction = (id: string, status: IntegrationStatus) => {
-    const integration = integrationsWithStatus.find(i => i.id === id);
-    if (integration?.isDisabled) {
-      addToast(`Integration locked: Requires the ${integration.name} platform.`, "error");
-      return;
-    }
-
-    if (status === "connected") {
-      if (id === "shopify") {
-        setSelectedIntegrationId(id);
-        setModalOpen(true);
-      } else if (id === "ai_core") {
-        addToast(`Opening Gemini audit logs...`, "info");
-      }
-      return;
-    }
-
-    if (status === "pending" || status === "error") {
-      if (!storeId || !snippetToken) {
-        addToast("Please complete your store registration first.", "info");
-        return;
-      }
-      setSetupGuideOpen(true);
-      setSelectedIntegrationId(id);
-    }
-  };
-
-  const handleDisconnectConfirm = (id: string) => {
-    addToast(`Integration ${id} disconnected. Data sync paused.`, "error");
-    setModalOpen(false);
-    setSelectedIntegrationId(null);
-    // In production, call your /products/disconnect-store endpoint here
+  const handleCopy = () => {
+    navigator.clipboard.writeText(snippetCode);
+    setCopied(true);
+    addToast("Snippet copied to clipboard", "success");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="py-4 px-2 w-full h-full text-white pt-10 ml-6 relative ">
-      <h1 className="text-3xl font-bold mb-4">Integrations Hub</h1>
-      <p className="text-gray-400 mb-8 max-w-2xl">
-        Connect your e-commerce platforms and messaging channels to activate Cliva's full sales potential.
-      </p>
+    <div className="py-8 px-6 w-full h-full text-white min-h-screen relative z-10">
+      {/* 1. HEADER */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-black uppercase italic tracking-tighter">Neural Bridges</h1>
+        <p className="text-gray-500 text-sm mt-2 max-w-2xl font-medium">
+          Connect Cliva's Pulse to your storefront to enable real-time behavioral tracking and AI communication.
+        </p>
+      </div>
 
-      <div className="bg-[#0b0b0b] rounded-xl p-6 shadow-2xl border border-gray-800">
-        <h2 className="text-xl font-bold mb-6 border-b border-gray-800 pb-3 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-[#FFB300]" /> Connected Platforms & Future Roadmap
-        </h2>
+      {/* 2. INTEGRATION GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {MOCK_INTEGRATIONS.map((app) => {
+          const Icon = app.icon;
+          const isLocked = app.id !== "ai_core" && userPlatform !== app.id.toUpperCase();
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {integrationsWithStatus.map((integration) => (
-            <IntegrationItem
-              key={integration.id}
-              integration={integration}
-              onAction={handleAction}
-              isDisabled={integration.isDisabled}
-            />
-          ))}
+          return (
+            <div
+              key={app.id}
+              className={`p-6 rounded-3xl bg-[#0b0b0b] border transition-all duration-500 
+                ${isLocked ? 'border-white/5 opacity-40' : 'border-white/10 hover:border-[#A500FF]/50 shadow-2xl'}`}
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className={`p-4 rounded-2xl bg-black border border-white/5 ${isLocked ? 'text-gray-600' : 'text-[#00A7FF]'}`}>
+                  <Icon size={24} />
+                </div>
+                {!isLocked && app.status === "connected" && <CheckCircle className="text-emerald-500" size={18} />}
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">{app.name}</h3>
+              <p className="text-xs text-gray-500 leading-relaxed mb-6">{app.details}</p>
+              <div className={`text-[10px] font-black uppercase tracking-widest py-2 px-4 rounded-lg text-center
+                ${isLocked ? 'bg-white/5 text-gray-500' : 'bg-[#A500FF]/10 text-[#A500FF] border border-[#A500FF]/20'}`}>
+                {isLocked ? "Bridge Locked" : "System Active"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 3. PERMANENT SETUP GUIDE (STATIC) */}
+      <div className="bg-[#080808] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-3xl">
+        <div className="p-8 border-b border-white/5 bg-gradient-to-r from-white/[0.02] to-transparent flex items-center gap-4">
+          <Terminal className="text-amber-500" size={24} />
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tight">Manual Injection Guide</h2>
+            <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Global Deployment Script</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-10">
+
+          {/* Left Column: Code & Steps */}
+          <div className="space-y-10">
+            <section>
+              <div className="flex items-center gap-4 mb-6">
+                <span className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center font-black text-xs">01</span>
+                <h4 className="text-sm font-black uppercase tracking-widest text-white">Copy Pulse Snippet</h4>
+              </div>
+              <div className="relative group">
+                <pre className="bg-black p-6 rounded-2xl border border-white/10 font-mono text-xs text-amber-500/80 leading-relaxed overflow-x-auto">
+                  {snippetCode}
+                </pre>
+                <button
+                  onClick={handleCopy}
+                  className="absolute right-4 top-4 p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+                >
+                  {copied ? <CheckCircle size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                </button>
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center gap-4 mb-6">
+                <span className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center font-black text-xs">02</span>
+                <h4 className="text-sm font-black uppercase tracking-widest text-white">Injection Point</h4>
+              </div>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                Open your platform's theme editor (e.g., <code className="text-white">theme.liquid</code> in Shopify).
+                Paste the snippet directly before the <code className="text-amber-500">{"</head>"}</code> closing tag.
+              </p>
+
+              <div className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                <Monitor className="text-blue-500 mt-1" size={20} />
+                <p className="text-[11px] text-gray-400">
+                  <strong className="text-white">Behavioral Monitoring:</strong> Once injected, Cliva will begin tracking customer clicks, hovers, and exit intent in real-time.
+                </p>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column: Visual Previews / Screenshots */}
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-4">Implementation Preview</h4>
+
+            {/* Screenshot Placeholder 1 */}
+            <div className="aspect-video bg-black rounded-3xl border border-white/10 flex flex-col items-center justify-center group overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#A500FF]/10 to-transparent opacity-50" />
+              <Layout className="text-gray-800 mb-2 group-hover:scale-110 transition-transform" size={48} />
+              <p className="text-[10px] text-gray-600 font-bold uppercase">Shopify theme.liquid Preview</p>
+              {/*  */}
+            </div>
+
+            {/* Live Status Tracker */}
+            <div className="p-8 rounded-3xl bg-black border border-white/5 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-amber-500/5 border border-amber-500/20 flex items-center justify-center mb-4">
+                <RefreshCw className="text-amber-500 animate-spin-slow" size={24} />
+              </div>
+              <h5 className="text-white font-bold text-sm">Neural Sync Status</h5>
+              <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-1">Waiting for Pulse Heartbeat...</p>
+
+              <div className="mt-6 w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="w-1/3 h-full bg-amber-500 animate-pulse" />
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {modalOpen && selectedIntegrationId && (
+      {modalOpen && (
         <ConfirmModal
-          title={`Disconnect ${selectedIntegrationId.toUpperCase()}?`}
-          message={`This is a sensitive action. Disconnecting this platform will stop all real-time data sync, RAG updates, and AI sales activity immediately.`}
-          onConfirm={() => handleDisconnectConfirm(selectedIntegrationId)}
+          title="Disconnect Intelligence?"
+          message="Stopping the pulse will immediately cease all behavioral tracking and deactivate the chat interface on your storefront."
+          onConfirm={() => { }}
           onCancel={() => setModalOpen(false)}
-          confirmText={`Yes, Disconnect ${selectedIntegrationId.toUpperCase()}`}
-          cancelText="Keep Connected"
-        />
-      )}
-
-      {setupGuideOpen && selectedIntegrationId && (
-        <SetupGuidePanel
-          integrationName={MOCK_INTEGRATIONS.find((i) => i.id === selectedIntegrationId)?.name || "Integration"}
-          onClose={() => setSetupGuideOpen(false)}
-          storeId={storeId}
-          snippetToken={snippetToken}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ import Integrations from "./Integrations";
 import Analytics from "./Analytics";
 import Settings from "./Settings";
 import HelpCenter from "./HelpCenter";
+import { NotificationBoard } from "./NotificationBoard";
 
 const RenderActiveContent = () => {
   const searchParams = useSearchParams();
@@ -23,6 +24,8 @@ const RenderActiveContent = () => {
       return <Settings />;
     case "help-center":
       return <HelpCenter />;
+    case "notifications":
+      return <NotificationBoard />
     case "inbox":
     default:
       return <Inbox />;
