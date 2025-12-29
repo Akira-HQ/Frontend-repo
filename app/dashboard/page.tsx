@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/dashboardExt/Sidebar";
 import DashboardContent from "@/components/dashboardExt/DashboardContent";
 import RenderActiveContent from "@/components/dashboardExt/RenderActiveContent";
@@ -9,14 +9,21 @@ import { ClivaStarsBackground } from "@/components/Stars";
 import { useAppContext } from "@/components/AppContext";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import ClivaChat from "@/components/chatTools/ClivaChat";
+import { useSearchParams } from "next/navigation"; // ⚡️ Import search params
 
 const COLLAPSED_WIDTH = 65;
 const DEFAULT_EXPANDED_WIDTH = 280;
 
 const Page = () => {
+  const searchParams = useSearchParams();
+  const currentView = searchParams.get("view"); // ⚡️ Detect current view
+
+  // Logic to hide chat UI entirely if we are in the notification log
+  const isNotificationView = currentView === "notifications";
+
   const [isSidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const lastExpandedWidth = useRef(DEFAULT_EXPANDED_WIDTH);
-  const {isChatOpen, openChat, setIsChatOpen, chatContextProduct} = useAppContext()
+  const { isChatOpen, openChat, setIsChatOpen, chatContextProduct } = useAppContext();
 
   const {
     width: sidebarWidth,
@@ -56,11 +63,9 @@ const Page = () => {
 
     handleResize();
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   return (
     <section
       className={`pt-10 main-bg h-screen w-screen relative ${isResizing ? "cursor-col-resize select-none" : ""}`}
@@ -75,23 +80,31 @@ const Page = () => {
         />
         <DashboardContent sidebarWidth={sidebarWidth}>
           <RenderActiveContent />
-          {/* FLOATING GLOBAL CHAT TRIGGER */}
-          {!isChatOpen && (
-            <button
-              onClick={() => openChat(null)}
-              className="fixed bottom-10 right-10 z-50 p-4 bg-amber-500 text-black rounded-full shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-110 transition-all active:scale-95 group"
-            >
-              <IoChatbubbleOutline size={28} />
-              <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#0b0b0b] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Ask Cliva
-              </span>
-            </button>
+
+          {/* ⚡️ GATE: Only show Chat UI if NOT in notification view */}
+          {!isNotificationView && (
+            <>
+              {/* FLOATING GLOBAL CHAT TRIGGER */}
+              {!isChatOpen && (
+                <button
+                  onClick={() => openChat(null)}
+                  className="fixed bottom-10 right-10 z-50 p-4 bg-amber-500 text-black rounded-full shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-110 transition-all active:scale-95 group"
+                >
+                  <IoChatbubbleOutline size={28} />
+                  <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#0b0b0b] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    Ask Cliva
+                  </span>
+                </button>
+              )}
+
+              {/* CLIVA CHAT PANEL */}
+              <ClivaChat
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                activeProduct={chatContextProduct}
+              />
+            </>
           )}
-          <ClivaChat
-            isOpen={isChatOpen}
-            onClose={() => setIsChatOpen(false)}
-            activeProduct={chatContextProduct}
-          />
         </DashboardContent>
       </AuthGuard>
     </section>

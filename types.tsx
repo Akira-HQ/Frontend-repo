@@ -60,10 +60,19 @@ export type NotificationType = "USAGE_ALERT" | "ANNOUNCEMENT" | "SECURITY_TIP" |
 
 export interface Notification {
   id: string;
-  type: NotificationType;
+  type: 'USAGE_ALERT' | 'PLAN_ALERT' | 'ANNOUNCEMENT' | 'SECURITY_TIP'; // and others...
   read: boolean;
-  timestamp: Date;
-  data: UsageAlertData; // Or a Union type if other types have different data structures
+  timestamp: Date | string;
+  count?: number; // ⚡️ Add this line (optional because not all notifs have it)
+  data: {
+    title: string;
+    message: string;
+    progress?: {
+      value: number;
+      max: number;
+      unit: string;
+    };
+  };
 }
 
 export interface AnnoucementData {
@@ -191,6 +200,7 @@ export interface User {
     snippetToken: string;
     is_authorized: boolean;
   };
+  notifications: Notification[];
 }
 
 export interface ProductAnalysis {
@@ -238,15 +248,16 @@ export interface ContextProps {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   logout: () => void;
   syncQuotas: () => Promise<void>;
-
-  // Chat
+  notifications: Notification[];
+  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
+  markNotificationRead: (id: string) => void;
+  clearNotification: (id: string) => void;
   isChatOpen: boolean;
   setIsChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
   chatContextProduct: Product | null;
   openChat: (product?: Product | null) => void;
 
-  // --- ✅ WebSocket Events ---
-  wsEvent: WsEvent | null; // <-- add this
+  wsEvent: WsEvent | null; 
 }
 
 export type WsEvent =

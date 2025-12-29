@@ -42,26 +42,6 @@ const Sidebar = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  // --- 1. NEURAL LINK (WebSocket) for Live Notifications ---
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     const token = localStorage.getItem("token");
-  //     if (!token || !user) return;
-
-  //     const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&type=dashboard`);
-
-  //     ws.onmessage = (event) => {
-  //       const data = JSON.parse(event.data);
-  //       // If an audit finishes or a quota warning is pushed, refresh user state
-  //       if (data.type === "AUDIT_COMPLETE" || data.type === "QUOTA_UPDATE" || data.type === "QUOTA_WARNING") {
-  //         syncQuotas();
-  //       }
-  //     };
-
-  //     return () => ws.close();
-  //   }
-  // }, [user?.id, syncQuotas]);
-
   useEffect(() => {
     const view = searchParams.get("view");
     if (view) {
@@ -91,6 +71,8 @@ const Sidebar = ({
       setState(5);
     } else if (view === "help-center") {
       setState(6);
+    } else if (view === "notifications") {
+      setState(7); // Setting state for the notifications view
     }
   }, [view]);
 
@@ -99,12 +81,10 @@ const Sidebar = ({
     const dynamicNotifs: Notification[] = [];
     if (!user || !user.quotas) return [];
 
-    // Mapping to the new nested quota structure
     const currentAuditUsed = user.quotas.audits_used || 0;
     const maxAudit = user.quotas.audits_limit || 50;
     const auditsLeft = Math.max(0, maxAudit - currentAuditUsed);
 
-    // 1. Quota Alert Logic
     const quotaId = `quota-alert-logic`;
     if (auditsLeft <= (maxAudit * 0.2) && !dismissedIds.includes(quotaId)) {
       dynamicNotifs.push({
@@ -159,6 +139,11 @@ const Sidebar = ({
   const navigate = (id: number, view: string) => {
     setState(id);
     router.push(`/dashboard?view=${view}`);
+  };
+
+  // Helper to specifically open full notifications
+  const openNotifications = () => {
+    navigate(7, "notifications");
   };
 
   const NavItemContent = ({ isActive, Icon, label }: { isActive: boolean, Icon: React.ElementType, label: string }) => (
@@ -252,9 +237,13 @@ const Sidebar = ({
 
         <div className="others fixed right-4 left-4 bottom-4">
           <div className="flex w-full flex-col gap-1">
-            <div className="rounded-md py-1 px-2 flex gap-3 items-center mb-1 ml-[-5px]">
+            {/* Notification Logic Linked to Section View */}
+            <div
+              className="rounded-md py-1 px-2 flex gap-3 items-center mb-1 ml-[-5px] cursor-pointer"
+              onClick={openNotifications}
+            >
               {isCollapsed && unReadNotifications.length > 0 && (
-                <div className="bg-[#181c21] p-2 rounded-md shadow-xl -ml-2 relative">
+                <div className="bg-[#181c21] p-2 rounded-md shadow-xl -ml-2 relative hover:bg-gray-800 transition-colors">
                   <FaBell className="text-xl text-blue-500" />
                   <span className="badge absolute -top-1 -right-1 flex justify-center items-center h-5 w-5 text-xs font-bold text-white bg-blue-500 rounded-full">
                     {unReadNotifications.length}
@@ -262,15 +251,17 @@ const Sidebar = ({
                 </div>
               )}
               {!isCollapsed && unReadNotifications.length > 0 && notificationToShow && (
-                <Notify
-                  key={notificationToShow.id}
-                  notification={notificationToShow}
-                  onDismiss={() => handleDismiss(notificationToShow.id)}
-                  onNext={handleNext}
-                  onPrev={handlePrev}
-                  currentIndex={currentIndex}
-                  totalUnread={unReadNotifications.length}
-                />
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <Notify
+                    key={notificationToShow.id}
+                    notification={notificationToShow}
+                    onDismiss={() => handleDismiss(notificationToShow.id)}
+                    onNext={handleNext}
+                    onPrev={handlePrev}
+                    currentIndex={currentIndex}
+                    totalUnread={unReadNotifications.length}
+                  />
+                </div>
               )}
             </div>
 
