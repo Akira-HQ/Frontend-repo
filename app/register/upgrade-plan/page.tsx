@@ -62,7 +62,7 @@ const UpgradePlanPage: React.FC = () => {
 
   // Use current user data for context
   const currentPlan = user?.plan?.toUpperCase() || 'FREE';
-  const storeId = user?.store?.storeId;
+  const storeId = user?.store?.id;
   // 🛑 FIX: Use PLAN_CONFIG here
   const isPaidPlanSelected = PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG]?.price > 0;
 
