@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  CheckCircle, Zap, MessageSquare, ShoppingCart, Lock,
-  Globe, RefreshCw, XCircle, Copy, Terminal, Monitor, Layout
+  CheckCircle, ShoppingCart, Globe, MessageSquare,
+  RefreshCw, Copy, Terminal, Monitor, Layout
 } from "lucide-react";
 import { useAppContext } from "../AppContext";
 import ConfirmModal from "../notifications/CTAAlerts";
@@ -53,21 +53,49 @@ const MOCK_INTEGRATIONS: Integration[] = [
 ];
 
 const IntegrationsHub: React.FC = () => {
-  const { user, addToast, syncQuotas } = useAppContext();
+  const { user, addToast } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Initialize status based on user data from DB if available
+  const [syncStatus, setSyncStatus] = useState<"waiting" | "verified">(
+    user?.store?.is_authorized ? "verified" : "waiting"
+  );
 
   const userPlatform = user?.store?.platform?.toUpperCase();
-  const snippetToken = user?.store?.snippetToken || "CLIVA_NEURAL_TOKEN_001";
 
-  const snippetCode = `<script>
-  (function(c,l,i,v,a){
-    a=l.createElement(i);a.async=1;a.src=v;
-    a.setAttribute('data-id', '${snippetToken}');
-    l.head.appendChild(a);
-  })(window, document, 'script', 'https://cdn.cliva.ai/pulse.js');
-</script>`;
+  // ⚡️ REAL-TIME HANDSHAKE LOGIC
+  useEffect(() => {
+    // If already verified from DB, we don't strictly need to open WS for handshake, 
+    // but we keep it active for live updates.
+    const token = localStorage.getItem("token");
+    const ws = new WebSocket(`ws://localhost:8000?type=dashboard&token=${token}`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === "NEURAL_LINK_ESTABLISHED") {
+        setSyncStatus("verified");
+        addToast("Neural Link established with Shopify!", "success");
+      }
+    };
+
+    ws.onerror = () => {
+      console.warn("WebSocket Connection failed. Ensure backend is live.");
+    };
+
+    return () => ws.close();
+  }, [addToast, user?.store?.is_authorized]);
+
+  const snippetCode = `
+    <script>
+      (function(c,l,i,v,a){
+        a=l.createElement(i);a.async=1;a.src=v;
+        a.setAttribute('data-cliva-id', 'cliva_test_store_001');
+        l.head.appendChild(a);
+      })(window, document, 'script', 'https://subgeneric-intraabdominal-justine.ngrok-free.dev/pulse.mjs');
+    </script>
+  `;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(snippetCode);
@@ -91,6 +119,7 @@ const IntegrationsHub: React.FC = () => {
         {MOCK_INTEGRATIONS.map((app) => {
           const Icon = app.icon;
           const isLocked = app.id !== "ai_core" && userPlatform !== app.id.toUpperCase();
+          const isActuallyConnected = !isLocked && (app.status === "connected" || syncStatus === "verified");
 
           return (
             <div
@@ -102,20 +131,20 @@ const IntegrationsHub: React.FC = () => {
                 <div className={`p-4 rounded-2xl bg-black border border-white/5 ${isLocked ? 'text-gray-600' : 'text-[#00A7FF]'}`}>
                   <Icon size={24} />
                 </div>
-                {!isLocked && app.status === "connected" && <CheckCircle className="text-emerald-500" size={18} />}
+                {isActuallyConnected && <CheckCircle className="text-emerald-500 animate-in zoom-in" size={18} />}
               </div>
               <h3 className="text-lg font-bold text-white mb-2">{app.name}</h3>
               <p className="text-xs text-gray-500 leading-relaxed mb-6">{app.details}</p>
               <div className={`text-[10px] font-black uppercase tracking-widest py-2 px-4 rounded-lg text-center
                 ${isLocked ? 'bg-white/5 text-gray-500' : 'bg-[#A500FF]/10 text-[#A500FF] border border-[#A500FF]/20'}`}>
-                {isLocked ? "Bridge Locked" : "System Active"}
+                {isLocked ? "Bridge Locked" : (syncStatus === "verified" ? "Connected" : "System Active")}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* 3. PERMANENT SETUP GUIDE (STATIC) */}
+      {/* 3. PERMANENT SETUP GUIDE */}
       <div className="bg-[#080808] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-3xl">
         <div className="p-8 border-b border-white/5 bg-gradient-to-r from-white/[0.02] to-transparent flex items-center gap-4">
           <Terminal className="text-amber-500" size={24} />
@@ -126,7 +155,6 @@ const IntegrationsHub: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-10">
-
           {/* Left Column: Code & Steps */}
           <div className="space-y-10">
             <section>
@@ -156,42 +184,42 @@ const IntegrationsHub: React.FC = () => {
                 Open your platform's theme editor (e.g., <code className="text-white">theme.liquid</code> in Shopify).
                 Paste the snippet directly before the <code className="text-amber-500">{"</head>"}</code> closing tag.
               </p>
-
-              <div className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <Monitor className="text-blue-500 mt-1" size={20} />
-                <p className="text-[11px] text-gray-400">
-                  <strong className="text-white">Behavioral Monitoring:</strong> Once injected, Cliva will begin tracking customer clicks, hovers, and exit intent in real-time.
-                </p>
-              </div>
             </section>
           </div>
 
-          {/* Right Column: Visual Previews / Screenshots */}
+          {/* Right Column: Visual Previews */}
           <div className="space-y-6">
             <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-4">Implementation Preview</h4>
 
-            {/* Screenshot Placeholder 1 */}
             <div className="aspect-video bg-black rounded-3xl border border-white/10 flex flex-col items-center justify-center group overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-[#A500FF]/10 to-transparent opacity-50" />
               <Layout className="text-gray-800 mb-2 group-hover:scale-110 transition-transform" size={48} />
               <p className="text-[10px] text-gray-600 font-bold uppercase">Shopify theme.liquid Preview</p>
-              {/*  */}
             </div>
 
-            {/* Live Status Tracker */}
+            {/* LIVE STATUS TRACKER */}
             <div className="p-8 rounded-3xl bg-black border border-white/5 flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-full bg-amber-500/5 border border-amber-500/20 flex items-center justify-center mb-4">
-                <RefreshCw className="text-amber-500 animate-spin-slow" size={24} />
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-500 ${syncStatus === 'verified' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                {syncStatus === 'verified' ? (
+                  <CheckCircle className="text-emerald-500 animate-in zoom-in" size={24} />
+                ) : (
+                  <RefreshCw className="text-amber-500 animate-spin-slow" size={24} />
+                )}
               </div>
-              <h5 className="text-white font-bold text-sm">Neural Sync Status</h5>
-              <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-1">Waiting for Pulse Heartbeat...</p>
+
+              <h5 className="text-white font-bold text-sm">
+                {syncStatus === 'verified' ? "Neural Link Active" : "Neural Sync Status"}
+              </h5>
+
+              <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-1">
+                {syncStatus === 'verified' ? "Synchronization Complete" : "Waiting for Pulse Heartbeat..."}
+              </p>
 
               <div className="mt-6 w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="w-1/3 h-full bg-amber-500 animate-pulse" />
+                <div className={`h-full transition-all duration-1000 ease-out ${syncStatus === 'verified' ? 'w-full bg-emerald-500' : 'w-1/3 bg-amber-500 animate-pulse'}`} />
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
