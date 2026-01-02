@@ -17,7 +17,7 @@ const SetupGuidePanel: React.FC<SetupProps> = ({ onClose, snippetToken }) => {
     a=l.createElement(i);a.async=1;a.src=v;
     a.setAttribute('data-cliva-id', '${snippetToken || "YOUR_TOKEN"}');
     l.head.appendChild(a);
-  })(window, document, 'script', 'https://cdn.cliva.ai/pulse.js');
+  })(window, document, 'script', 'https://subgeneric-intraabdominal-justine.ngrok-free.dev/pulse.js');
 </script>`;
 
   const copyToClipboard = () => {
