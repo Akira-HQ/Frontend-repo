@@ -37,8 +37,12 @@ export const QuotaMonitor = () => {
 
   const maxVal = useMemo(() => {
     if (!history.length) return 10;
-    // We only care about audit and enhance for the strategy bars
-    const allValues = history.flatMap(d => [Number(d.audit || 0), Number(d.enhance || 0)]);
+    // Account for all three metrics in the graph: audit, enhance, and chat
+    const allValues = history.flatMap(d => [
+      Number(d.audit || 0),
+      Number(d.enhance || 0),
+      Number(d.chat || 0)
+    ]);
     const highest = Math.max(...allValues, 0);
     return highest > 0 ? highest : 10;
   }, [history]);
@@ -97,17 +101,24 @@ export const QuotaMonitor = () => {
               </div>
             )) :
               quotas.filter(q => q.category === category).map((item) => {
-                // ⚡️ FIX: Ensure we use Number() to avoid "empty" display due to string types
                 const used = Number(item.used) || 0;
                 const limit = Number(item.limit) || 1;
                 const percent = Math.min(100, (used / limit) * 100);
                 const isDaily = category.includes('Daily');
 
+                // Dynamic Icon selection based on quota ID
+                const getIcon = () => {
+                  if (item.id.includes('audit')) return <Search size={20} />;
+                  if (item.id.includes('chat')) return <MessageSquare size={20} />;
+                  return <Database size={20} />;
+                };
+
                 return (
                   <div key={item.id} className="p-8 bg-[#0d0d0d] rounded-[2.5rem] border border-white/5 group hover:border-white/10 transition-all duration-500 relative overflow-hidden">
                     <div className="flex justify-between items-start mb-6 relative z-10">
-                      <div className={`p-3 rounded-2xl ${isDaily ? 'bg-amber-500/10 text-amber-500' : 'bg-[#A500FF]/10 text-[#A500FF]'}`}>
-                        {item.id.includes('audit') ? <Search size={20} /> : <Database size={20} />}
+                      {/* Context-aware color logic for icons */}
+                      <div className={`p-3 rounded-2xl ${isDaily ? 'bg-amber-500/10 text-amber-500' : item.id.includes('chat') ? 'bg-blue-500/10 text-blue-500' : 'bg-[#A500FF]/10 text-[#A500FF]'}`}>
+                        {getIcon()}
                       </div>
                       <div className="text-right">
                         <p className={`text-2xl font-black tracking-tighter ${percent > 90 ? 'text-red-500' : 'text-white'}`}>
@@ -123,8 +134,9 @@ export const QuotaMonitor = () => {
                     </p>
 
                     <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden relative">
+                      {/* Context-aware color logic for bars */}
                       <div
-                        className={`h-full transition-all duration-1000 ${percent > 90 ? "bg-red-500" : isDaily ? "bg-amber-500" : "bg-[#A500FF]"}`}
+                        className={`h-full transition-all duration-1000 ${percent > 90 ? "bg-red-500" : isDaily ? "bg-amber-500" : item.id.includes('chat') ? "bg-blue-500" : "bg-[#A500FF]"}`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -137,7 +149,7 @@ export const QuotaMonitor = () => {
         </div>
       ))}
 
-      {/* 3. NEW & SIMPLE: ACTIVITY FLOW GRAPH */}
+      {/* 3. ACTIVITY FLOW GRAPH (Updated to show Audit, Enhance, and Chat) */}
       <div className="bg-[#0d0d0d] border border-white/5 rounded-[3rem] p-10 relative overflow-hidden">
         <div className="flex justify-between items-start mb-12">
           <div>
@@ -147,7 +159,11 @@ export const QuotaMonitor = () => {
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Your daily progress at a glance</p>
           </div>
           <div className="flex gap-4 px-4 py-2 bg-black/50 rounded-xl border border-white/5">
-            {[{ c: 'bg-amber-500', l: 'Scans' }, { c: 'bg-[#A500FF]', l: 'Fixes' }].map(leg => (
+            {[
+              { c: 'bg-amber-500', l: 'Scans' },
+              { c: 'bg-[#A500FF]', l: 'Fixes' },
+              { c: 'bg-blue-500', l: 'Chats' }
+            ].map(leg => (
               <div key={leg.l} className="flex items-center gap-2">
                 <div className={`w-1.5 h-1.5 rounded-full ${leg.c}`} />
                 <span className="text-[8px] font-black uppercase text-gray-400">{leg.l}</span>
@@ -158,7 +174,6 @@ export const QuotaMonitor = () => {
 
         <div className="h-64 w-full flex items-end justify-start gap-4 px-2 overflow-x-auto cliva-scrollbar">
           {history.length > 0 ? history.map((day, i) => {
-            // Check if day is today for highlighting
             const isToday = day.label === new Date().toLocaleDateString("en-US", { day: "2-digit", month: "short" });
 
             return (
@@ -166,20 +181,26 @@ export const QuotaMonitor = () => {
                 <div className="flex items-end gap-1.5 w-full h-40 justify-center relative">
                   {/* Audit Bar - Amber */}
                   <div
-                    className="w-3.5 bg-amber-500/20 rounded-t-sm group-hover:bg-amber-500 transition-all duration-300 relative"
+                    className="w-2.5 bg-amber-500/20 rounded-t-sm group-hover:bg-amber-500 transition-all duration-300 relative"
                     style={{ height: `${(day.audit / maxVal) * 100}%`, minHeight: day.audit > 0 ? '4px' : '0px' }}
                   >
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[9px] font-bold text-amber-500">{day.audit}</div>
                   </div>
                   {/* Enhance Bar - Purple */}
                   <div
-                    className="w-3.5 bg-[#A500FF]/20 rounded-t-sm group-hover:bg-[#A500FF] transition-all duration-300 relative"
+                    className="w-2.5 bg-[#A500FF]/20 rounded-t-sm group-hover:bg-[#A500FF] transition-all duration-300 relative"
                     style={{ height: `${(day.enhance / maxVal) * 100}%`, minHeight: day.enhance > 0 ? '4px' : '0px' }}
                   >
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[9px] font-bold text-[#A500FF]">{day.enhance}</div>
                   </div>
+                  {/* Chat Bar - Blue */}
+                  <div
+                    className="w-2.5 bg-blue-500/20 rounded-t-sm group-hover:bg-blue-500 transition-all duration-300 relative"
+                    style={{ height: `${(day.chat / maxVal) * 100}%`, minHeight: day.chat > 0 ? '4px' : '0px' }}
+                  >
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[9px] font-bold text-blue-500">{day.chat}</div>
+                  </div>
                 </div>
-                {/* Horizontal simple date label */}
                 <span className={`text-[9px] mt-4 font-black uppercase tracking-tighter whitespace-nowrap ${isToday ? 'text-white' : 'text-gray-600'}`}>
                   {day.label}
                 </span>
