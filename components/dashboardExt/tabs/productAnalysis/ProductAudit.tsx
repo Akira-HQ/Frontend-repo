@@ -114,6 +114,7 @@ const ProductAudit = ({
         onProductUpdated(res.data);
         if (setEnhanceQuota) setEnhanceQuota(liveEnhanceQuota - 1);
         addToast("Fixed that specific friction point!", "success");
+        handleSave();
       }
     } catch (error: any) {
       console.error("Enhance failed", error);
