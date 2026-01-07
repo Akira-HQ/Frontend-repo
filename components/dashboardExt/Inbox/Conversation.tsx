@@ -1,213 +1,132 @@
 "use client";
-import React, { useState } from "react";
-// FIX: Using Lucide imports
-import { MessageCircle, X, Send, Zap, ChevronRight } from "lucide-react";
-// NOTE: Assuming alias resolution for common types and utilities
-import { ReportData } from "@/types";
+import React, { useState, useEffect } from "react";
+import { MessageCircle, X, Zap, Loader2, Edit3, Target } from "lucide-react";
+import { UseAPI } from "@/components/hooks/UseAPI";
 import ConfirmModal from "@/components/notifications/CTAAlerts";
 
-// ⚠️ NOTE: You must place your actual ConfirmModal component definition here,
-// or import it from its location (e.g., import ConfirmModal from '../components/ConfirmModal';)
-
-// --- Mock ConfirmModal Definition (Placeholder for functionality) ---
-// Since the user provided the interface earlier, we use a mock.
-interface ConfirmModalProps {
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  confirmText?: string;
-  cancelText?: string;
-}
-
-// NOTE: You MUST replace this mock with your actual component
-// const ConfirmModal: React.FC<ConfirmModalProps> = ({ title, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel" }) => (
-//   <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-950/80 backdrop-blur-sm p-4">
-//     <div className="w-full max-w-sm bg-gray-900 rounded-lg p-6 shadow-xl border border-gray-700">
-//       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-//       <p className="text-sm text-gray-400">{message}</p>
-//       <div className="mt-6 flex justify-end space-x-3">
-//         <button onClick={onCancel} className="px-4 py-2 text-sm rounded bg-gray-700 text-gray-300">
-//           {cancelText}
-//         </button>
-//         <button onClick={onConfirm} className="px-4 py-2 text-sm rounded bg-purple-600 text-white font-semibold">
-//           {confirmText}
-//         </button>
-//       </div>
-//     </div>
-//   </div>
-// );
-// // --- END Mock ConfirmModal Definition ---
-
-
-// Mock chat data for review (Simulating the full transcript pulled from PostgreSQL)
-const mockChat = [
-  { sender: "customer", text: "Is the leather backpack available in blue?" },
-  {
-    sender: "cliva",
-    text: "Yes! We have the Vintage Leather Backpack in Midnight Blue. It's currently in low stock (only 3 left). Would you like me to reserve one for you now? 🛍️",
-  },
-  {
-    sender: "customer",
-    text: "3 left? Ah, I'll think about it. Too expensive right now.",
-  },
-  {
-    sender: "cliva",
-    text: "I understand! We also have the **Portable Espresso Maker** on sale this week. It's a fantastic value at $25,000. Can I tell you more about it? ☕",
-  },
-  // AI INSIGHT injected by the system, not visible to the customer
-  {
-    sender: "system_insight",
-    text: "Insight: Customer hit **Price Objection**. Cliva attempted cross-sell with the Espresso Maker but failed. Conversion likelihood: Medium.",
-  },
-];
-
-interface PanelProps {
-  conversationId: string;
-  onClose: () => void;
-}
-
-const ConversationReviewPanel: React.FC<PanelProps> = ({
-  conversationId,
-  onClose,
-}) => {
+const ConversationReviewPanel = ({ conversationId, onClose }: { conversationId: string; onClose: () => void }) => {
+  const [chat, setChat] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [correctionInput, setCorrectionInput] = useState("");
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // ⚡ NEW STATE
-  const NEON_PURPLE = "#A500FF";
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 
-  // ⚡ HANDLES CONFIRMATION AND SUBMISSION ⚡
-  const handleConfirmSubmit = () => {
-    // 1. Send data to the backend (Actual RL Loop)
-    console.log(`[RL FEEDBACK SUBMITTED] Conversation ID: ${conversationId}`);
-    console.log(`Correction: ${correctionInput}`);
+  const { callApi } = UseAPI();
 
-    // 2. Cleanup
-    setCorrectionInput("");
-    setShowConfirmModal(false); // Close the modal
-    onClose(); // Close the panel
+  // ⚡️ LOAD REAL TRANSCRIPT
+  useEffect(() => {
+    const loadTranscript = async () => {
+      const res = await callApi(`/pulse/inbox/conversation/${conversationId}`, "GET");
+      if (res) setChat(res);
+      setLoading(false);
+    };
+    loadTranscript();
+  }, [conversationId, callApi]);
+
+  // ⚡️ MARKDOWN PARSER
+  const parseMarkdown = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-white">$1</span>')
+      .replace(/__(.*?)__/g, '<span class="text-[#00A7FF] font-bold underline">$1</span>')
+      .replace(/\n/g, "<br>");
   };
 
-  // ⚡ OPENS THE CONFIRMATION MODAL ⚡
-  const handleCorrection = () => {
-    if (!correctionInput.trim()) return;
+  const handleMessageCorrection = (msg: any, index: number) => {
+    setSelectedMessageId(index);
+    setCorrectionInput(`Cliva said: "${msg.text}"\nCorrection: `);
+  };
 
-    // Show modal instead of alert()
-    setShowConfirmModal(true);
+  const handleConfirmSubmit = async () => {
+    // ⚡️ RL FEEDBACK LOOP: Store the instruction in the intelligence table
+    await callApi("/pulse/feedback", "POST", {
+      visitor_id: conversationId,
+      sentiment: "AI_TRAINING_CORRECTION",
+      message: correctionInput
+    });
+    setCorrectionInput("");
+    setSelectedMessageId(null);
+    setShowConfirmModal(false);
+    onClose();
   };
 
   return (
-    <div className="absolute inset-0 bg-gray-950/95 backdrop-blur-md z-50 p-6 flex flex-col">
-      <div className="flex justify-between items-center pb-4 border-b border-gray-800 flex-shrink-0">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-          <MessageCircle className="w-5 h-5 text-green-400" /> Conversation
-          Review:{" "}
-          <span className="text-[#FFB300] font-mono font-medium">
-            #{conversationId}
-          </span>
-        </h3>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-white transition p-1"
-        >
-          <X className="w-6 h-6" />
+    <div className="absolute inset-0 bg-gray-950/95 backdrop-blur-xl z-50 p-6 flex flex-col animate-in slide-in-from-bottom duration-500">
+      {/* 1. HEADER */}
+      <div className="flex justify-between items-center pb-4 border-b border-white/10">
+        <div>
+          <h3 className="text-xl font-bold text-white flex items-center gap-2 italic tracking-tighter uppercase">
+            <Target className="w-5 h-5 text-red-500 animate-pulse" /> Training Mode
+          </h3>
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Session: {conversationId.slice(-6)}</p>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition text-gray-400 hover:text-white">
+          <X size={20} />
         </button>
       </div>
 
-      {/* Mock Chat Transcript */}
-      <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-2 custom-scrollbar">
-        {mockChat.map((msg, index) => {
-          const isSystem = msg.sender === "system_insight";
-          const isCustomer = msg.sender === "customer";
+      {/* 2. CHAT FEED WITH MARKDOWN & FEEDBACK ACTIONS */}
+      <div className="flex-1 overflow-y-auto mt-4 space-y-6 pr-2 custom-scrollbar">
+        {loading ? <div className="h-full flex flex-col items-center justify-center gap-4">
+          <Loader2 className="animate-spin text-[#A500FF]" />
+          <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Synchronizing Neural Logs</span>
+        </div> :
+          chat.map((msg, index) => {
+            const isUser = msg.sender === "user";
+            const isInsight = msg.sender === "system_insight";
 
-          return (
-            <div
-              key={index}
-              className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[85%] p-3 rounded-xl shadow-md ${isCustomer
-                    ? "bg-[#A500FF]/50 text-white rounded-br-none"
-                    : isSystem
-                      ? "bg-yellow-900/40 text-yellow-100 border border-yellow-700/50 text-sm italic rounded-xl" // Insight style
-                    : "bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700" // Cliva style
-                  }`}
-              >
-                <p className="font-medium text-xs mb-1">
-                  {isSystem ? (
-                    <span className="flex items-center text-yellow-300 gap-1">
-                      <Zap className="w-3 h-3" /> Cliva Analysis:
-                    </span>
-                  ) : isCustomer ? (
-                    "Customer"
-                  ) : (
-                    "Cliva Response:"
-                  )}
-                </p>
-                <p
-                  className="text-sm"
-                  dangerouslySetInnerHTML={{ __html: msg.text }}
-                />
+            return (
+              <div key={index} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+                <div className={`group relative max-w-[85%] p-4 rounded-2xl shadow-2xl transition-all duration-300 ${isUser ? "bg-[#A500FF]/20 text-white border border-[#A500FF]/30" :
+                    isInsight ? "bg-amber-500/10 text-amber-200 italic border border-amber-500/20" :
+                      "bg-white/5 text-gray-200 border border-white/10 hover:border-white/20"
+                  }`}>
+                  <p className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.text) }} />
 
-                {/* Highlight the specific message Cliva responded to */}
-                {!isSystem &&
-                  index > 0 &&
-                  mockChat[index - 1].sender === "customer" && (
-                    <div
-                      className={`mt-2 pt-2 border-t ${isCustomer ? "border-white/20" : "border-gray-700"} text-[10px] text-gray-400 flex items-center gap-1`}
+                  {/* ⚡️ PER-MESSAGE TRAINING BUTTON */}
+                  {!isUser && !isInsight && (
+                    <button
+                      onClick={() => handleMessageCorrection(msg, index)}
+                      className="absolute -right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 bg-white/5 hover:bg-red-500/20 text-gray-500 hover:text-red-500 rounded-lg transition-all"
                     >
-                      <ChevronRight className="w-3 h-3" /> Responded to prior
-                      message.
-                    </div>
+                      <Edit3 size={14} />
+                    </button>
                   )}
+                </div>
+                <span className="text-[8px] mt-1 font-black text-gray-600 uppercase tracking-tighter">{msg.sender}</span>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        }
       </div>
 
-      {/* Correction/Feedback Input (Reinforcement Learning) */}
-      <div className="pt-4 border-t border-gray-800 mt-4 flex-shrink-0">
-        <label className="text-sm text-gray-400 block mb-2">
-          Owner Feedback Loop (Direct RL Correction):
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="e.g., 'Next time, suggest a cheaper backpack alternative...'"
+      {/* 3. RL FEEDBACK INPUT */}
+      <div className="mt-6 pt-4 border-t border-white/10">
+        <div className="flex gap-3 bg-white/5 p-2 rounded-2xl border border-white/10 focus-within:border-[#A500FF]/50 transition-all">
+          <textarea
             value={correctionInput}
             onChange={(e) => setCorrectionInput(e.target.value)}
-            className="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-1 focus:ring-[#A500FF] focus:border-[#A500FF] transition"
+            placeholder={selectedMessageId !== null ? "Correct this specific response..." : "Provide overall feedback for Cliva..."}
+            className="flex-1 bg-transparent border-none text-white text-sm p-3 outline-none resize-none h-12"
           />
           <button
-            onClick={handleCorrection}
+            onClick={() => setShowConfirmModal(true)}
             disabled={!correctionInput.trim()}
-            className={`px-4 py-3 rounded-lg bg-[${NEON_PURPLE}] text-white font-semibold hover:bg-[#FFB300] transition disabled:opacity-50 flex items-center gap-1`}
+            className="px-6 py-2 rounded-xl bg-gradient-to-r from-red-500 to-[#A500FF] text-white font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:grayscale flex items-center gap-2 shadow-lg shadow-red-500/20"
           >
-            <Zap className="w-5 h-5" />
-            Send
+            <Zap size={14} fill="currentColor" /> Train Cliva
           </button>
         </div>
       </div>
 
-      {/* ⚡ CONFIRM MODAL RENDERING ⚡ */}
       {showConfirmModal && (
         <ConfirmModal
-          title="Submit AI Correction?"
-          message={`You are submitting this feedback: "${correctionInput}". This data will be used by the Reinforcement Learning loop to refine Cliva's future sales strategies for conversation #${conversationId}.`}
+          title="Commit Intelligence Correction?"
+          message="This correction will be permanently logged. Cliva will prioritize this instruction in future sessions with similar context."
           onConfirm={handleConfirmSubmit}
           onCancel={() => setShowConfirmModal(false)}
-          confirmText="Send Correction"
-          cancelText="Review Again"
+          confirmText="Verify Correction"
         />
       )}
-
-      {/* Custom Scrollbar CSS (Included locally for this modal) */}
-      <style jsx>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
-            `}</style>
     </div>
   );
 };

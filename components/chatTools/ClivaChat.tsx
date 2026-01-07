@@ -37,6 +37,9 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
 
   const currentView = searchParams.get("view") || "general";
   const isSettings = currentView === "settings" || currentView === "quotas";
+  const isInbox = currentView === "inbox";
+  const isIntegration = currentView === "integrations"; // ⚡️ NEW: Detect Integration view
+
   const contextKey = activeProduct ? `product-${activeProduct.id}` : `view-${currentView}`;
 
   const [allThreads, setAllThreads] = useState<Record<string, any[]>>({});
@@ -60,22 +63,14 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
       if (!token || !isOpen) return;
 
       const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&type=dashboard`);
-
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === "CLIVA_MESSAGE") {
           const clivaMsg = { role: "cliva", content: data.message };
-          setAllThreads(prev => ({
-            ...prev,
-            [contextKey]: [...(prev[contextKey] || []), clivaMsg]
-          }));
+          setAllThreads(prev => ({ ...prev, [contextKey]: [...(prev[contextKey] || []), clivaMsg] }));
         }
-        if (data.type === "QUOTA_UPDATE" || data.type === "AUDIT_COMPLETE") {
-          syncQuotas();
-        }
-        if (data.type === "CLIVA_THINKING") {
-          setIsTyping(data.status);
-        }
+        if (data.type === "QUOTA_UPDATE" || data.type === "AUDIT_COMPLETE") syncQuotas();
+        if (data.type === "CLIVA_THINKING") setIsTyping(data.status);
       };
       return () => ws.close();
     }
@@ -84,19 +79,14 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
   useEffect(() => {
     if (isOpen) {
       const initChat = async () => {
-        const endpoint = activeProduct
-          ? `/cliva-chat-history?productId=${activeProduct.id}`
-          : `/cliva-chat-history?context=${currentView}`;
-
+        const endpoint = activeProduct ? `/cliva-chat-history?productId=${activeProduct.id}` : `/cliva-chat-history?context=${currentView}`;
         try {
           const res = await callApi(endpoint, "GET");
           if (res?.data) {
             setAllThreads(prev => ({ ...prev, [contextKey]: res.data.messages || [] }));
             setQuotaInfo({ used: res.data.usedToday || 0, limit: res.data.limit || 10 });
           }
-        } catch (err) {
-          console.error("Failed to load Cliva history");
-        }
+        } catch (err) { console.error("Failed to load Cliva history"); }
       };
       initChat();
     }
@@ -107,6 +97,19 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
       return [
         { label: "Identify Friction", value: "What are the specific conversion blockers for this product?" },
         { label: "Analyze Score", value: `Explain why this score is ${activeProduct.health_score || activeProduct.health}%` }
+      ];
+    }
+    if (isInbox) {
+      return [
+        { label: "High-Intent Leads", value: "Analyze the current inbox and list customers who are closest to buying." },
+        { label: "Summary", value: "What is the general sentiment in the inbox right now?" }
+      ];
+    }
+    if (isIntegration) {
+      // ⚡️ Integration specific quick actions
+      return [
+        { label: "Installation Guide", value: "Show me exactly how to install the snippet in my Shopify theme." },
+        { label: "Verification Status", value: "Is my neural link currently active and tracking?" }
       ];
     }
     if (isSettings) {
@@ -125,19 +128,21 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     const thread = allThreads[contextKey] || [];
     if (thread.length > 0) return thread;
 
-    let greeting = `I see we're in the **${currentView.replace('-', ' ')}** section. How can I assist with your strategy?`;
+    let greeting = `I see we're in the **${currentView.replace('-', ' ')}** section. How can I assist?`;
     if (activeProduct) {
       greeting = `I'm focused on **${activeProduct.name}**. I've mapped the friction points—what should we optimize first?`;
+    } else if (isInbox) {
+      greeting = `I am analyzing your live customer chats. I can help you spot hot leads or summarize feedback.`;
+    } else if (isIntegration) {
+      greeting = `Ready to go live? I can walk you through pasting your snippet into **theme.liquid** step-by-step.`;
     } else if (isSettings) {
-      greeting = `Welcome to your **Settings & Control Center**. I can help you understand your energy recharges or subscription limits.`;
+      greeting = `Welcome to your **Settings**. I can explain your energy limits or help with plan details.`;
     }
     return [{ role: "cliva", content: greeting }];
-  }, [allThreads, contextKey, activeProduct, currentView, isSettings]);
+  }, [allThreads, contextKey, activeProduct, currentView, isSettings, isInbox, isIntegration]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-    }
+    if (scrollRef.current) scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [currentMessages, isTyping, isFinishingType]);
 
   const handleSend = async (overrideMessage?: string) => {
@@ -150,31 +155,23 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     setAllThreads(prev => ({ ...prev, [contextKey]: threadWithUserMsg }));
     setInput("");
     setIsTyping(true);
-    setIsFinishingType(true); // Block suggestions until typing finishes
+    setIsFinishingType(true);
 
     try {
       const res = await callApi("/chat", "POST", {
         message: messageToSend,
         context: currentView,
         productId: activeProduct?.id || null,
-        // Include context for the "Store Summary" request
         accountStats: { history: [], currentQuotas: [] }
       });
 
       if (res?.reply) {
         const clivaMsg = { role: "cliva", content: res.reply };
-        setAllThreads(prev => ({
-          ...prev,
-          [contextKey]: [...threadWithUserMsg, clivaMsg]
-        }));
+        setAllThreads(prev => ({ ...prev, [contextKey]: [...threadWithUserMsg, clivaMsg] }));
         setQuotaInfo({ used: res.usedToday, limit: res.limit });
         if (res.isLimitHit) addToast("Dashboard chat limit reached.", "warning");
       }
-    } catch (error) {
-      addToast("Connection issues.", "error");
-    } finally {
-      setIsTyping(false);
-    }
+    } catch (error) { addToast("Connection issues.", "error"); } finally { setIsTyping(false); }
   };
 
   const showSuggestions = currentMessages.length === 1 && !isFinishingType && input.length === 0 && !isTyping && !isLimitHit;
@@ -195,14 +192,14 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
       <div className="fixed inset-y-0 right-0 w-[450px] bg-[#08090a]/95 backdrop-blur-3xl border-l border-white/10 shadow-2xl z-[100] flex flex-col animate-in slide-in-from-right duration-500">
 
         {/* Header */}
-        <div className={`p-6 border-b border-white/5 flex justify-between items-center transition-colors duration-500 ${isLimitHit ? 'bg-red-500/10' : isSettings ? 'bg-blue-500/5' : activeProduct ? 'bg-amber-500/5' : 'bg-transparent'}`}>
+        <div className={`p-6 border-b border-white/5 flex justify-between items-center transition-colors duration-500 ${isLimitHit ? 'bg-red-500/10' : isSettings ? 'bg-blue-500/5' : isInbox ? 'bg-green-500/5' : isIntegration ? 'bg-purple-500/5' : activeProduct ? 'bg-amber-500/5' : 'bg-transparent'}`}>
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl border shadow-inner transition-all ${isLimitHit ? 'bg-red-500/10 text-red-500 border-red-500/20' : isSettings ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
+            <div className={`p-2.5 rounded-xl border shadow-inner transition-all ${isLimitHit ? 'bg-red-500/10 text-red-500 border-red-500/20' : isSettings ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : isInbox ? 'bg-green-500/10 text-green-500 border-green-500/20' : isIntegration ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
               {isLimitHit ? <IoTimeOutline size={20} className="animate-pulse" /> : <HiSparkles size={20} className="animate-pulse" />}
             </div>
             <div>
               <h3 className="font-bold text-white tracking-tight leading-none mb-1">
-                {isLimitHit ? "Battery Depleted" : isSettings ? "System Intelligence" : activeProduct ? "Product Strategist" : "Cliva's Lounge"}
+                {isLimitHit ? "Battery Depleted" : isSettings ? "System Intelligence" : isInbox ? "Sales Intelligence" : isIntegration ? "Neural Architect" : activeProduct ? "Product Strategist" : "Cliva's Lounge"}
               </h3>
               <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${isLimitHit ? 'text-red-500' : 'text-gray-500'}`}>
                 {isLimitHit ? "Locked until midnight" : "Assistant Active"}
@@ -261,7 +258,7 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
               type="text" value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isTyping || isLimitHit}
-              placeholder={isLimitHit ? `Cliva recharges at ${rechargeTime}` : `Ask about ${isSettings ? 'limits...' : 'strategy...'}`}
+              placeholder={isLimitHit ? `Cliva recharges at ${rechargeTime}` : `Ask about ${isSettings ? 'limits...' : isInbox ? 'this inbox...' : isIntegration ? 'installation...' : 'strategy...'}`}
               className={`w-full bg-white/[0.03] border rounded-2xl py-4 pl-6 pr-14 text-white outline-none transition-all placeholder:text-gray-700 ${isLimitHit ? 'border-red-500/20 cursor-not-allowed italic' : 'border-white/10 focus:border-amber-500/40'}`}
             />
             <button
