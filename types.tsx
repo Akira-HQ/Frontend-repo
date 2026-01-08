@@ -127,11 +127,15 @@ export type Metric = {
 // Shared Report Data Type
 export type ReportData = {
   id: string;
-  type: "DIGEST" | "ALERT" | "ESCALATION" | "QUERY_RESPONSE";
+  type: "DIGEST" | "ALERT" | "ESCALATION" | "QUERY_RESPONSE" | "insight";
   title: string;
   message: string;
   time: string;
+  summary?: string;
   conversationId?: string;
+  created_at?: string;
+  status?: "pending" | "completed";
+  metadata?: { [key: string]: any };
 };
 
 // Mock KPI Data
@@ -143,34 +147,34 @@ export const MOCK_KPIS: Metric[] = [
 ];
 
 // Mock Reports
-export const MOCK_REPORTS: ReportData[] = [
-  {
-    id: "r_003",
-    type: "ALERT",
-    title: "Hottest Product Alert!",
-    message:
-      "The **Pro DSLR Camera MK-V** saw a 25% increase in purchase intent after Akira recommended it 45 times yesterday. Consider boosting ad spend.",
-    time: "1 hour ago",
-    conversationId: "conv_789",
-  },
-  {
-    id: "r_002",
-    type: "DIGEST",
-    title: "Daily Sales Digest: 12/05/2025",
-    message:
-      "Total conversions increased by 7% thanks to automated follow-ups. However, the **Smartwatch Series 8** hit 0 stock, generating 12 frustrated customer chats.",
-    time: "5 hours ago",
-  },
-  {
-    id: "r_001",
-    type: "ESCALATION",
-    title: "Human Intervention Required",
-    message:
-      "A customer is demanding a refund outside the 30-day window for order #3098. Please review the chat log and handle the exception.",
-    time: "1 day ago",
-    conversationId: "conv_101",
-  },
-];
+// export const MOCK_REPORTS: ReportData[] = [
+//   {
+//     id: "r_003",
+//     type: "ALERT",
+//     title: "Hottest Product Alert!",
+//     message:
+//       "The **Pro DSLR Camera MK-V** saw a 25% increase in purchase intent after Akira recommended it 45 times yesterday. Consider boosting ad spend.",
+//     time: "1 hour ago",
+//     conversationId: "conv_789",
+//   },
+//   {
+//     id: "r_002",
+//     type: "DIGEST",
+//     title: "Daily Sales Digest: 12/05/2025",
+//     message:
+//       "Total conversions increased by 7% thanks to automated follow-ups. However, the **Smartwatch Series 8** hit 0 stock, generating 12 frustrated customer chats.",
+//     time: "5 hours ago",
+//   },
+//   {
+//     id: "r_001",
+//     type: "ESCALATION",
+//     title: "Human Intervention Required",
+//     message:
+//       "A customer is demanding a refund outside the 30-day window for order #3098. Please review the chat log and handle the exception.",
+//     time: "1 day ago",
+//     conversationId: "conv_101",
+//   },
+// ];
 
 
 //---------New Typees
@@ -182,6 +186,14 @@ export interface User {
   plan: "FREE" | "BASIC" | "PREMIUM"; // Matches DB UPPER case
   onboarding_step: 'ACCOUNT_CREATION' | 'CONNECT_STORE' | 'PAYMENT_WALL' | 'DASHBOARD';
   is_paid: boolean;
+  usage: {
+    daily_audits_used: number;
+    daily_audits_limit: number;
+    daily_enhance_used: number;
+    daily_enhance_limit: number;
+    daily_chat_used: number;
+    daily_chat_limit: number;
+  };
   // 🔥 New Quota Structure matching buildUserFeedback
   quotas: {
     audits_used: number;

@@ -27,7 +27,7 @@ const AiTrainingContent = () => {
 
         setProgress({ current: finished, total });
 
-        // ⚡️ FIX: Only show analyzing if we haven't hit the daily limit
+        // Only show analyzing if we haven't hit the limit
         const hasEnergy = quotas.audits_used < quotas.audits_limit;
         setIsAnalyzing(finished < total && hasEnergy);
 
@@ -52,15 +52,11 @@ const AiTrainingContent = () => {
       globalSync();
     }
 
-    // ⚡️ FIX: Handle both completion and quota warnings
     if (wsEvent.type === "AUDIT_COMPLETE") {
       setIsAnalyzing(false);
       syncContentData();
       globalSync();
-
-      // Distinct colors for types
-      const toastType = "success";
-      addToast(wsEvent.message, toastType);
+      addToast(wsEvent.message, "success");
     }
   }, [wsEvent, syncContentData, globalSync, addToast]);
 
@@ -68,11 +64,8 @@ const AiTrainingContent = () => {
   const handleCancel = async () => {
     setIsCancelling(true);
     try {
-      // ⚡️ This hits the Map.set(userId, true) on your backend
       await callApi("/products/cancel-audit", "POST");
       addToast("Disconnecting Neural Link...", "info");
-
-      // Optimistically hide banner
       setIsAnalyzing(false);
     } catch (err) {
       addToast("Failed to stop sync.", "error");
@@ -81,11 +74,14 @@ const AiTrainingContent = () => {
     }
   };
 
-  // --- 4. UI CALCULATIONS ---
-  const maxLimit = user?.quotas?.audits_limit || 5;
-  const used = user?.quotas?.audits_used || 0;
-  const energyLeft = Math.max(0, maxLimit - used);
-  const auditPerc = (energyLeft / maxLimit) * 100;
+  // --- 4. UI CALCULATIONS (MONTHLY REMAINING) ---
+  // Using the 1000 limit from your "quotas" which maps to monthly_chat_limit in your backend
+  const maxLimit = user?.quotas?.chats_limit || 1000;
+  const used = user?.quotas?.chats_used || 0;
+
+  // ⚡️ CALCULATE WHAT IS LEFT
+  const remainingEnergy = Math.max(0, maxLimit - used);
+  const auditPerc = (remainingEnergy / maxLimit) * 100;
 
   return (
     <div className={`py-4 px-2 w-full h-full ${isDarkMode ? "text-white" : ""} relative`}>
@@ -110,7 +106,7 @@ const AiTrainingContent = () => {
         <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Cliva Battery</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Monthly Strategy</span>
               <HiLightningBolt className="text-amber-500 animate-pulse" size={14} />
             </div>
             <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -122,9 +118,9 @@ const AiTrainingContent = () => {
           </div>
           <div className="text-right">
             <div className="text-[14px] font-black text-white leading-none">
-              {energyLeft}<span className="text-gray-600 text-[10px] ml-1">/ {maxLimit}</span>
+              {remainingEnergy}<span className="text-gray-600 text-[10px] ml-1">LEFT</span>
             </div>
-            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Daily Energy</p>
+            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Monthly Quota</p>
           </div>
         </div>
       </div>
