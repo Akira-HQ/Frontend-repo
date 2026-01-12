@@ -7,140 +7,148 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   Bar,
   Cell,
 } from "recharts";
 import {
-  Users,
-  Target,
-  Clock,
-  MessageCircle,
-  DollarSign,
+  TrendingUp,
+  ShieldCheck,
   Zap,
+  Search,
+  BrainCircuit,
 } from "lucide-react";
+import { CHART_GRID_COLOR, TEXT_GRAY } from "@/types";
 
-const NEON_PURPLE = "#A500FF";
-const NEON_ORANGE = "#FFB300";
-const ACCENT_BLUE = "#00A7FF";
-const CHART_GRID_COLOR = "#374151";
-const TEXT_GRAY = "#9ca3af";
+interface SegmentProps {
+  data?: any[];
+}
 
-// Mock Data: Classified customer groups based on behavior
-const SEGMENTS_DATA = [
-  { name: "Fast Deciders", count: 180, AOV_Factor: 1.2, color: NEON_ORANGE },
-  { name: "Loyalty Tier 1", count: 95, AOV_Factor: 1.5, color: NEON_PURPLE },
-  { name: "Price Sensitive", count: 320, AOV_Factor: 0.8, color: ACCENT_BLUE },
-  { name: "Feature Inquirer", count: 150, AOV_Factor: 1.0, color: "#f87171" },
-];
+const SegmentProfile: React.FC<{ segment: any }> = ({ segment }) => {
+  const icons: any = {
+    "Fast Deciders": TrendingUp,
+    "Loyalty Tier 1": ShieldCheck,
+    "Price Sensitive": Zap,
+    "Feature Inquirer": Search,
+  };
+  const Icon = icons[segment.name] || BrainCircuit;
 
-// --- NEW COMPONENT: Segment Explanation Panel ---
-const ExplanationPanel: React.FC = () => (
-  <div className="p-4 bg-gray-900 rounded-xl border border-gray-700 h-full">
-    <h4 className="text-lg font-bold text-[#FFB300] mb-3 flex items-center gap-2">
-      <Zap className="w-4 h-4" /> Actionable Personas
-    </h4>
-    <p className="text-sm text-gray-400 mb-4">
-      Cliva automatically classifies store visitors based on their chat history
-      and purchase intent. Use these insights for targeted marketing.
-    </p>
-
-    <div className="space-y-3">
-      <div className="flex items-start gap-3">
-        <span className="w-2 h-2 mt-2 flex-shrink-0 rounded-full bg-yellow-500"></span>
-        <div>
-          <h5 className="font-semibold text-white">Fast Deciders</h5>
-          <p className="text-xs text-gray-400">
-            **Strategy:** Use low-stock alerts or limited-time offers to convert
-            them instantly.
-          </p>
-        </div>
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group shrink-0">
+      <div
+        className="p-2 rounded-lg flex-shrink-0"
+        style={{ backgroundColor: `${segment.color}15`, color: segment.color }}
+      >
+        <Icon size={16} />
       </div>
-      <div className="flex items-start gap-3">
-        <span className="w-2 h-2 mt-2 flex-shrink-0 rounded-full bg-[#A500FF]"></span>
-        <div>
-          <h5 className="font-semibold text-white">Loyalty Tier 1</h5>
-          <p className="text-xs text-gray-400">
-            **Strategy:** Target with exclusive sneak-previews or early access
-            to new collections.
-          </p>
+      <div className="min-w-0 flex-1">
+        <div className="flex justify-between items-center mb-0.5">
+          <h5 className="text-[10px] font-black text-white uppercase tracking-widest truncate mr-2">
+            {segment.name}
+          </h5>
+          <span className="text-[9px] font-bold text-[#A500FF] bg-[#A500FF]/10 px-1.5 rounded uppercase">
+            x{segment.AOV_Factor || '1.2'} AOV
+          </span>
         </div>
-      </div>
-      <div className="flex items-start gap-3">
-        <span className="w-2 h-2 mt-2 flex-shrink-0 rounded-full bg-[#00A7FF]"></span>
-        <div>
-          <h5 className="font-semibold text-white">Price Sensitive</h5>
-          <p className="text-xs text-gray-400">
-            **Strategy:** Mention financing or package deals early in the
-            conversation.
-          </p>
-        </div>
-      </div>
-      <div className="flex items-start gap-3">
-        <span className="w-2 h-2 mt-2 flex-shrink-0 rounded-full bg-red-400"></span>
-        <div>
-          <h5 className="font-semibold text-white">Feature Inquirer</h5>
-          <p className="text-xs text-gray-400">
-            **Strategy:** Ensure product descriptions are comprehensive, linking
-            them to deep specs/guides.
-          </p>
-        </div>
+        <p className="text-[10px] text-gray-500 leading-snug line-clamp-2">
+          {segment.strategy || "Optimizing engagement based on neural behavioral patterns."}
+        </p>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const CustomerSegmentsChart: React.FC = () => {
+const CustomerSegmentsChart: React.FC<SegmentProps> = ({ data }) => {
+  const segments = data || [];
+
   return (
-    <div className="p-6 bg-[#0b0b0b] rounded-xl border border-gray-800 shadow-xl h-auto">
-      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-[#A500FF]" />
-        AI Customer Segmentation
-      </h3>
-      <p className="text-sm text-gray-400 mb-6">
-        Cliva classifies customers by persona, optimizing sales strategies for
-        each group.
-      </p>
+    <div className="p-6 bg-white/[0.03] backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden h-full min-h-[500px] flex flex-col">
+      {/* Internal Scrollbar Styling */}
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+          background: rgba(165, 0, 255, 0.3); 
+          border-radius: 10px; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #A500FF; }
+      `}</style>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-96 lg:h-[400px]">
-        {/* Left Column: Chart Visualization */}
-        <div className="h-full">
+      {/* Decorative Top Glow */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#A500FF]/40 to-transparent" />
+
+      <header className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-[#A500FF]/20 rounded-lg">
+            <BrainCircuit size={18} className="text-[#A500FF]" />
+          </div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-white italic">
+            Neural <span className="text-[#A500FF]">Personas</span>
+          </h3>
+        </div>
+        <p className="text-[10px] text-gray-500 uppercase tracking-tight font-bold">
+          Behavioral classification engine mapping customer intent.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 flex-1 overflow-hidden">
+        {/* Visualization Hub */}
+        <div className="xl:col-span-3 h-[250px] xl:h-full min-h-[250px] relative bg-black/20 rounded-2xl p-4 border border-white/5">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={SEGMENTS_DATA}
-              margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={CHART_GRID_COLOR}
-                vertical={false}
+            <BarChart data={segments} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} vertical={false} opacity={0.05} />
+              <XAxis
+                dataKey="name"
+                stroke={TEXT_GRAY}
+                fontSize={9}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: '#4b5563', fontWeight: 'bold' }}
               />
-              <XAxis dataKey="name" stroke={TEXT_GRAY} />
-              <YAxis stroke={TEXT_GRAY} />
+              <YAxis
+                stroke={TEXT_GRAY}
+                fontSize={9}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: '#4b5563' }}
+              />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  border: "none",
-                  borderRadius: "8px",
+                cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const d = payload[0].payload;
+                    return (
+                      <div className="bg-gray-950 border border-white/10 p-2 rounded-lg shadow-2xl">
+                        <p className="text-[9px] font-black uppercase tracking-tighter" style={{ color: d.color }}>
+                          {d.name}
+                        </p>
+                        <p className="text-xs font-bold text-white">{d.count} Users</p>
+                      </div>
+                    );
+                  }
+                  return null;
                 }}
-                labelStyle={{ color: "#fff" }}
-                formatter={(value, name, props) => [
-                  `${value} customers`,
-                  "Count",
-                ]}
               />
-              <Legend wrapperStyle={{ paddingTop: "10px", color: TEXT_GRAY }} />
-              <Bar dataKey="count" name="Customer Count" radius={[4, 4, 0, 0]}>
-                {SEGMENTS_DATA.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+              <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={30}>
+                {segments.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} opacity={0.7} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Right Column: Explanation Panel (New Addition) */}
-        <ExplanationPanel />
+        {/* Intelligence Side-Panel (Scrollable) */}
+        <div className="xl:col-span-2 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-2 max-h-[350px] xl:max-h-full">
+          {segments.length > 0 ? (
+            segments.map((segment: any, index: number) => (
+              <SegmentProfile key={index} segment={segment} />
+            ))
+          ) : (
+            <div className="h-full flex items-center justify-center border border-dashed border-white/10 rounded-2xl">
+              <p className="text-[10px] text-gray-600 uppercase font-black">No Segments Found</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
