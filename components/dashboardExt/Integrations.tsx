@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import {
   CheckCircle, ShoppingCart, Globe, MessageSquare,
-  RefreshCw, Copy, Terminal, Monitor, Layout
+  RefreshCw, Copy, Terminal, Monitor, Layout, ArrowRight
 } from "lucide-react";
 import { useAppContext } from "../AppContext";
 import ConfirmModal from "../notifications/CTAAlerts";
@@ -57,23 +57,18 @@ const IntegrationsHub: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Initialize status based on user data from DB if available
   const [syncStatus, setSyncStatus] = useState<"waiting" | "verified">(
     user?.store?.is_authorized ? "verified" : "waiting"
   );
 
   const userPlatform = user?.store?.platform?.toUpperCase();
 
-  // ⚡️ REAL-TIME HANDSHAKE LOGIC
   useEffect(() => {
-    // If already verified from DB, we don't strictly need to open WS for handshake, 
-    // but we keep it active for live updates.
     const token = localStorage.getItem("token");
     const ws = new WebSocket(`ws://localhost:8000?type=dashboard&token=${token}`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
       if (data.type === "NEURAL_LINK_ESTABLISHED") {
         setSyncStatus("verified");
         addToast("Neural Link established with Shopify!", "success");
@@ -91,9 +86,9 @@ const IntegrationsHub: React.FC = () => {
     <script>
       (function(c,l,i,v,a){
         a=l.createElement(i);a.async=1;a.src=v;
-        a.setAttribute('data-cliva-id', 'cliva_test_store_001');
+        a.setAttribute('data-cliva-id', '${user?.store?.id || "cliva_test_store_001"}');
         l.head.appendChild(a);
-      })(window, document, 'script', 'https://subgeneric-intraabdominal-justine.ngrok-free.dev/pulse.mjs');
+      })(window, document, 'script', 'https://cliva.ai/pulse.mjs');
     </script>
   `;
 
@@ -188,13 +183,61 @@ const IntegrationsHub: React.FC = () => {
           </div>
 
           {/* Right Column: Visual Previews */}
-          <div className="space-y-6">
-            <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-4">Implementation Preview</h4>
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Implementation Map</h4>
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#A500FF]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
+              </div>
+            </div>
 
-            <div className="aspect-video bg-black rounded-3xl border border-white/10 flex flex-col items-center justify-center group overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#A500FF]/10 to-transparent opacity-50" />
-              <Layout className="text-gray-800 mb-2 group-hover:scale-110 transition-transform" size={48} />
-              <p className="text-[10px] text-gray-600 font-bold uppercase">Shopify theme.liquid Preview</p>
+            {/* STEP-BY-STEP IMAGE MAP */}
+            <div className="grid grid-cols-1 gap-4">
+              <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black group">
+                <img
+                  src="https://cliva.ai/assets/help/step1.png"
+                  alt="Navigate to Theme Settings"
+                  className="w-full aspect-[16/7] object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="absolute bottom-4 left-4 flex items-center gap-3">
+                  <span className="bg-[#A500FF] text-white text-[10px] font-black px-2 py-1 rounded">STEP 1</span>
+                  <p className="text-xs font-bold text-white shadow-sm">Navigate to Theme Settings</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center py-2">
+                <ArrowRight className="text-gray-800 rotate-90 lg:rotate-0" size={20} />
+              </div>
+
+              <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black group">
+                <img
+                  src="https://cliva.ai/assets/help/step2.png"
+                  alt="Locate Head Tag"
+                  className="w-full aspect-[16/7] object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="absolute bottom-4 left-4 flex items-center gap-3">
+                  <span className="bg-[#00A7FF] text-white text-[10px] font-black px-2 py-1 rounded">STEP 2</span>
+                  <p className="text-xs font-bold text-white shadow-sm">Locate the &lt;head&gt; Tag</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center py-2">
+                <ArrowRight className="text-gray-800 rotate-90 lg:rotate-0" size={20} />
+              </div>
+
+              <div className="relative rounded-3xl overflow-hidden border border-[#A500FF]/30 bg-black group ring-1 ring-[#A500FF]/20">
+                <img
+                  src="https://cliva.ai/assets/help/step3.png"
+                  alt="Paste Snippet"
+                  className="w-full aspect-[16/7] object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="absolute bottom-4 left-4 flex items-center gap-3">
+                  <span className="bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded">FINAL</span>
+                  <p className="text-xs font-bold text-white shadow-sm">Paste Pulse Snippet</p>
+                </div>
+              </div>
             </div>
 
             {/* LIVE STATUS TRACKER */}
