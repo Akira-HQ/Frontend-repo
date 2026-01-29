@@ -1,187 +1,117 @@
 "use client";
 import React, { useState } from 'react';
-import { CreditCard, Zap, CheckCircle, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Zap, CheckCircle, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/components/AppContext';
 import { UseAPI } from '@/components/hooks/UseAPI';
-
-// 🛑 FIX: Changed import name from PLAN_DETAILS to PLAN_CONFIG 
-// and adjusted the assumed path to the shared config file.
 import { PLAN_CONFIG } from '@/utils/checkPlan';
 import { ClivaStarsBackground } from '@/components/Stars';
 
-interface PlanCardProps {
-  planKey: string;
-  details: any;
-  onSelect: (key: string) => void;
-  currentPlan: string;
-  isActive: boolean;
-}
+const PaystackButton = dynamic(() => import('@/components/hooks/PayStackButton'), { ssr: false });
 
-// --- Plan Card Component ---
-const PlanCard: React.FC<PlanCardProps> = ({ planKey, details, onSelect, currentPlan, isActive }) => {
-  const isCurrent = currentPlan.toUpperCase() === planKey.toUpperCase();
-  const isPaid = details.price > 0;
-
-  return (
-    <div className={`p-6 rounded-xl border-2 transition-all duration-300 shadow-lg cursor-pointer h-full
-            ${isCurrent ? 'bg-[#A500FF]/20 border-[#A500FF] shadow-[#A500FF]/50' : 'bg-gray-900 border-gray-700 hover:border-[#00A7FF]'}`}
-      onClick={() => onSelect(planKey)}
-    >
-      <h3 className="text-2xl font-bold uppercase mb-2" style={{ color: isCurrent ? '#A500FF' : 'white' }}>
-        {planKey}
-      </h3>
-      <p className="text-4xl font-extrabold text-white mb-4">
-        {details.price === 0 ? 'FREE' : `$${details.price}`}
-        {isPaid && <span className="text-lg text-gray-500">/mo</span>}
-      </p>
-
-      {isCurrent && <div className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Your Current Plan</div>}
-
-      <ul className="space-y-2 text-sm text-gray-300 pt-4 border-t border-gray-700">
-        {details.features.map((feature: string, index: number) => (
-          <li key={index} className="flex items-start gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> {feature}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-
-// --- Main Upgrade Page Component ---
 const UpgradePlanPage: React.FC = () => {
   const router = useRouter();
-  const { addToast, user } = useAppContext();
+  const { addToast, user, setUser } = useAppContext();
   const { callApi } = UseAPI();
 
   const [selectedPlanKey, setSelectedPlanKey] = useState<string>('BASIC');
   const [loading, setLoading] = useState(false);
-  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvc: '', tokenizedId: 'mock_payment_token_123' }); // Mock token ID
+  const [showManualRef, setShowManualRef] = useState(false);
+  const [manualRef, setManualRef] = useState("");
 
-  // Use current user data for context
   const currentPlan = user?.plan?.toUpperCase() || 'FREE';
   const storeId = user?.store?.id;
-  // 🛑 FIX: Use PLAN_CONFIG here
   const isPaidPlanSelected = PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG]?.price > 0;
+  const US_TO_NGN_RATE = 1600;
 
-  const handleUpgrade = async (e: React.FormEvent) => {
-    e.preventDefault();
+  
 
-    if (!storeId) {
-      addToast("Error: Store context missing. Please re-login.", "error");
-      return;
-    }
-
-    if (selectedPlanKey.toUpperCase() === currentPlan) {
-      addToast("You are already on the selected plan.", "info");
-      return;
-    }
-
+  const finalizeUpgrade = async (reference: string) => {
     setLoading(true);
-    addToast(`Attempting to update to ${selectedPlanKey}...`, "loading");
-
-    // 1. Prepare Payload
-    const payload = {
-      plan: selectedPlanKey,
-      storeId: storeId,
-      // For paid plans, include the mock token
-      tokenizedPaymentMethodId: isPaidPlanSelected ? cardDetails.tokenizedId : undefined,
-      // In a real app, tokenization (Stripe.js) happens here.
-    };
-
+    addToast("Verifying payment with Cliva servers...", "loading");
     try {
-      // 2. API Call to the Secured Endpoint
-      const response = await callApi("/upgrade-plan", "PATCH", payload);
+      const response = await callApi("/upgrade-plan", "PATCH", {
+        plan: selectedPlanKey,
+        storeId: storeId,
+        paystackReference: reference,
+      });
 
-      // 3. Success Feedback and Redirection
-      addToast(response.message || `Successfully moved to ${selectedPlanKey} plan.`, "success");
+      addToast(response.message, "success");
 
-      // ⚠️ NOTE: You should update the user context after a successful upgrade
-      // by refetching the user/store data or using the data returned by the API.
+      // ⚡️ CRITICAL: Fetch fresh user data so the AuthGuard sees the 'is_paid: true'
+      const freshUser = await callApi("/verify-session", "GET");
+      setUser(freshUser.user);
 
-      router.push('/dashboard/settings?tab=billing');
-
+      // Now redirect
+      router.push('/dashboard');
     } catch (error: any) {
-      addToast(error.message || "Upgrade failed. Please check payment info.", "error");
+      addToast(error.message, "error");
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
-    <div className="py-20 px-4 bg-[#050505] relative">
+    <div className="py-20 px-4 bg-[#050505] relative min-h-screen">
       <ClivaStarsBackground density={200} />
-      <div className="relative">
-        <h1 className="text-4xl font-extrabold text-white text-center mb-2 flex items-center justify-center gap-3 relative">
-          <Zap className="w-8 h-8 text-[#A500FF]" /> Upgrade Your Plan
+      <div className="relative max-w-6xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-white text-center mb-10 flex items-center justify-center gap-3">
+          <Zap className="w-8 h-8 text-[#A500FF]" /> Upgrade Cliva
         </h1>
-        <p className="text-gray-400 text-center mb-10">
-          Current Plan: <span className="font-semibold uppercase text-white">{currentPlan}</span> | Select a new tier below.
-        </p>
 
-        <form onSubmit={handleUpgrade} className="max-w-6xl mx-auto">
-          {/* Plan Selection Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            {/* 🛑 FIX: Use PLAN_CONFIG for iteration 🛑 */}
-            {Object.entries(PLAN_CONFIG).map(([key, details]) => (
-              <PlanCard
-                key={key}
-                planKey={key}
-                details={details}
-                onSelect={setSelectedPlanKey}
-                currentPlan={currentPlan}
-                isActive={currentPlan.toUpperCase() === key.toUpperCase()}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {Object.entries(PLAN_CONFIG).map(([key, details]: [string, any]) => (
+            <div key={key}
+              className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${selectedPlanKey === key ? 'bg-[#A500FF]/10 border-[#A500FF]' : 'bg-gray-900 border-gray-800'}`}
+              onClick={() => setSelectedPlanKey(key)}>
+              <h3 className="text-xl font-bold text-white uppercase">{key}</h3>
+              <p className="text-3xl font-black text-white mt-2">${details.price}</p>
+              <ul className="mt-4 space-y-2">
+                {details.features.map((f: string, i: number) => (
+                  <li key={i} className="text-sm text-gray-400 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-xl mx-auto p-8 rounded-2xl bg-gray-900 border border-gray-800 text-center">
+          {!showManualRef ? (
+            <>
+              <PaystackButton
+                loading={loading}
+                email={user?.email || ""}
+                amount={(PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG]?.price || 0) * US_TO_NGN_RATE * 100}
+                onSuccess={(ref) => finalizeUpgrade(ref.reference)}
+                onClose={() => addToast("Payment Window Closed", "info")}
+                isPaidPlanSelected={isPaidPlanSelected}
               />
-            ))}
-          </div>
-
-          {/* Payment/Action Section */}
-          <div className="max-w-3xl mx-auto p-8 rounded-xl bg-gray-800 border border-gray-700 shadow-xl">
-            <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-2">
-              {isPaidPlanSelected ? <CreditCard className="w-5 h-5 text-[#FFB300]" /> : <CheckCircle className="w-5 h-5 text-green-400" />}
-              {isPaidPlanSelected ? 'Secure Payment' : 'Confirmation'}
-            </h2>
-
-            {isPaidPlanSelected && (
-              <>
-                <p className="text-sm text-gray-400 mb-4">
-                  Finalize your upgrade to the **{selectedPlanKey}** plan for ${PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG].price}/month.
-                </p>
-                {/* ⚠️ Placeholder for real tokenization element ⚠️ */}
-                <input
-                  type="text"
-                  placeholder="Mock Card Number / Token ID"
-                  onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                  required
-                  className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 text-white outline-none mb-4"
-                />
-              </>
-            )}
-
-            {!isPaidPlanSelected && (
-              <p className="text-lg text-green-300 font-medium">
-                No payment required. Your plan will be downgraded to **FREE** (or switched to the target free tier).
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || currentPlan.toUpperCase() === selectedPlanKey.toUpperCase()}
-              className={`w-full mt-6 py-3 rounded-lg font-bold text-lg transition duration-200 
-                            ${loading ? 'bg-gray-600' : 'bg-gradient-to-r from-[#A500FF] to-[#00A7FF] hover:opacity-80'} text-white`}
-            >
-              {loading
-                ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> Processing...</span>
-                : isPaidPlanSelected
-                  ? `Confirm Upgrade & Pay $${PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG].price}.00`
-                  : 'Confirm Downgrade to FREE'
-              }
-            </button>
-          </div>
-        </form>
+              <button
+                onClick={() => setShowManualRef(true)}
+                className="mt-6 text-sm text-gray-500 hover:text-[#A500FF] transition flex items-center justify-center gap-2 w-full"
+              >
+                <HelpCircle className="w-4 h-4" /> I've already paid for this plan
+              </button>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-gray-300 text-sm">Enter the Reference ID from your Paystack receipt:</p>
+              <input
+                className="w-full bg-black border border-gray-700 rounded-lg p-3 text-white outline-none focus:border-[#A500FF]"
+                placeholder="cliva_123456789"
+                value={manualRef}
+                onChange={(e) => setManualRef(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <button onClick={() => finalizeUpgrade(manualRef)} className="flex-1 bg-[#A500FF] py-3 rounded-lg font-bold">Confirm Payment</button>
+                <button onClick={() => setShowManualRef(false)} className="px-4 bg-gray-800 rounded-lg">Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

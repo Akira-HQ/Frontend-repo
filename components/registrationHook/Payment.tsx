@@ -1,158 +1,139 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, CheckCircle, Lock, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import { CheckCircle, ShieldCheck, Zap, Star, LayoutDashboard } from "lucide-react";
 import { useAppContext } from "../AppContext";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { PLAN_CONFIG } from "@/utils/checkPlan";
+import { ClivaStarsBackground } from "@/components/Stars";
+
+// Dynamically import to avoid SSR window error
+const PaystackButton = dynamic(() => import('../hooks/PayStackButton'), { ssr: false });
 
 const PaymentWall: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addToast, setAlertMessage, user, syncQuotas } = useAppContext();
+  const { addToast, setUser, user, syncQuotas } = useAppContext();
   const { callApi } = UseAPI();
 
   const [loading, setLoading] = useState(false);
-  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvc: '', name: '' });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  const hasToasted = useRef(false);
-  const hasRedirected = useRef(false); // ⚡ Prevent infinite redirect loops
+  // URL Params
+  const planQuery = (searchParams.get("plan") || "BASIC").toUpperCase();
+  const plan = PLAN_CONFIG[planQuery as keyof typeof PLAN_CONFIG] || PLAN_CONFIG.BASIC;
+  const isPaidPlanSelected = plan.price > 0;
 
-  // Determine plan from URL
-  const planQuery = (searchParams.get("plan") || "basic").toLowerCase();
-  const selectedPlanKey = planQuery === "pro" ? "PREMIUM" : planQuery.toUpperCase();
-  const storeUrl = searchParams.get("store");
+  const US_TO_NGN_RATE = 1600;
 
-  const plan = PLAN_CONFIG[selectedPlanKey as keyof typeof PLAN_CONFIG] || PLAN_CONFIG.BASIC;
-
-  // --- ⚡ NEW: AUTOMATIC REDIRECT FOR FREE PLAN ⚡ ---
-  useEffect(() => {
-    if (selectedPlanKey === "FREE" && !hasRedirected.current) {
-      hasRedirected.current = true;
-      setLoading(true);
-
-      const finalizeFreeTier = async () => {
-        addToast("Free plan selected. Redirecting to dashboard...", "info");
-        // Optional: Call your backend to finalize the 'FREE' status if necessary
-        // await callApi("/finalize-free-setup", "POST", { storeUrl });
-
-        await syncQuotas();
-        handleFinalizeSubscription();
-      };
-
-      finalizeFreeTier();
-    }
-  }, [selectedPlanKey, syncQuotas]);
-
-  useEffect(() => {
-    if (hasToasted.current) return;
-    if (!user || !user.id) {
-      addToast("Please log in to continue.", "error");
-    }
-    if (storeUrl) {
-      addToast(`Store ${storeUrl} successfully connected!`, "success");
-      hasToasted.current = true;
-    }
-  }, [user, storeUrl, addToast]);
-
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const finalizeUpgrade = async (reference: string) => {
     setLoading(true);
-    setAlertMessage("Processing payment...", "loading");
-
-    if (plan.price <= 0) {
-      handleFinalizeSubscription();
-      return;
-    }
+    addToast("Securing your connection...", "loading");
 
     try {
-      const paymentResponse = await callApi("/process-payment", "POST", {
-        plan: selectedPlanKey,
-        storeUrl: storeUrl,
-        cardDetails: cardDetails,
+      const response = await callApi("/upgrade-plan", "PATCH", {
+        plan: planQuery,
+        storeId: user?.store?.id,
+        paystackReference: reference,
       });
 
-      if (paymentResponse.success) {
-        setPaymentSuccess(true);
-        syncQuotas();
-        handleFinalizeSubscription();
-      } else {
-        throw new Error(paymentResponse.message || "Payment declined.");
-      }
+      setPaymentSuccess(true);
+
+      // Refresh session to update AuthGuard
+      const freshUser = await callApi("/verify-session", "GET");
+      setUser(freshUser.user);
+      await syncQuotas();
+
+      addToast("Subscription Activated!", "success");
+
+      setTimeout(() => {
+        router.replace('/dashboard?view=ai-training');
+      }, 2000);
+
     } catch (error: any) {
-      setAlertMessage(error.message || "Payment failed.", "error");
-      addToast(error.message || "Payment failed.", "error");
+      addToast(error.message || "Verification failed.", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFinalizeSubscription = () => {
-    setAlertMessage("Success! Accessing dashboard...", "success");
-    // Short timeout to allow state sync and user to see the message
-    setTimeout(() => {
-      router.replace('/dashboard'); // Use replace to prevent back-button loops
-    }, 1500);
-  };
-
-  // If redirecting the free user, show a full-screen loader
-  if (selectedPlanKey === "FREE" && loading) {
-    return (
-      <div className="fixed inset-0 bg-[#050505] flex flex-col items-center justify-center z-[200]">
-        <Loader2 className="w-12 h-12 text-[#A500FF] animate-spin mb-4" />
-        <h2 className="text-white font-bold text-xl">Activating your store...</h2>
-      </div>
-    );
-  }
-
   if (paymentSuccess) {
     return (
-      <div className="w-full max-w-lg mx-auto p-10 bg-gray-900 rounded-3xl text-center border border-green-600/50 shadow-xl relative z-10">
-        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h2 className="text-3xl font-bold text-white mb-2">Setup Confirmed!</h2>
-        <p className="text-gray-400">Your {selectedPlanKey} dashboard is ready.</p>
+      <div className="flex flex-col items-center justify-center text-center p-12 bg-gray-900/50 backdrop-blur-xl rounded-[40px] border border-green-500/30 shadow-2xl">
+        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle className="w-12 h-12 text-green-500" />
+        </div>
+        <h2 className="text-4xl font-black text-white mb-4 italic uppercase">Neural Link Established</h2>
+        <p className="text-gray-400 mb-8">Accessing your Cliva {planQuery} command center...</p>
+        <LayoutDashboard className="w-8 h-8 text-[#A500FF] animate-bounce" />
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-gray-900/80 rounded-3xl border border-gray-800 backdrop-blur-md shadow-2xl relative z-10">
-      <h1 className="text-3xl font-extrabold text-center text-white mb-3 flex items-center justify-center gap-2">
-        <CreditCard className="w-7 h-7 text-[#FFB300]" /> Final Step: Activate
-      </h1>
+    <div className="relative w-full max-w-4xl mx-auto">
+      <ClivaStarsBackground density={150} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <div className="space-y-4 p-4 rounded-xl bg-gray-800 border border-gray-700 h-fit">
-          <h2 className="text-2xl font-bold text-[#A500FF] uppercase">{planQuery} Plan</h2>
-          <p className="text-4xl font-extrabold text-white">${plan.price} <span className="text-lg text-gray-500">/mo</span></p>
-          <ul className="space-y-2 text-sm text-gray-300 pt-3 border-t border-gray-700">
-            {plan.features.map((feature: string, index: number) => (
-              <li key={index} className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" /> {feature}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden bg-gray-900/40 backdrop-blur-2xl rounded-[40px] border border-gray-800 shadow-2xl">
+
+        {/* Left Side: Info */}
+        <div className="p-10 lg:p-12 bg-gradient-to-br from-[#A500FF]/10 to-transparent border-r border-gray-800">
+          <div className="px-3 py-1 rounded-full bg-[#A500FF]/20 border border-[#A500FF]/30 text-[#A500FF] text-xs font-bold uppercase tracking-widest mb-6 w-fit">
+            Selected Plan
+          </div>
+
+          <h2 className="text-5xl font-black text-white mb-2 uppercase">{planQuery}</h2>
+          <div className="flex items-baseline gap-2 mb-8">
+            <span className="text-4xl font-light text-white">${plan.price}</span>
+            <span className="text-gray-500">/ month</span>
+          </div>
+
+          <ul className="space-y-4">
+            {plan.features.map((feature: string, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-gray-300">
+                <Star className="w-5 h-5 text-[#00A7FF] fill-[#00A7FF]/20 flex-shrink-0 mt-0.5" />
+                <span className="text-sm font-medium">{feature}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <form onSubmit={handlePaymentSubmit} className="space-y-4">
-          <div className="p-3 bg-blue-900/20 text-sm text-blue-300 rounded-lg flex items-center gap-2">
-            <Lock className="w-4 h-4" /> Secure SSL Encryption
+        {/* Right Side: Action */}
+        <div className="p-10 lg:p-12 flex flex-col justify-center bg-black/20">
+          <div className="mb-10">
+            <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              <ShieldCheck className="text-green-500 w-6 h-6" /> Secure Activation
+            </h3>
+            <p className="text-gray-400 text-sm">Activate your neural store link. Encrypted via Paystack.</p>
           </div>
-          <input type="text" placeholder="Card Number" required onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-            className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 text-white outline-none focus:border-[#A500FF]" />
-          <div className="flex gap-4">
-            <input type="text" placeholder="MM/YY" required onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-              className="w-1/2 p-3 rounded-lg bg-gray-700/50 border border-gray-600 text-white outline-none focus:border-[#A500FF]" />
-            <input type="text" placeholder="CVC" required onChange={(e) => setCardDetails({ ...cardDetails, cvc: e.target.value })}
-              className="w-1/2 p-3 rounded-lg bg-gray-700/50 border border-gray-600 text-white outline-none focus:border-[#A500FF]" />
+
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl bg-gray-800/40 border border-gray-700/50">
+              <div className="flex justify-between items-center mb-1 text-gray-400 text-xs uppercase tracking-widest">
+                <span>Total to pay</span>
+                <Zap className="w-4 h-4 text-[#FFB300]" />
+              </div>
+              <div className="text-3xl font-mono font-bold text-white">
+                ₦{(plan.price * US_TO_NGN_RATE).toLocaleString()}
+              </div>
+            </div>
+
+            <PaystackButton
+              planName={planQuery}
+              isPaidPlanSelected={isPaidPlanSelected}
+              loading={loading}
+              email={user?.email || ""}
+              amount={plan.price * US_TO_NGN_RATE * 100}
+              onSuccess={(ref: any) => finalizeUpgrade(ref.reference)}
+              onClose={() => addToast("Security check cancelled.", "info")}
+            />
+
+            <div className="flex items-center justify-center gap-4 pt-4 grayscale opacity-50">
+              <span className="text-[10px] text-gray-500 uppercase tracking-widest italic">Cliva Security Node Alpha</span>
+            </div>
           </div>
-          <input type="text" placeholder="Name on Card" required onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-            className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 text-white outline-none focus:border-[#A500FF]" />
-          <button type="submit" disabled={loading} className={`w-full py-3 rounded-lg font-bold transition ${loading ? 'bg-gray-600' : 'bg-gradient-to-r from-[#FFB300] to-[#A500FF] hover:opacity-90'} text-white shadow-lg active:scale-95`}>
-            {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Pay $${plan.price}.00 & Launch`}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

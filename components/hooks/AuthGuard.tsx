@@ -13,24 +13,27 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkGating = (u: any) => {
+      if (!u) return;
+
       const planName = u.plan?.toUpperCase().trim();
       const isFreeUser = planName === 'FREE';
       const storeAuthorized = u.store?.is_authorized === true;
       const step = u.onboarding_step;
 
       // 1. Force Store Connection if missing or unauthorized
-      if (step === "CONNECT_STORE" || !storeAuthorized) {
+      if (!storeAuthorized && step !== "COMPLETED") {
         router.replace("/register?step=connect-store");
         return false;
       }
 
-      // 2. Handle Payment Wall (Skip if FREE, or if already PAID)
-      if (!isFreeUser && (step === "PAYMENT_WALL" || !u.is_paid)) {
+      // 2. Handle Payment Wall
+      // If NOT free, and the DB doesn't say they are paid, and they are still in the payment step
+      if (!isFreeUser && u.is_paid === false && step === "PAYMENT_WALL") {
         router.replace(`/register/payment-wall?plan=${u.plan}&store=${u.store?.url || ""}`);
         return false;
       }
 
-      // 3. Access Granted
+      // 3. Access Granted: Either they are PAID or they are FREE
       setIsLoading(false);
       return true;
     };

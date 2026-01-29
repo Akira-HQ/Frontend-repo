@@ -1,7 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
-import { BiChevronDown, BiChevronUp } from "react-icons/bi";
-import { HiSparkles } from "react-icons/hi2";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import ProductTable from "./ProductTable";
 import ProductAudit from "./ProductAudit";
 import ProductTableSkeleton from "./ProductTableSkeleton";
@@ -14,37 +12,36 @@ const ProductsAnalysisCom = () => {
   const [analyzedProducts, setAnalyzedProducts] = useState<any[]>([]);
   const [isBgAnalyzing, setIsBgAnalyzing] = useState(false);
 
-  // Destructure 'user' from context to fix "Cannot find name 'user'" errors
   const { callApi } = UseAPI();
-  const { syncQuotas, user } = useAppContext(); // ⚡️ ADDED 'user' HERE
+  const { syncQuotas, user } = useAppContext();
+
+  // Use a ref to track if we are already fetching to prevent "Network Changed" spam
+  const isFetching = useRef(false);
 
   const fetchProducts = useCallback(async (silent = false) => {
+    if (isFetching.current) return;
     if (!silent) setIsLoading(true);
+
+    isFetching.current = true;
     try {
       const response = await callApi("/products/analyze");
       if (response?.data) {
         const products = response.data.analyzedProducts;
         const quotas = response.data.quotas;
-
         setAnalyzedProducts(products);
 
-        // ⚡️ TIGHT LOGIC FIX:
-        // We are only "Analyzing" if:
-        // 1. There are products not yet AI audited
-        // 2. AND we haven't hit our daily energy limit (audits_used < audits_limit)
         const hasPending = products.some((p: any) => !p.is_ai_audited);
         const hasEnergy = quotas.audits_used < quotas.audits_limit;
-
         setIsBgAnalyzing(hasPending && hasEnergy);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Fetch Products Error:", error);
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
   }, [callApi]);
 
-  // Define handleProductUpdated to fix "Cannot find name 'handleProductUpdated'" error
   const handleProductUpdated = (updated: any) => {
     setAnalyzedProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setSelectedProduct(updated);
@@ -52,26 +49,36 @@ const ProductsAnalysisCom = () => {
 
   // Real-time Neural Link
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+    if (!user?.id) return;
 
-      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}&type=dashboard`);
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-      ws.onmessage = (event) => {
+    // Use environment variable for the URL
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+    const ws = new WebSocket(`${wsUrl}?token=${token}&type=dashboard`);
+
+    ws.onmessage = (event) => {
+      try {
         const data = JSON.parse(event.data);
-        // Refresh UI when a product is analyzed or process finishes
         if (data.type === "AUDIT_PROGRESS" || data.type === "AUDIT_COMPLETE") {
-          fetchProducts(true); // Update table scores
-          syncQuotas();        // Drain Energy Bars in real-time
+          // fetchProducts(true) updates the counts automatically
+          fetchProducts(true);
+          syncQuotas();
         }
-      };
+      } catch (e) {
+        console.error("WS Parsing Error", e);
+      }
+    };
 
-      return () => ws.close();
-    }
-  }, [fetchProducts, syncQuotas]);
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) ws.close();
+    };
+  }, [user?.id, fetchProducts, syncQuotas]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <div className="mt-20 px-6 max-w-[1600px] mx-auto pb-20">
@@ -93,9 +100,8 @@ const ProductsAnalysisCom = () => {
           <ProductAudit
             product={selectedProduct}
             onSelect={setSelectedProduct}
-            onProductUpdated={handleProductUpdated} // Fixed
+            onProductUpdated={handleProductUpdated}
             isBgAnalyzing={isBgAnalyzing}
-            // Logic for Quota calculation using destructured 'user'
             enhanceQuota={user?.quotas ? user.quotas.enhance_limit - user.quotas.enhance_used : 0}
             setEnhanceQuota={syncQuotas}
           />
