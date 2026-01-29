@@ -31,7 +31,6 @@ const LoginContent: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. Basic Validation
       if (!email || !password) {
         const errorMsg = "Email and password are required.";
         setAlertMessage(errorMsg, "error");
@@ -42,7 +41,6 @@ const LoginContent: React.FC = () => {
 
       setAlertMessage("Authenticating with Cliva...", "loading");
 
-      // 2. API Call
       const response = await callApi("/user/login", "POST", {
         email,
         password,
@@ -52,43 +50,40 @@ const LoginContent: React.FC = () => {
         throw new Error("Authentication failed: No token received.");
       }
 
-      // ⚡ 3. CRITICAL: Store Token & Hydrate State IMMEDIATELY ⚡
-      // This ensures UseAPI and syncQuotas can use the token for the next steps
       localStorage.setItem("token", response.token);
 
       const userData = response.data;
       const { onboarding_step, plan, store, is_paid } = userData;
 
-      // Update global context so components like Sidebar don't crash
       setUser(userData);
 
-      // ⚡ 4. GATING LOGIC: Enforce Store & Payment ⚡
+      // ⚡️ UPDATED GATING LOGIC: Match AuthGuard behavior ⚡️
 
-      // Check for Store Connection
-      if (onboarding_step === "CONNECT_STORE" || !store) {
+      // 1. Check for Store Connection
+      // Only redirect if they haven't completed onboarding and store is missing
+      if (onboarding_step !== "COMPLETED" && (!store || !store.is_authorized)) {
         addToast("Step 2: Connect your Shopify store to activate Cliva.", "info");
         router.push("/register?step=connect-store");
         return;
       }
 
-      // Check for Payment (Skip for FREE plan users)
-      const needsPayment = plan?.toUpperCase() !== 'FREE' && !is_paid;
-      if (onboarding_step === "PAYMENT_WALL" || needsPayment) {
+      // 2. Check for Payment Wall
+      // Skip if FREE. 
+      // If PAID plan: Only redirect if is_paid is false AND they are explicitly at the PAYMENT_WALL step.
+      const isFreeUser = plan?.toUpperCase().trim() === 'FREE';
+      if (!isFreeUser && is_paid === false && onboarding_step === "PAYMENT_WALL") {
         addToast("Almost there! Please finalize your subscription.", "info");
-        // Using store.url from our new schema
         router.push(`/register/payment-wall?plan=${plan}&store=${store?.url || ""}`);
         return;
       }
 
-      // ⚡ 5. Final Success Path ⚡
-
-      // Initialize the Neural Link / Fetch live Quotas 
+      // ⚡️ 3. FINAL SUCCESS PATH ⚡️
+      // If they are COMPLETED or is_paid is true, they go straight to Dashboard
       await syncQuotas();
 
       setAlertMessage("Identity verified. Entering dashboard...", "success");
       addToast("Welcome back!", "success");
 
-      // 3. Final Redirect to Dashboard
       router.push("/dashboard?view=ai-training");
 
     } catch (error: any) {
@@ -96,14 +91,13 @@ const LoginContent: React.FC = () => {
       const errorMsg = error.message || "Invalid credentials.";
       setAlertMessage(errorMsg, "error");
       addToast(errorMsg, "error");
-
-      // Clean up in case of failed login attempts
       localStorage.removeItem("token");
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <form
       onSubmit={handleSignIn}
@@ -134,7 +128,7 @@ const LoginContent: React.FC = () => {
       </div>
 
       <div className="flex justify-end pt-1">
-        <a href="/register/forgot-password" className="text-sm text-[#00A7FF] hover:underline">
+        <a href="/register/forgot-password" title="reset password" className="text-sm text-[#00A7FF] hover:underline">
           Forgot Password?
         </a>
       </div>

@@ -205,9 +205,9 @@ const Sidebar = ({
                   <h1 className={`${isCollapsed ? "hidden" : "block"} transition-all duration-300 ease-out text-2xl font-bold text-white`}>
                     {user?.name}
                   </h1>
-                  <span className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md text-xs font-bold border border-green-500/20">
+                  <a href="/register/upgrade-plan" className="text-green-500 bg-gray-900 px-3 py-0.5 rounded-md text-xs font-bold border border-green-500/20">
                     {user?.plan.toUpperCase()}
-                  </span>
+                  </a>
                 </div>
                 {user?.store?.url ? (
                   <a

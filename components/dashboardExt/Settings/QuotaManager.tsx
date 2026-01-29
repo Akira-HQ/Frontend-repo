@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react"; // Added useCallback
 import { Zap, Search, BarChart3, ChevronDown, Database, ShieldCheck, Loader2, MessageSquare, TrendingUp, Info, Activity } from "lucide-react";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { useAppContext } from "@/components/AppContext";
@@ -13,27 +13,44 @@ export const QuotaMonitor = () => {
   const [timeFilter, setTimeFilter] = useState("Last Month");
 
   const { callApi } = UseAPI();
-  const { user, addToast } = useAppContext();
+  const { user, addToast, wsEvent } = useAppContext(); // Destructured wsEvent
 
-  useEffect(() => {
-    const fetchUsage = async () => {
-      if (!user?.id) return;
-      setLoading(true);
-      try {
-        const res = await callApi(`/user-quotas?userId=${user.id}&filter=${timeFilter.toLowerCase()}`, "GET");
-        if (res && res.quotas) {
-          setQuotas(res.quotas);
-          setHistory(res.history || []);
-        }
-      } catch (err) {
-        console.error("Quota Sync Error:", err);
-        addToast("Failed to sync quotas.", "error");
-      } finally {
-        setLoading(false);
+  // ⚡️ Wrapped fetchUsage in useCallback to allow triggers from both useEffect and WebSockets
+  const fetchUsage = useCallback(async (isSilent = false) => {
+    if (!user?.id) return;
+    if (!isSilent) setLoading(true);
+    try {
+      const res = await callApi(`/user-quotas?userId=${user.id}&filter=${timeFilter.toLowerCase()}`, "GET");
+      if (res && res.quotas) {
+        setQuotas(res.quotas);
+        setHistory(res.history || []);
       }
-    };
+    } catch (err) {
+      console.error("Quota Sync Error:", err);
+      if (!isSilent) addToast("Failed to sync quotas.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, timeFilter, callApi, addToast]);
+
+  // Initial Load & Filter Changes
+  useEffect(() => {
     fetchUsage();
-  }, [user?.id, timeFilter, platform, callApi, addToast]);
+  }, [fetchUsage, platform]);
+
+  // ⚡️ WebSocket Listener: Automatically refreshes data when Neural Audit events occur
+  useEffect(() => {
+    if (!wsEvent) return;
+
+    // Refresh UI silently when audit is progressing, completes, or specific quota updates arrive
+    if (
+      wsEvent.type === "AUDIT_PROGRESS" ||
+      wsEvent.type === "AUDIT_COMPLETE" ||
+      wsEvent.type === "QUOTA_UPDATE"
+    ) {
+      fetchUsage(true); // 'true' performs a silent background sync without showing a loader
+    }
+  }, [wsEvent, fetchUsage]);
 
   const maxVal = useMemo(() => {
     if (!history.length) return 10;

@@ -27,7 +27,6 @@ const AiTrainingContent = () => {
 
         setProgress({ current: finished, total });
 
-        // Only show analyzing if we haven't hit the limit
         const hasEnergy = quotas.audits_used < quotas.audits_limit;
         setIsAnalyzing(finished < total && hasEnergy);
 
@@ -37,6 +36,39 @@ const AiTrainingContent = () => {
       console.error("Sync Failed", err);
     }
   }, [callApi, globalSync]);
+
+  useEffect(() => {
+    syncContentData();
+  }, [syncContentData]);
+
+  // --- 2. NEURAL LINK (Fixing Real-Time Updates) ---
+  useEffect(() => {
+    if (!wsEvent) return;
+
+    if (wsEvent.type === "AUDIT_PROGRESS") {
+      setIsAnalyzing(true);
+      // UPDATE: Instantly set progress from WS data
+      setProgress({ current: wsEvent.current, total: wsEvent.total });
+
+      // ⚡️ TRIGGER: Ensure the global context refreshes quotas too
+      globalSync();
+
+      // ⚡️ IMPORTANT: If the current tab relies on analyzed product data,
+      // we might need to trigger a fresh fetch or update local product state here.
+      if (wsEvent.current % 5 === 0) {
+        // Sync full data every 5 products to keep the list updated without lag
+        syncContentData();
+      }
+    }
+
+    if (wsEvent.type === "AUDIT_COMPLETE") {
+      setIsAnalyzing(false);
+      setProgress((prev) => ({ ...prev, current: prev.total })); // Visual completion
+      syncContentData(); // Final full sync
+      globalSync();
+      addToast(wsEvent.message || "Audit Complete", "success");
+    }
+  }, [wsEvent, syncContentData, globalSync, addToast]);
 
   useEffect(() => {
     syncContentData();
