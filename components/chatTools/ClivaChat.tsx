@@ -162,6 +162,8 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
         message: messageToSend,
         context: currentView,
         productId: activeProduct?.id || null,
+        productData: activeProduct || null,
+        
         accountStats: { history: [], currentQuotas: [] }
       });
 
