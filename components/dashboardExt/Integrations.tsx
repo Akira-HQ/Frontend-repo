@@ -88,7 +88,7 @@ const IntegrationsHub: React.FC = () => {
         a=l.createElement(i);a.async=1;a.src=v;
         a.setAttribute('data-cliva-id', '${user?.store?.id || "cliva_test_store_001"}');
         l.head.appendChild(a);
-      })(window, document, 'script', 'https://cliva.ai/pulse.mjs');
+      })(window, document, 'script', 'https://akira-backend-vklc.onrender.com/pulse.mjs');
     </script>
   `;
 
