@@ -38,7 +38,7 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
   const currentView = searchParams.get("view") || "general";
   const isSettings = currentView === "settings" || currentView === "quotas";
   const isInbox = currentView === "inbox";
-  const isIntegration = currentView === "integrations"; // ⚡️ NEW: Detect Integration view
+  const isIntegration = currentView === "integrations";
 
   const contextKey = activeProduct ? `product-${activeProduct.id}` : `view-${currentView}`;
 
@@ -94,9 +94,11 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
 
   const getQuickActions = () => {
     if (activeProduct) {
+      // ⚡️ FIX: Use nullish coalescing to avoid "undefined%" in the question
+      const score = activeProduct.health_score ?? activeProduct.health ?? 0;
       return [
         { label: "Identify Friction", value: "What are the specific conversion blockers for this product?" },
-        { label: "Analyze Score", value: `Explain why this score is ${activeProduct.health_score || activeProduct.health}%` }
+        { label: "Analyze Score", value: `Explain why this score is ${score}%` }
       ];
     }
     if (isInbox) {
@@ -106,7 +108,6 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
       ];
     }
     if (isIntegration) {
-      // ⚡️ Integration specific quick actions
       return [
         { label: "Installation Guide", value: "Show me exactly how to install the snippet in my Shopify theme." },
         { label: "Verification Status", value: "Is my neural link currently active and tracking?" }
@@ -157,13 +158,20 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
     setIsTyping(true);
     setIsFinishingType(true);
 
+    // ⚡️ FIX: Pass storeSnapshot to backend to prevent "Inventory Snapshot Pending" fallback
+    const snapshot = activeProduct ? {
+      selectedProduct: activeProduct.name,
+      health: activeProduct.health_score ?? activeProduct.health ?? 0,
+      is_audited: !!activeProduct.is_ai_audited
+    } : null;
+
     try {
       const res = await callApi("/chat", "POST", {
         message: messageToSend,
         context: currentView,
         productId: activeProduct?.id || null,
         productData: activeProduct || null,
-        
+        storeSnapshot: snapshot, // Added this field
         accountStats: { history: [], currentQuotas: [] }
       });
 
