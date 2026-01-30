@@ -86,7 +86,7 @@ const IntegrationsHub: React.FC = () => {
     <script>
       (function(c,l,i,v,a){
         a=l.createElement(i);a.async=1;a.src=v;
-        a.setAttribute('data-cliva-id', '${user?.store?.id || "cliva_test_store_001"}');
+        a.setAttribute('data-cliva-id', '${user?.store?.snippetToken || "cliva_test_store_001"}');
         l.head.appendChild(a);
       })(window, document, 'script', 'https://akira-backend-vklc.onrender.com/pulse.mjs');
     </script>
