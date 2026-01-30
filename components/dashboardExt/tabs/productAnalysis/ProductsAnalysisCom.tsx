@@ -25,7 +25,8 @@ const ProductsAnalysisCom = () => {
     isFetching.current = true;
     try {
       const response = await callApi("/products/analyze");
-      if (response?.data) {
+      console.log(response)
+      if (response) {
         const products = response.data.analyzedProducts;
         const quotas = response.data.quotas;
         setAnalyzedProducts(products);
