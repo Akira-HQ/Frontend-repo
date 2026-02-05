@@ -12,28 +12,35 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { callApi } = UseAPI();
 
   useEffect(() => {
+    /**
+     * ⚡️ NEURAL GATING LOGIC
+     * Determines if the user identity has clearance to access the current view.
+     */
     const checkGating = (u: any) => {
       if (!u) return;
 
       const planName = u.plan?.toUpperCase().trim();
       const isFreeUser = planName === 'FREE';
+      const isFounder = u.is_founding_member === true; // ⚡️ FOUNDER STATUS DETECTED
       const storeAuthorized = u.store?.is_authorized === true;
       const step = u.onboarding_step;
 
-      // 1. Force Store Connection if missing or unauthorized
+      // 1. Force Store Connection: If the pulse isn't linked, they can't enter.
+      // Exception: If they've already "Completed" onboarding.
       if (!storeAuthorized && step !== "COMPLETED") {
         router.replace("/register?step=connect-store");
         return false;
       }
 
-      // 2. Handle Payment Wall
-      // If NOT free, and the DB doesn't say they are paid, and they are still in the payment step
-      if (!isFreeUser && u.is_paid === false && step === "PAYMENT_WALL") {
+      // 2. Handle Payment Wall:
+      // Founders skip this because they are on an active trial.
+      // Free users skip this because they have no subscription.
+      if (!isFreeUser && !isFounder && u.is_paid === false && step === "PAYMENT_WALL") {
         router.replace(`/register/payment-wall?plan=${u.plan}&store=${u.store?.url || ""}`);
         return false;
       }
 
-      // 3. Access Granted: Either they are PAID or they are FREE
+      // 3. Clearance Granted
       setIsLoading(false);
       return true;
     };
@@ -47,9 +54,11 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
       try {
         const response = await callApi("/verify-session");
-        if (!response.valid || !response.user) throw new Error("User not found");
+        if (!response.valid || !response.user) throw new Error("Neural identity mismatch");
 
         const vUser = response.user;
+
+        // Update global state and run gating check
         setUser(vUser);
         checkGating(vUser);
       } catch (error) {
@@ -59,6 +68,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
+    // Execution Priority: Check existing user state first, otherwise verify token with server.
     if (!user) {
       verifySession();
     } else {

@@ -53,7 +53,8 @@ const LoginContent: React.FC = () => {
       localStorage.setItem("token", response.token);
 
       const userData = response.data;
-      const { onboarding_step, plan, store, is_paid } = userData;
+      // ⚡️ MODIFIED: Destructure is_founding_member to use in gating logic
+      const { onboarding_step, plan, store, is_paid, is_founding_member } = userData;
 
       setUser(userData);
 
@@ -69,20 +70,22 @@ const LoginContent: React.FC = () => {
 
       // 2. Check for Payment Wall
       // Skip if FREE. 
-      // If PAID plan: Only redirect if is_paid is false AND they are explicitly at the PAYMENT_WALL step.
+      // ⚡️ MODIFIED: If user is a Founder, they also skip the Payment Wall (trial access)
       const isFreeUser = plan?.toUpperCase().trim() === 'FREE';
-      if (!isFreeUser && is_paid === false && onboarding_step === "PAYMENT_WALL") {
+      const isFounder = is_founding_member === true;
+
+      if (!isFreeUser && !isFounder && is_paid === false && onboarding_step === "PAYMENT_WALL") {
         addToast("Almost there! Please finalize your subscription.", "info");
         router.push(`/register/payment-wall?plan=${plan}&store=${store?.url || ""}`);
         return;
       }
 
       // ⚡️ 3. FINAL SUCCESS PATH ⚡️
-      // If they are COMPLETED or is_paid is true, they go straight to Dashboard
+      // If they are COMPLETED, is_paid is true, or is_founding_member is true, they go straight to Dashboard
       await syncQuotas();
 
       setAlertMessage("Identity verified. Entering dashboard...", "success");
-      addToast("Welcome back!", "success");
+      addToast(isFounder ? "Welcome back, Founder!" : "Welcome back!", "success");
 
       router.push("/dashboard?view=ai-training");
 

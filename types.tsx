@@ -184,7 +184,7 @@ export interface User {
   name: string;
   email: string;
   plan: "FREE" | "BASIC" | "PREMIUM"; // Matches DB UPPER case
-  onboarding_step: 'ACCOUNT_CREATION' | 'CONNECT_STORE' | 'PAYMENT_WALL' | 'DASHBOARD';
+  onboarding_step: 'ACCOUNT_CREATION' | 'CONNECT_STORE' | 'PAYMENT_WALL' | 'DASHBOARD' | 'COMPLETED';
   is_paid: boolean;
   usage: {
     daily_audits_used: number;
