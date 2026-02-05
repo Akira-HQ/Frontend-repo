@@ -21,20 +21,27 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
       const planName = u.plan?.toUpperCase().trim();
       const isFreeUser = planName === 'FREE';
-      const isFounder = u.is_founding_member === true; // ⚡️ FOUNDER STATUS DETECTED
+      const isFounder = u.is_founding_member === true;
       const storeAuthorized = u.store?.is_authorized === true;
       const step = u.onboarding_step;
 
-      // 1. Force Store Connection: If the pulse isn't linked, they can't enter.
-      // Exception: If they've already "Completed" onboarding.
-      if (!storeAuthorized && step !== "COMPLETED") {
+      /**
+       * ⚡️ STEP 1: Store Connection Bypass
+       * We only redirect to connect-store if:
+       * 1. The store is NOT authorized AND
+       * 2. They aren't already further along in the funnel (PAYMENT_WALL or COMPLETED)
+       */
+      const hasPassedStoreStep = step === "PAYMENT_WALL" || step === "COMPLETED";
+
+      if (!storeAuthorized && !hasPassedStoreStep) {
         router.replace("/register?step=connect-store");
         return false;
       }
 
-      // 2. Handle Payment Wall:
-      // Founders skip this because they are on an active trial.
-      // Free users skip this because they have no subscription.
+      /**
+       * ⚡️ STEP 2: Payment Wall Bypass
+       * Founders and Free users should never see the payment wall.
+       */
       if (!isFreeUser && !isFounder && u.is_paid === false && step === "PAYMENT_WALL") {
         router.replace(`/register/payment-wall?plan=${u.plan}&store=${u.store?.url || ""}`);
         return false;
