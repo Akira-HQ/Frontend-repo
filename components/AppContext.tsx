@@ -137,7 +137,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const wsBase = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8001";
+      const wsBase = process.env.NEXT_PUBLIC_WS_URL || "wss://localhost:8001";
       ws = new WebSocket(`${wsBase.replace(/\/$/, "")}?token=${token}&type=dashboard`);
       socketRef.current = ws;
 
