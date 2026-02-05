@@ -53,27 +53,26 @@ const LoginContent: React.FC = () => {
       localStorage.setItem("token", response.token);
 
       const userData = response.data;
-      // ⚡️ MODIFIED: Destructure is_founding_member to use in gating logic
       const { onboarding_step, plan, store, is_paid, is_founding_member } = userData;
 
       setUser(userData);
 
-      // ⚡️ UPDATED GATING LOGIC: Match AuthGuard behavior ⚡️
+      // ⚡️ REFINED GATING LOGIC: Prevents "Connect Store" loops ⚡️
+
+      const isFreeUser = plan?.toUpperCase().trim() === 'FREE';
+      const isFounder = is_founding_member === true;
+      const hasPassedStoreStep = onboarding_step === "PAYMENT_WALL" || onboarding_step === "COMPLETED";
 
       // 1. Check for Store Connection
-      // Only redirect if they haven't completed onboarding and store is missing
-      if (onboarding_step !== "COMPLETED" && (!store || !store.is_authorized)) {
+      // Only redirect to connect-store if they haven't passed that phase and store is missing
+      if (!hasPassedStoreStep && (!store || !store.is_authorized)) {
         addToast("Step 2: Connect your Shopify store to activate Cliva.", "info");
         router.push("/register?step=connect-store");
         return;
       }
 
       // 2. Check for Payment Wall
-      // Skip if FREE. 
-      // ⚡️ MODIFIED: If user is a Founder, they also skip the Payment Wall (trial access)
-      const isFreeUser = plan?.toUpperCase().trim() === 'FREE';
-      const isFounder = is_founding_member === true;
-
+      // Founders and Free users bypass this entirely. 
       if (!isFreeUser && !isFounder && is_paid === false && onboarding_step === "PAYMENT_WALL") {
         addToast("Almost there! Please finalize your subscription.", "info");
         router.push(`/register/payment-wall?plan=${plan}&store=${store?.url || ""}`);
@@ -81,7 +80,7 @@ const LoginContent: React.FC = () => {
       }
 
       // ⚡️ 3. FINAL SUCCESS PATH ⚡️
-      // If they are COMPLETED, is_paid is true, or is_founding_member is true, they go straight to Dashboard
+      // If they are COMPLETED, is_paid is true, or is_founder is true, they go straight to Dashboard
       await syncQuotas();
 
       setAlertMessage("Identity verified. Entering dashboard...", "success");
