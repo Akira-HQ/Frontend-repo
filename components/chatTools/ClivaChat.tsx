@@ -141,4 +141,7 @@ const ClivaChat = ({ isOpen, onClose, activeProduct }: any) => {
       </div>
     </>
   );
+
 };
+
+export default ClivaChat;
