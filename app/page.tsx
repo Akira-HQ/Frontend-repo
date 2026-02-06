@@ -132,15 +132,22 @@ const Home: React.FC = () => {
           <PricingToggle monthly={isMonthly} setMonthly={setIsMonthly} />
           <div className="grid lg:grid-cols-3 gap-8 items-stretch">
             {pricingData.map((plan, index) => (
-              <PricingCard key={index} {...plan} onCTA={handleCtaClick} monthly={isMonthly} />
+              <PricingCard
+                key={index}
+                {...plan}
+                onCTAAction={handleCtaClick} // ⚡️ Change from onCtaClick
+                monthly={isMonthly}
+              />
             ))}
           </div>
         </section>
         {/* <DeepConversionSection features={featureData}  /> */}
 
         <TestimonialPlaceholder />
-        <FinalCTA onStart={() => handleCtaClick("premium")} onSeePlans={() => handleCtaClick("basic")} />
-      </main>
+        <FinalCTA
+          onStartAction={() => handleCtaClick("premium")}     // ⚡️ Change from onStart
+          onSeePlansAction={() => handleCtaClick("basic")}    // ⚡️ Change from onSeePlans
+        />      </main>
 
       <LandingChat />
       <Footer />
