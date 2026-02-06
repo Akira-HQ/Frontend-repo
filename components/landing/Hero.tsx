@@ -1,230 +1,217 @@
+"use client";
 import React from "react";
+import { motion, Variants } from "framer-motion";
 import {
-  ShoppingCart,
   RefreshCw,
   Layers,
   Zap,
-  MessageCircle,
-  Heart,
-  CheckCircle,
   TrendingUp,
 } from "lucide-react";
 import { PrimaryButton, SecondaryButton } from "../Button";
 import Link from "next/link";
 
-// Assuming you have a component that handles CTA clicks passed as a prop
-// Renamed prop type to match your preferred format (onCta)
 interface InspiredHeroSectionProps {
-  onCta: (message: string) => void;
+  onCtaAction: (message: string) => void;
 }
+
+// --- ⚡️ Premium Motion Variants (Self-Contained) ---
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] },
+  },
+};
+
+const panelVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
 
 const TagPill: React.FC<{ text: string }> = ({ text }) => (
-  <div className="inline-block py-1 px-3 mb-4 rounded-full text-xs font-medium uppercase tracking-widest text-[#9370DB] bg-[#9370DB]/20 border border-[#9370DB]/30 backdrop-blur-sm">
+  <motion.div
+    variants={itemVariants}
+    className="inline-block py-1 px-3 mb-4 rounded-full text-xs font-medium uppercase tracking-widest text-[#9370DB] bg-[#9370DB]/20 border border-[#9370DB]/30 backdrop-blur-sm"
+  >
     {text}
-  </div>
+  </motion.div>
 );
 
-const IntegrationLogo: React.FC<{ name: string }> = ({ name }) => (
-  <div className="text-sm font-semibold text-white/70 hover:text-white transition duration-200 cursor-default">
-    <span className="text-[#A500FF] font-black mr-1">&lt;</span>
-    {name}
-    <span className="text-[#A500FF] font-black ml-1">&gt;</span>
-  </div>
-);
-
-// Custom styles for the background glows and animations (using standard CSS within the component)
 const customStyles = `
 @keyframes pulse-slow {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.4;
-  }
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.4; }
 }
-
-.animate-pulse-slow {
-  animation: pulse-slow 8s infinite alternate ease-in-out;
-}
-
-.animate-pulse-slow-reverse {
-  animation: pulse-slow 8s infinite alternate-reverse ease-in-out;
-}
-
-/* Central Radial Gradient for background depth */
-.bg-radial-gradient-purple {
-  background: radial-gradient(circle at center, rgba(165, 0, 255, 0.1), transparent 50%);
-}
+.animate-pulse-slow { animation: pulse-slow 8s infinite alternate ease-in-out; }
+.animate-pulse-slow-reverse { animation: pulse-slow 8s infinite alternate-reverse ease-in-out; }
+.bg-radial-gradient-purple { background: radial-gradient(circle at center, rgba(165, 0, 255, 0.1), transparent 50%); }
 `;
 
-// Adapted to use the simplified content structure you prefer, but retaining the modern design elements
-export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCta }) => {
+export const HeroSection: React.FC<InspiredHeroSectionProps> = ({ onCtaAction }) => {
   return (
-    // Note: The main wrapper needs to include the custom styles
     <section
       id="hero"
-      className="relative pt-24 pb-40 px-4 text-center overflow-hidden min-h-[80vh]"
+      className="relative pt-24 pb-40 px-4 text-center overflow-hidden min-h-[80vh] bg-[#08090a]"
     >
       <style>{customStyles}</style>
 
-      {/* 1. Illustration and Neon Glow Handling (CSS/Tailwind Approach) */}
+      {/* 1. Background Atmosphere */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Left Glow (Orange) */}
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-orange-500/30 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse-slow"></div>
-        {/* Right Glow (Purple) */}
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-600/30 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse-slow-reverse"></div>
-        {/* Central Radial Gradient - for the depth */}
         <div className="absolute inset-0 bg-radial-gradient-purple opacity-20"></div>
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 max-w-5xl mx-auto">
-        {/* Top Pill / Tag */}
+      <motion.div
+        className="relative z-10 max-w-5xl mx-auto"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={containerVariants}
+      >
         <TagPill text="✨ AI Sales Manager" />
 
-        {/* Hero Title (Using your preferred text structure) */}
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+        <motion.h1
+          variants={itemVariants}
+          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-white"
+        >
           CLIVA: Your Personal
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#A500FF] to-[#FFB300] ml-3">
             AI Sales Manager.
           </span>
-        </h1>
+        </motion.h1>
 
-        {/* Sub-text (Using your preferred text) */}
-        <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10">
+        <motion.p
+          variants={itemVariants}
+          className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10"
+        >
           Cliva is an intelligent, automated assistant that engages customers,
           proactively interacts with customers, and drives sales for your
           e-commerce business.
-        </p>
+        </motion.p>
 
-        {/* CTA Button Group */}
-        <div className="flex justify-center space-x-4 mb-20">
-          <PrimaryButton onClick={() => onCta("Free")}>
+        <motion.div variants={itemVariants} className="flex justify-center space-x-4 mb-20">
+          <PrimaryButton onClick={() => onCtaAction("Free")}>
             Start Free Trial
           </PrimaryButton>
-          <SecondaryButton >
-            <Link href={'#pricing'}>
-              See Plans
-            </Link>
+          <SecondaryButton>
+            <Link href={'#pricing'}>See Plans</Link>
           </SecondaryButton>
-          
-        </div>
+        </motion.div>
+      </motion.div>
 
-        {/* Integrations Bar
-        <div className="flex justify-center items-center space-x-4 md:space-x-8 mt-16 pt-8 border-t border-white/10 flex-wrap gap-y-4">
-          <IntegrationLogo name="Shopify" />
-          <IntegrationLogo name="Klaviyo" />
-          <IntegrationLogo name="&lt;Trello&gt;" />
-          <IntegrationLogo name="Slack" />
-          <IntegrationLogo name="HubSpot" />
-        </div> */}
-      </div>
-
-      {/* 2. Glassmorphism Panels (Dashboard Mockup) - Now illustrating the core concept */}
-      <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-3 gap-6 mt-24">
-        {/* Panel 1 — Simple Definition */}
-        <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-orange-900/40">
-          <h3 className="text-xl font-bold text-[#FFB300] mb-3">
-            What Cliva Really Does
-          </h3>
+      {/* 2. Dashboard Mockup Panels */}
+      <motion.div
+        className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-3 gap-6 mt-24"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={{ visible: { transition: { staggerChildren: 0.2 } } }}
+      >
+        {/* Panel 1 */}
+        <motion.div
+          variants={panelVariants}
+          whileHover={{ y: -5 }}
+          className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-orange-900/40 text-left"
+        >
+          <h3 className="text-xl font-bold text-[#FFB300] mb-3">What Cliva Really Does</h3>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Cliva works like a{" "}
-            <span className="text-white font-semibold">24/7 sales manager</span>
-            for your online store. It chats with customers, answers questions,
-            recommends products, handles objections, and follows up —
-            automatically.
+            Cliva works like a <span className="text-white font-semibold">24/7 sales manager</span> for your online store.
+            It recommendations products, handles objections, and follows up — automatically.
           </p>
-
           <div className="mt-5 p-4 rounded-xl bg-white/5 border border-white/10 flex items-start space-x-3">
             <Zap className="w-5 h-5 text-[#FFB300] shrink-0 mt-1" />
             <div>
               <p className="text-white font-semibold">Always available</p>
-              <p className="text-xs text-gray-400">
-                Engages customers instantly, anytime.
-              </p>
+              <p className="text-xs text-gray-400">Engages customers instantly, anytime.</p>
             </div>
           </div>
+        </motion.div>
 
-          <div className="mt-3 text-xs text-gray-500">
-            *No scripts. No delays. Pure intelligence.
-          </div>
-        </div>
-
-        {/* Panel 2 — Live Sales Scenario */}
-        <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-purple-900/40">
-          <h3 className="text-xl font-bold text-[#A500FF] mb-3">
-            Cliva in Real Action
-          </h3>
-
+        {/* Panel 2 */}
+        <motion.div
+          variants={panelVariants}
+          whileHover={{ y: -5 }}
+          className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-purple-900/40 text-left"
+        >
+          <h3 className="text-xl font-bold text-[#A500FF] mb-3">Cliva in Real Action</h3>
           <div className="space-y-4">
-            {/* Customer */}
             <div className="text-right">
               <span className="inline-block px-4 py-2 bg-[#A500FF]/50 text-white rounded-2xl rounded-br-none text-sm">
                 Does this dress come in size XL?
               </span>
-              <p className="text-xs text-gray-500 mt-1">Customer • 9:42 AM</p>
             </div>
-
-            {/* Cliva */}
             <div className="text-left">
               <span className="inline-block px-4 py-2 bg-white/10 text-white rounded-2xl rounded-tl-none text-sm leading-relaxed">
-                Yes, it does! 🎉
-                <br />
+                Yes, it does! 🎉 <br />
                 We have XL in red and midnight blue.
-                <br />
-                You’ll love the fit — it’s our highest-rated size for comfort.
-                <br />
-                <span className="underline">Click here</span> to see available
-                colors.
               </span>
-              <p className="text-xs text-gray-500 mt-1">Cliva • 9:42 AM</p>
             </div>
-
-            {/* Intent */}
             <div className="flex items-center space-x-2 text-xs text-gray-400 mt-3">
-              <RefreshCw className="w-4 h-4" />
-              <span>
-                Intent identified: Size check → high interest → conversion path
-                created.
-              </span>
+              <RefreshCw className="w-4 h-4 animate-spin-slow" />
+              <span>Intent identified: Conversion path created.</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Panel 3 — Business Growth */}
-        <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-indigo-900/40">
-          <h3 className="text-xl font-bold text-[#7F00FF] mb-3">
-            How It Grows Your Business
-          </h3>
-          <p className="text-sm text-gray-300 leading-relaxed">
-            Every conversation is analyzed. Cliva learns what customers like,
-            when they buy, and what makes them hesitate — then improves itself
-            automatically.
+        {/* Panel 3 — WITH CONVERSION ANIMATION */}
+        <motion.div
+          variants={panelVariants}
+          whileHover={{ y: -5 }}
+          className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl shadow-indigo-900/40 text-left"
+        >
+          <h3 className="text-xl font-bold text-[#7F00FF] mb-3">How It Grows Your Business</h3>
+          <p className="text-sm text-gray-300 leading-relaxed mb-6">
+            Cliva learns what customers like and what makes them hesitate — then improves automatically.
           </p>
 
-          <div className="mt-5 p-4 bg-white/5 border border-white/10 rounded-xl flex items-start space-x-3">
-            <Layers className="w-5 h-5 text-[#7F00FF] shrink-0 mt-1" />
-            <div>
-              <p className="text-white font-semibold">Smarter every day</p>
-              <p className="text-xs text-gray-400">
-                Learns from past sales and customer patterns.
-              </p>
+          <div className="space-y-4">
+            <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-start space-x-3">
+              <Layers className="w-5 h-5 text-[#7F00FF] shrink-0 mt-1" />
+              <div>
+                <p className="text-white font-semibold text-xs">Smarter every day</p>
+                <div className="mt-2 w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "100%" }}
+                    transition={{ duration: 1.5, delay: 0.5 }}
+                    className="h-full bg-[#7F00FF]"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-5 p-4 bg-white/5 border border-white/10 rounded-xl flex items-start space-x-3">
-            <TrendingUp className="w-5 h-5 text-green-400 shrink-0 mt-1" />
-            <div>
-              <p className="text-white font-semibold">Higher conversions</p>
-              <p className="text-xs text-gray-400">
-                Users typically see a boost in sales & AOV.
-              </p>
+            <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-start space-x-3">
+              <TrendingUp className="w-5 h-5 text-green-400 shrink-0 mt-1" />
+              <div>
+                <p className="text-white font-semibold text-xs">Higher conversions</p>
+                <div className="mt-2 w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "85%" }}
+                    transition={{ duration: 1.5, delay: 0.8 }}
+                    className="h-full bg-green-400"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

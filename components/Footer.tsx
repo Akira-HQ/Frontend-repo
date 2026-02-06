@@ -70,17 +70,17 @@ const Footer: React.FC = () => {
       { name: "Dashboard", href: "/dashboard" },
     ],
     company: [
-      { name: "About Us", href: "/about" },
-      { name: "Careers", href: "/careers" },
+      { name: "About Us", href: "/about-us" },
+      // { name: "Careers", href: "/careers" },
       { name: "Contact", href: "/contact" },
     ],
-    resources: [
-      { name: "Blog", href: "/blog" },
-      { name: "Guides", href: "/guides" },
-      { name: "Docs", href: "/docs" },
-      { name: "API", href: "/api" },
-      { name: "FAQ", href: "/faq" },
-    ],
+    // resources: [
+    //   { name: "Blog", href: "/blog" },
+    //   { name: "Guides", href: "/guides" },
+    //   { name: "Docs", href: "/docs" },
+    //   { name: "API", href: "/api" },
+    //   { name: "FAQ", href: "/faq" },
+    // ],
     legal: [
       { name: "Privacy Policy", href: "/privacy" },
       { name: "Terms of Service", href: "/terms-of-service" },
@@ -191,7 +191,7 @@ const Footer: React.FC = () => {
           <LinkColumn title="Company" items={links.company} />
 
           {/* 4. Resources Links */}
-          <LinkColumn title="Resources" items={links.resources} />
+          {/* <LinkColumn title="Resources" items={links.resources} /> */}
 
           {/* 5. Legal Links */}
           <LinkColumn title="Legal" items={links.legal} />

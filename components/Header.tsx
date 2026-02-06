@@ -68,7 +68,9 @@ export const Header = () => {
     pathname === "/register/sign-in" ||
     pathname.startsWith("/register") ||
     pathname === "/waitlist" ||
-    pathname.startsWith("/early-access");
+    pathname.startsWith("/early-access") ||
+    pathname === "/about-us" ||
+    pathname === "/contact";
 
   const navLinks = [
     { id: "hero", label: "Hero" },

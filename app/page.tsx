@@ -99,7 +99,7 @@ const Home: React.FC = () => {
       <ClivaStarsBackground density={200} />
 
       <main className="relative z-10 pt-16 pb-24 text-white">
-        <HeroSection onCta={handleCtaClick} />
+        <HeroSection onCtaAction={handleCtaClick} />
 
         <section className="container mx-auto px-4 py-20 max-w-7xl" id="features">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Key Features</h2>
@@ -124,6 +124,7 @@ const Home: React.FC = () => {
 
         <CapabilityGrid capabilities={capabilityData} />
         <HowItWorksAnimation />
+        <DeepConversionSection features={featureData} />
         <IntegrationGrid />
 
         <section id="pricing" className="container mx-auto px-4 py-20 max-w-7xl">
