@@ -3,9 +3,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useAppContext } from "../AppContext";
 import ProductsAnalysisCom from "./tabs/productAnalysis/ProductsAnalysisCom";
 import ProductOverview from "./tabs/productOverview/ProductOverview";
+// ⚡️ NEW: Import the Store Context component
+import StoreContextForm from "./tabs/StoreIntelligence";
 import { HiLightningBolt } from "react-icons/hi";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { IoSyncOutline, IoCloseCircleOutline } from "react-icons/io5";
+import { HiOutlineSparkles } from "react-icons/hi2";
 
 const AiTrainingContent = () => {
   const { isDarkMode, user, addToast, syncQuotas: globalSync, wsEvent } = useAppContext();
@@ -41,54 +44,26 @@ const AiTrainingContent = () => {
     syncContentData();
   }, [syncContentData]);
 
-  // --- 2. NEURAL LINK (Fixing Real-Time Updates) ---
+  // --- 2. NEURAL LINK (Real-Time Updates) ---
   useEffect(() => {
     if (!wsEvent) return;
 
     if (wsEvent.type === "AUDIT_PROGRESS") {
       setIsAnalyzing(true);
-      // UPDATE: Instantly set progress from WS data
       setProgress({ current: wsEvent.current, total: wsEvent.total });
-
-      // ⚡️ TRIGGER: Ensure the global context refreshes quotas too
       globalSync();
 
-      // ⚡️ IMPORTANT: If the current tab relies on analyzed product data,
-      // we might need to trigger a fresh fetch or update local product state here.
       if (wsEvent.current % 5 === 0) {
-        // Sync full data every 5 products to keep the list updated without lag
         syncContentData();
       }
     }
 
     if (wsEvent.type === "AUDIT_COMPLETE") {
       setIsAnalyzing(false);
-      setProgress((prev) => ({ ...prev, current: prev.total })); // Visual completion
-      syncContentData(); // Final full sync
-      globalSync();
-      addToast(wsEvent.message || "Audit Complete", "success");
-    }
-  }, [wsEvent, syncContentData, globalSync, addToast]);
-
-  useEffect(() => {
-    syncContentData();
-  }, [syncContentData]);
-
-  // --- 2. NEURAL LINK (Handle AUDIT_PROGRESS) ---
-  useEffect(() => {
-    if (!wsEvent) return;
-
-    if (wsEvent.type === "AUDIT_PROGRESS") {
-      setIsAnalyzing(true);
-      setProgress({ current: wsEvent.current, total: wsEvent.total });
-      globalSync();
-    }
-
-    if (wsEvent.type === "AUDIT_COMPLETE") {
-      setIsAnalyzing(false);
+      setProgress((prev) => ({ ...prev, current: prev.total }));
       syncContentData();
       globalSync();
-      addToast(wsEvent.message, "success");
+      addToast(wsEvent.message || "Audit Complete", "success");
     }
   }, [wsEvent, syncContentData, globalSync, addToast]);
 
@@ -106,12 +81,9 @@ const AiTrainingContent = () => {
     }
   };
 
-  // --- 4. UI CALCULATIONS (MONTHLY REMAINING) ---
-  // Using the 1000 limit from your "quotas" which maps to monthly_chat_limit in your backend
+  // --- 4. UI CALCULATIONS ---
   const maxLimit = user?.quotas?.chats_limit || 1000;
   const used = user?.quotas?.chats_used || 0;
-
-  // ⚡️ CALCULATE WHAT IS LEFT
   const remainingEnergy = Math.max(0, maxLimit - used);
   const auditPerc = (remainingEnergy / maxLimit) * 100;
 
@@ -132,6 +104,14 @@ const AiTrainingContent = () => {
             onClick={() => setActiveTab(2)}
           >
             Overview
+          </div>
+          {/* ⚡️ NEW: Store Context Tab */}
+          <div
+            className={`rounded-xl h-[44px] px-6 flex items-center gap-2 cursor-pointer transition-all font-bold text-sm ${activeTab === 3 ? "bg-[#A500FF] text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
+            onClick={() => setActiveTab(3)}
+          >
+            <HiOutlineSparkles size={16} />
+            Store Intelligence
           </div>
         </div>
 
@@ -193,6 +173,12 @@ const AiTrainingContent = () => {
       <div className={`TabContents ${isAnalyzing ? 'mt-48' : 'mt-28'} transition-all duration-500`}>
         {activeTab === 1 && <ProductsAnalysisCom />}
         {activeTab === 2 && <ProductOverview />}
+        {/* ⚡️ NEW: Store Intelligence View */}
+        {activeTab === 3 && (
+          <div className="px-10 max-w-5xl">
+            <StoreContextForm />
+          </div>
+        )}
       </div>
     </div>
   );

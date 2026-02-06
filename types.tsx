@@ -211,6 +211,10 @@ export interface User {
     platform: string;
     snippetToken: string;
     is_authorized: boolean;
+    description: string | null;
+    return_policy: string | null;
+    shipping_policy: string | null;
+    warranty_info: string | null;
   };
   notifications: Notification[];
 }
