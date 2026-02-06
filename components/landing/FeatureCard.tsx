@@ -34,6 +34,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   description,
 }) => (
   <motion.div
+  id="features"
     variants={cardVariants}
     initial="hidden"
     whileInView="visible"

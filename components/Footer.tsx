@@ -63,11 +63,11 @@ const Footer: React.FC = () => {
   // Link Column Definitions
   const links = {
     product: [
-      { name: "Overview", href: "/" },
+      // { name: "Overview", href: "/" },
       { name: "Features", href: "#features" },
       { name: "Pricing", href: "#pricings" },
-      { name: "Demo", href: "/demo" },
-      { name: "Dashboard", href: "/dashboard" },
+      // { name: "Demo", href: "/demo" },
+      // { name: "Dashboard", href: "/dashboard" },
     ],
     company: [
       { name: "About Us", href: "/about-us" },
@@ -90,12 +90,12 @@ const Footer: React.FC = () => {
 
   // Social icons data
   const socialIcons = [
-    {
-      icon: Linkedin,
-      href: "https://linkedin.com/company/cliva",
-      label: "LinkedIn",
-      hoverColor: NEON_ORANGE,
-    },
+    // {
+    //   icon: Linkedin,
+    //   href: "https://linkedin.com/company/cliva",
+    //   label: "LinkedIn",
+    //   hoverColor: NEON_ORANGE,
+    // },
     {
       icon: Twitter,
       href: "https://twitter.com/cliva",
