@@ -88,8 +88,8 @@ const Home: React.FC = () => {
     { icon: Target, title: "Customer Intent Prediction" },
     { icon: Smile, title: "Emotion-Aware Conversation Layer" },
     { icon: RefreshCw, title: "Real-time Product Intelligence" },
-    { icon: Globe, title: "Multilingual Selling Agent" },
-    { icon: Smartphone, title: "Omnichannel (WhatsApp + IG + Email)" },
+    // { icon: Globe, title: "Multilingual Selling Agent" },
+    // { icon: Smartphone, title: "Omnichannel (WhatsApp + IG + Email)" },
     { icon: TrendingUp, title: "Smart Upsell / Cross-Sell" },
     { icon: Layers, title: "Campaign-Driven Conversations" },
   ];
