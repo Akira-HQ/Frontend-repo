@@ -1,38 +1,45 @@
-// utils/planConfig.ts
 export const PLAN_CONFIG = {
   FREE: {
     title: "Free",
     price: 0,
-    queryLimit: 100,
-    description: "Forever free tier, great for small shops.",
+    queryLimit: 1000,
+    description: "Try Cliva risk-free and see how AI sales assistance feels.",
     features: [
-      "Basic Analytics",
-      "1,000 AI Queries/Month", // Updated to 1000 per your edit
-      "Basic Tracking",
+      "7-day free trial access",
+      "Up to 1,000 AI actions",
+      "Live customer chat (limited)",
+      "Basic session analytics",
+      "Shopify store integration",
     ],
   },
+
   BASIC: {
     title: "Basic",
     price: 10,
     queryLimit: 10000,
-    description: "Essential tools for growing your sales.",
+    description: "For growing stores that want AI-powered sales support.",
     features: [
-      "Up to 5,000 sessions/mo",
-      "Advanced Recommendations",
-      "Automated Follow-ups",
-      "Sales Analytics",
+      "Up to 5,000 customer sessions / month",
+      "10,000 AI actions",
+      "Smart product recommendations",
+      "Proactive AI greetings",
+      "Sales & conversion analytics",
+      "Email support",
     ],
   },
+
   PREMIUM: {
     title: "Pro",
     price: 20,
     queryLimit: 50000,
-    description: "Full-scale intelligence for high-volume stores.",
+    description: "Advanced AI intelligence for serious e-commerce growth.",
     features: [
-      "Up to 15,000 sessions/mo", // Adjusted to match your queryLimit
-      "Advanced A/B Testing",
-      "Custom API Access",
-      "Priority VIP Support",
+      "Up to 15,000 customer sessions / month",
+      "50,000 AI actions",
+      "Unlimited proactive AI nudges",
+      "Product audits & optimization insights",
+      "Strategic AI commands (founder-level insights)",
+      "Priority support",
     ],
   },
 };
