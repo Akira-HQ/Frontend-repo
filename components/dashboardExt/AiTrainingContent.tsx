@@ -115,7 +115,7 @@ const AiTrainingContent = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
+        {/* <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Monthly Strategy</span>
@@ -134,7 +134,7 @@ const AiTrainingContent = () => {
             </div>
             <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Monthly Quota</p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* 2. REAL-TIME PROGRESS BANNER */}
