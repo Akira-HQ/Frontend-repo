@@ -3,9 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useAppContext } from "../AppContext";
 import ProductsAnalysisCom from "./tabs/productAnalysis/ProductsAnalysisCom";
 import ProductOverview from "./tabs/productOverview/ProductOverview";
-// ⚡️ NEW: Import the Store Context component
 import StoreContextForm from "./tabs/StoreIntelligence";
-import { HiLightningBolt } from "react-icons/hi";
 import { UseAPI } from "@/components/hooks/UseAPI";
 import { IoSyncOutline, IoCloseCircleOutline } from "react-icons/io5";
 import { HiOutlineSparkles } from "react-icons/hi2";
@@ -30,8 +28,12 @@ const AiTrainingContent = () => {
 
         setProgress({ current: finished, total });
 
+        // Logic check: Only show analysis banner if there's un-audited products and we have energy
+        const hasUnfinished = finished < total;
         const hasEnergy = quotas.audits_used < quotas.audits_limit;
-        setIsAnalyzing(finished < total && hasEnergy);
+
+        // Don't auto-flip isAnalyzing to true here; let WebSockets handle real-time state
+        if (finished === total) setIsAnalyzing(false);
 
         globalSync();
       }
@@ -44,16 +46,26 @@ const AiTrainingContent = () => {
     syncContentData();
   }, [syncContentData]);
 
-  // --- 2. NEURAL LINK (Real-Time Updates) ---
+  // --- 2. NEURAL LINK (Hardened Real-Time Updates) ---
   useEffect(() => {
     if (!wsEvent) return;
 
+    // ⚡️ Fix: Listen for specific statuses from the backend notifyDashboard call
     if (wsEvent.type === "AUDIT_PROGRESS") {
+      const { message } = wsEvent; // Backend sends data inside 'message' object
+
       setIsAnalyzing(true);
-      setProgress({ current: wsEvent.current, total: wsEvent.total });
+
+      setProgress((prev) => ({
+        current: message.current || prev.current,
+        total: message.total || prev.total || 1, // Keep the total from sync if message lacks it
+      }));
+
+      // Refresh the progress bars in the Sidebar/QuotaMonitor
       globalSync();
 
-      if (wsEvent.current % 5 === 0) {
+      // Trigger a soft refresh of the product list to show the new health scores
+      if (message.status === "processing") {
         syncContentData();
       }
     }
@@ -61,9 +73,9 @@ const AiTrainingContent = () => {
     if (wsEvent.type === "AUDIT_COMPLETE") {
       setIsAnalyzing(false);
       setProgress((prev) => ({ ...prev, current: prev.total }));
-      syncContentData();
+      syncContentData(); // Final data pull
       globalSync();
-      addToast(wsEvent.message || "Audit Complete", "success");
+      addToast("Neural Audit Complete: All products mapped.", "success");
     }
   }, [wsEvent, syncContentData, globalSync, addToast]);
 
@@ -81,63 +93,35 @@ const AiTrainingContent = () => {
     }
   };
 
-  // --- 4. UI CALCULATIONS ---
-  const maxLimit = user?.quotas?.chats_limit || 1000;
-  const used = user?.quotas?.chats_used || 0;
-  const remainingEnergy = Math.max(0, maxLimit - used);
-  const auditPerc = (remainingEnergy / maxLimit) * 100;
-
   return (
     <div className={`py-4 px-2 w-full h-full ${isDarkMode ? "text-white" : ""} relative`}>
 
-      {/* 1. TABS & ENERGY HEADER */}
+      {/* 1. TABS HEADER */}
       <div className="tabs fixed top-16 right-10 left-[310px] z-50 py-4 px-6 bg-[#0b0b0b]/80 backdrop-blur-xl border border-white/10 rounded-2xl flex justify-between items-center shadow-2xl">
         <div className="flex gap-4">
-          <div
-            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all font-bold text-sm ${activeTab === 1 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
+          <button
+            className={`rounded-xl h-[44px] px-6 transition-all font-bold text-sm ${activeTab === 1 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
             onClick={() => setActiveTab(1)}
           >
             Products Analysis
-          </div>
-          <div
-            className={`rounded-xl h-[44px] px-6 flex items-center cursor-pointer transition-all font-bold text-sm ${activeTab === 2 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
+          </button>
+          {/* <button
+            className={`rounded-xl h-[44px] px-6 transition-all font-bold text-sm ${activeTab === 2 ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
             onClick={() => setActiveTab(2)}
           >
             Overview
-          </div>
-          {/* ⚡️ NEW: Store Context Tab */}
-          <div
-            className={`rounded-xl h-[44px] px-6 flex items-center gap-2 cursor-pointer transition-all font-bold text-sm ${activeTab === 3 ? "bg-[#A500FF] text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
+          </button> */}
+          <button
+            className={`rounded-xl h-[44px] px-6 flex items-center gap-2 transition-all font-bold text-sm ${activeTab === 3 ? "bg-[#A500FF] text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
             onClick={() => setActiveTab(3)}
           >
             <HiOutlineSparkles size={16} />
             Store Intelligence
-          </div>
+          </button>
         </div>
-
-        {/* <div className="flex items-center gap-6 bg-white/5 py-2 px-5 rounded-2xl border border-white/5">
-          <div className="flex flex-col items-end">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Monthly Strategy</span>
-              <HiLightningBolt className="text-amber-500 animate-pulse" size={14} />
-            </div>
-            <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000"
-                style={{ width: `${auditPerc}%` }}
-              />
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-[14px] font-black text-white leading-none">
-              {remainingEnergy}<span className="text-gray-600 text-[10px] ml-1">LEFT</span>
-            </div>
-            <p className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">Monthly Quota</p>
-          </div>
-        </div> */}
       </div>
 
-      {/* 2. REAL-TIME PROGRESS BANNER */}
+      {/* 2. REAL-TIME PROGRESS BANNER (Fixes visibility) */}
       {isAnalyzing && (
         <div className="fixed top-40 left-[340px] right-10 z-40 animate-in slide-in-from-top-4 duration-500">
           <div className="backdrop-blur-md bg-[#A500FF]/10 border border-[#A500FF]/20 p-4 rounded-2xl flex items-center justify-between shadow-2xl">
@@ -146,14 +130,16 @@ const AiTrainingContent = () => {
                 <IoSyncOutline className="text-white animate-spin" size={18} />
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase text-white">Neural Audit Active</p>
-                <p className="text-[10px] text-[#A500FF] font-bold">Progress: {progress.current} / {progress.total}</p>
+                <p className="text-[11px] font-black uppercase text-white tracking-widest">Neural Audit Active</p>
+                <p className="text-[10px] text-[#A500FF] font-bold">
+                  Mapped: {progress.current} / {progress.total} products
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-6">
               <div className="w-48 h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#A500FF] transition-all duration-700"
+                  className="h-full bg-[#A500FF] transition-all duration-700 ease-out"
                   style={{ width: `${(progress.current / (progress.total || 1)) * 100}%` }}
                 />
               </div>
@@ -172,8 +158,7 @@ const AiTrainingContent = () => {
       {/* 3. CONTENT AREA */}
       <div className={`TabContents ${isAnalyzing ? 'mt-48' : 'mt-28'} transition-all duration-500`}>
         {activeTab === 1 && <ProductsAnalysisCom />}
-        {activeTab === 2 && <ProductOverview />}
-        {/* ⚡️ NEW: Store Intelligence View */}
+        {/* {activeTab === 2 && <ProductOverview />} */}
         {activeTab === 3 && (
           <div className="px-10 max-w-5xl">
             <StoreContextForm />
