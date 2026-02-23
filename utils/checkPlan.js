@@ -2,43 +2,45 @@ export const PLAN_CONFIG = {
   FREE: {
     title: "Free",
     price: 0,
-    queryLimit: 1000,
-    description: "Try Cliva risk-free and see how AI sales assistance feels.",
+    queryLimit: 15, // per day
+    description:
+      "Experience how Cliva supports customer decisions inside your store.",
     features: [
-      "7-day free trial access",
-      "Up to 1,000 AI actions",
-      "Live customer chat (limited)",
-      "Basic session analytics",
-      "Shopify store integration",
+      "Up to 15 AI actions per day",
+      "Live store chat (limited)",
+      "1 product insight per day",
+      "Basic product analysis",
+      "Shopify integration",
     ],
   },
 
   BASIC: {
     title: "Basic",
-    price: 10,
-    queryLimit: 10000,
-    description: "For growing stores that want AI-powered sales support.",
+    price: 15, // early access price
+    queryLimit: 120, // per day
+    description: "AI-powered sales intelligence for growing Shopify stores.",
     features: [
-      "Up to 5,000 customer sessions / month",
-      "10,000 AI actions",
-      "Smart product recommendations",
-      "Proactive AI greetings",
-      "Sales & conversion analytics",
-      "Email support",
+      "Up to 120 AI actions per day",
+      "Full live store chat",
+      "Up to 5 product insights per day",
+      "1 deep product audit per day",
+      "Store-wide performance summary",
+      "Conversion analytics dashboard",
     ],
   },
 
   PREMIUM: {
     title: "Pro",
-    price: 20,
-    queryLimit: 50000,
-    description: "Advanced AI intelligence for serious e-commerce growth.",
+    price: 30,
+    queryLimit: 400, // per day
+    description:
+      "Advanced AI sales optimization for serious e-commerce operators.",
     features: [
-      "Up to 15,000 customer sessions / month",
-      "50,000 AI actions",
+      "Up to 400 AI actions per day",
+      "Advanced product audits",
+      "Founder-level strategic insights",
       "Unlimited proactive AI nudges",
-      "Product audits & optimization insights",
-      "Strategic AI commands (founder-level insights)",
+      "Full store intelligence reports",
       "Priority support",
     ],
   },
