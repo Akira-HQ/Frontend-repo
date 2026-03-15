@@ -223,6 +223,42 @@ body {
   }
 }
 
+/* Container: Fixed height, centered vertically, no wrapping */
+#cliva-suggestions { 
+  display: flex; 
+  gap: 8px; 
+  overflow-x: auto; 
+  padding: 10px 15px; /* Vertical padding controls the 'air' around pills */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  flex-shrink: 0; 
+  white-space: nowrap;
+  align-items: center; /* Ensures pills stay in a single slim line */
+}
+
+#cliva-suggestions::-webkit-scrollbar { display: none; }
+
+/* The Pill: Slim, rounded, and based on text size */
+.cliva-suggestion-pill { 
+  flex: 0 0 auto; 
+  background: rgba(255, 255, 255, 0.1); 
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  color: #efefef; 
+  font-size: 12px;      /* Slightly larger for readability */
+  padding: 6px 16px;    /* ⚡ Slim vertical (6px), wide horizontal (16px) */
+  border-radius: 20px;  /* ⚡ Higher radius for the 'pill' shape */
+  cursor: pointer; 
+  transition: all 0.2s ease;
+  line-height: 1;       /* Prevents text from pushing pill height */
+  height: fit-content;  /* Ensures it doesn't stretch vertically */
+}
+
+.cliva-suggestion-pill:hover { 
+  background: #A500FF; 
+  border-color: #A500FF; 
+  color: white; 
+}
+
 /* 
 #4F46E5
 #22D3Ee
