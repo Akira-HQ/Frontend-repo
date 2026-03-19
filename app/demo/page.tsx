@@ -113,7 +113,7 @@ export default function ClivaDemoPage() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7">
-            <VideoBlock src="/demo-video/storechat.mp4" />
+            <VideoBlock src="https://github.com/Akira-HQ/Frontend-repo/raw/refs/heads/main/public/demo-video/storechat.mp4" />
           </div>
           <div className="lg:col-span-5 space-y-8">
             <div className="flex gap-4 p-6 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-white/10 transition-colors">
@@ -186,7 +186,7 @@ export default function ClivaDemoPage() {
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
           </div>
-        </div>
+        </div> 
       </footer>
     </div>
   );
