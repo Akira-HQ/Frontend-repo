@@ -97,7 +97,7 @@ export default function ClivaDemoPage() {
         subtitle="The autonomous sales concierge that turns store visitors into loyal customers through real-time neural intelligence."
       >
         <div className="flex flex-wrap justify-center gap-4">
-          <a href='/' className="px-8 py-4 rounded-full bg-[#A500FF] hover:bg-[#B622FF] text-white font-bold transition-all transform hover:scale-105 flex items-center gap-2 shadow-lg shadow-[#A500FF]/20">
+          <a href='/waitlist' className="px-8 py-4 rounded-full bg-[#A500FF] hover:bg-[#B622FF] text-white font-bold transition-all transform hover:scale-105 flex items-center gap-2 shadow-lg shadow-[#A500FF]/20">
             Get Started <ChevronRight size={18} />
           </a>
           <a href='mailto:clivaaiofficial@gmail.com' className="px-8 py-4 rounded-full bg-zinc-900 border border-white/10 hover:bg-zinc-800 text-white font-bold transition-all">
