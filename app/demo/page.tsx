@@ -181,7 +181,7 @@ export default function ClivaDemoPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#A500FF] to-[#00A7FF]" />
             <span className="font-black text-xl tracking-tighter uppercase">Cliva</span>
           </div>
-          <p className="text-zinc-500 text-sm">© 2026 Cliva AI Neural Systems. All rights reserved.</p>
+          <p className="text-zinc-500 text-sm">&copy; {new Date().getFullYear()} Cliva. All rights reserved.</p>
           <div className="flex gap-6 text-sm text-zinc-400">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
