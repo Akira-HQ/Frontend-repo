@@ -70,7 +70,8 @@ export const Header = () => {
     pathname === "/waitlist" ||
     pathname.startsWith("/early-access") ||
     pathname === "/about-us" ||
-    pathname === "/contact";
+    pathname === "/contact" ||
+    pathname.startsWith("/demo");
 
   const navLinks = [
     { id: "hero", label: "Hero" },
