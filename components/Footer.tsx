@@ -90,15 +90,15 @@ const Footer: React.FC = () => {
 
   // Social icons data
   const socialIcons = [
-    // {
-    //   icon: Linkedin,
-    //   href: "https://linkedin.com/company/cliva",
-    //   label: "LinkedIn",
-    //   hoverColor: NEON_ORANGE,
-    // },
+    {
+      icon: Linkedin,
+      href: "https://linkedin.com/company/cliva-ai/",
+      label: "LinkedIn",
+      hoverColor: NEON_ORANGE,
+    },
     {
       icon: Twitter,
-      href: "https://twitter.com/cliva",
+      href: "https://x.com/cliva365688",
       label: "X (Twitter)",
       hoverColor: NEON_PURPLE,
     },

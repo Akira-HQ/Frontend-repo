@@ -185,81 +185,82 @@ const IntegrationsHub: React.FC = () => {
           {/* Right Column: Visual Previews */}
           <div className="space-y-8">
             <div className="flex items-center justify-between">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Implementation Map</h4>
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Shopify Implementation Map</h4>
               <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#A500FF]" />
+                <div className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'verified' ? 'bg-emerald-500' : 'bg-[#A500FF] animate-pulse'}`} />
                 <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
                 <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
               </div>
             </div>
 
-            {/* STEP-BY-STEP IMAGE MAP */}
-            <div className="grid grid-cols-1 gap-4">
-              <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black group">
-                <img
-                  src="https://cliva.ai/assets/help/step1.png"
-                  alt="Navigate to Theme Settings"
-                  className="w-full aspect-[16/7] object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute bottom-4 left-4 flex items-center gap-3">
-                  <span className="bg-[#A500FF] text-white text-[10px] font-black px-2 py-1 rounded">STEP 1</span>
-                  <p className="text-xs font-bold text-white shadow-sm">Navigate to Theme Settings</p>
+            {/* STEP-BY-STEP VISUAL GUIDE */}
+            <div className="space-y-6">
+              {/* STEP 1 */}
+              <div className="group relative rounded-3xl overflow-hidden border border-white/5 bg-[#050505] transition-all hover:border-white/20">
+                <div className="p-4 flex items-start gap-4">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white">01</span>
+                  <div>
+                    <h5 className="text-xs font-black uppercase tracking-tight text-white">Enter Theme Editor</h5>
+                    <p className="text-[10px] text-gray-500 mt-1">Go to <span className="text-zinc-300">Online Store &gt; Themes</span>. Click the <span className="text-zinc-300">"..."</span> button and select <span className="text-[#00A7FF]">Edit Code</span>.</p>
+                  </div>
+                </div>
+                <div className="relative aspect-[16/8] bg-zinc-900/50">
+                  <img
+                    src="/theme_setting_shop_4.png"
+                    alt="Shopify Edit Code"
+                    className="w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-opacity duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                 </div>
               </div>
 
-              <div className="flex items-center justify-center py-2">
-                <ArrowRight className="text-gray-800 rotate-90 lg:rotate-0" size={20} />
-              </div>
-
-              <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black group">
-                <img
-                  src="https://cliva.ai/assets/help/step2.png"
-                  alt="Locate Head Tag"
-                  className="w-full aspect-[16/7] object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute bottom-4 left-4 flex items-center gap-3">
-                  <span className="bg-[#00A7FF] text-white text-[10px] font-black px-2 py-1 rounded">STEP 2</span>
-                  <p className="text-xs font-bold text-white shadow-sm">Locate the &lt;head&gt; Tag</p>
+              {/* STEP 2 */}
+              <div className="group relative rounded-3xl overflow-hidden border border-white/5 bg-[#050505] transition-all hover:border-white/20">
+                <div className="p-4 flex items-start gap-4">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-white">02</span>
+                  <div>
+                    <h5 className="text-xs font-black uppercase tracking-tight text-white">Locate Layout File</h5>
+                    <p className="text-[10px] text-gray-500 mt-1">Under the <span className="text-zinc-300">Layout</span> folder, click on <span className="text-[#A500FF]">theme.liquid</span>. This is your site's master template.</p>
+                  </div>
+                </div>
+                <div className="relative aspect-[16/6] bg-zinc-900/50">
+                  <img
+                    src="/theme_setting_Shop_5.png"
+                    alt="Theme Liquid File"
+                    className="w-full h-full object-cover opacity-40 group-hover:opacity-100 transition-opacity duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                 </div>
               </div>
 
-              <div className="flex items-center justify-center py-2">
-                <ArrowRight className="text-gray-800 rotate-90 lg:rotate-0" size={20} />
-              </div>
-
-              <div className="relative rounded-3xl overflow-hidden border border-[#A500FF]/30 bg-black group ring-1 ring-[#A500FF]/20">
-                <img
-                  src="https://cliva.ai/assets/help/step3.png"
-                  alt="Paste Snippet"
-                  className="w-full aspect-[16/7] object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute bottom-4 left-4 flex items-center gap-3">
-                  <span className="bg-green-500 text-white text-[10px] font-black px-2 py-1 rounded">FINAL</span>
-                  <p className="text-xs font-bold text-white shadow-sm">Paste Pulse Snippet</p>
+              {/* STEP 3 */}
+              <div className="group relative rounded-3xl overflow-hidden border border-[#A500FF]/30 bg-[#050505] shadow-[0_0_30px_-10px_rgba(165,0,255,0.2)]">
+                <div className="p-4 flex items-start gap-4">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-[#A500FF] flex items-center justify-center text-[10px] font-black text-white">03</span>
+                  <div>
+                    <h5 className="text-xs font-black uppercase tracking-tight text-white font-bold">Injection & Save</h5>
+                    <p className="text-[10px] text-gray-400 mt-1">Scroll to the bottom, find the <span className="text-amber-500">{"</head>"}</span> tag, and paste the snippet above it. Click <span className="text-emerald-500">Save</span>.</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* LIVE STATUS TRACKER */}
-            <div className="p-8 rounded-3xl bg-black border border-white/5 flex flex-col items-center text-center">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-500 ${syncStatus === 'verified' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+            {/* LIVE STATUS TRACKER (Modified to be more compact) */}
+            <div className="p-6 rounded-[2rem] bg-black border border-white/5 flex items-center gap-6">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${syncStatus === 'verified' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
                 {syncStatus === 'verified' ? (
-                  <CheckCircle className="text-emerald-500 animate-in zoom-in" size={24} />
+                  <CheckCircle className="text-emerald-500 animate-in zoom-in" size={20} />
                 ) : (
-                  <RefreshCw className="text-amber-500 animate-spin-slow" size={24} />
+                  <RefreshCw className="text-amber-500 animate-spin-slow" size={20} />
                 )}
               </div>
-
-              <h5 className="text-white font-bold text-sm">
-                {syncStatus === 'verified' ? "Neural Link Active" : "Neural Sync Status"}
-              </h5>
-
-              <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-1">
-                {syncStatus === 'verified' ? "Synchronization Complete" : "Waiting for Pulse Heartbeat..."}
-              </p>
-
-              <div className="mt-6 w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className={`h-full transition-all duration-1000 ease-out ${syncStatus === 'verified' ? 'w-full bg-emerald-500' : 'w-1/3 bg-amber-500 animate-pulse'}`} />
+              <div className="flex-1">
+                <h5 className="text-white font-bold text-xs">
+                  {syncStatus === 'verified' ? "Neural Link Established" : "Listening for Pulse..."}
+                </h5>
+                <div className="mt-2 w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                  <div className={`h-full transition-all duration-1000 ease-out ${syncStatus === 'verified' ? 'w-full bg-emerald-500' : 'w-1/3 bg-amber-500 animate-pulse'}`} />
+                </div>
               </div>
             </div>
           </div>
