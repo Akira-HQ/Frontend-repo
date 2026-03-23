@@ -238,7 +238,7 @@ const IntegrationsHub: React.FC = () => {
                 <div className="p-4 flex items-start gap-4">
                   <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-[#A500FF] flex items-center justify-center text-[10px] font-black text-white">03</span>
                   <div>
-                    <h5 className="text-xs font-black uppercase tracking-tight text-white font-bold">Injection & Save</h5>
+                    <h5 className="text-xs uppercase tracking-tight text-white font-bold">Injection & Save</h5>
                     <p className="text-[10px] text-gray-400 mt-1">Scroll to the bottom, find the <span className="text-amber-500">{"</head>"}</span> tag, and paste the snippet above it. Click <span className="text-emerald-500">Save</span>.</p>
                   </div>
                 </div>
