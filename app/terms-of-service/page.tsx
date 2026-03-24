@@ -301,10 +301,10 @@ const page: React.FC = () => {
           <CollapsibleSection title="8. Governing Law and Dispute Resolution">
             <p>
               These Terms shall be governed by and defined by the laws of
-              [Insert Governing Jurisdiction], without regard to its conflict of
+              the Federal Republic of Nigeria, without regard to its conflict of
               law principles. Any legal action or proceeding arising under these
-              Terms will be brought exclusively in the federal or state courts
-              located in [Insert Specific Venue City and State/Country].
+              Terms will be brought exclusively in the courts of competent
+              jurisdiction located in Ibadan, Nigeria.
             </p>
           </CollapsibleSection>
 
@@ -317,12 +317,12 @@ const page: React.FC = () => {
             <ul className="list-disc list-inside ml-4 space-y-2 mt-3">
               <li>
                 <strong className="text-white">Email:</strong>{" "}
-                support@cliva.com
+                clivaaiofficial@gmail.com
               </li>
-              <li>
+              {/* <li>
                 <strong className="text-white">Mailing Address:</strong> [Insert
                 Legal Company Mailing Address]
-              </li>
+              </li> */}
             </ul>
           </CollapsibleSection>
         </section>

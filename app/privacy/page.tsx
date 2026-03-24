@@ -596,14 +596,13 @@ const page: React.FC = () => {
               </h4>
               <ul className="list-disc list-inside ml-4 space-y-2">
                 <li>
-                  <strong className="text-white">Company Name:</strong> [Insert
-                  Legal Company Name Here]
+                  <strong className="text-white">Company Name:</strong> Cliva
                 </li>
                 <li>
                   <strong className="text-white">Mailing Address:</strong>{" "}
-                  [Insert Mailing Address Here]
+                  clivaaiofficial@gmail.com
                 </li>
-                <li>
+                {/* <li>
                   <strong className="text-white">
                     Email for Privacy Requests:
                   </strong>{" "}
@@ -614,7 +613,7 @@ const page: React.FC = () => {
                     privacy@cliva.com
                   </a>{" "}
                   (Recommended for all data rights requests)
-                </li>
+                </li> */}
               </ul>
               <p>
                 We take all privacy inquiries seriously and will respond

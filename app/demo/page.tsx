@@ -200,8 +200,8 @@ export default function ClivaDemoPage() {
           </div>
           <p className="text-zinc-500 text-sm italic tracking-tighter">&copy; {new Date().getFullYear()} CLIVA AI NEURAL SYSTEMS. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-6 text-sm text-zinc-400">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/terms-of-service" className="hover:text-white transition-colors">Terms</a>
           </div>
         </div>
       </footer>
