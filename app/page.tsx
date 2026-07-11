@@ -35,9 +35,9 @@ const Home: React.FC = () => {
       planParam = "premium"; // Matches the key in PLAN_CONFIG
     }
 
-    // router.push(`/register?plan=${planParam}`);
+    router.push(`/register?plan=${planParam}`);
     // development route for now
-    router.push("/waitlist");
+    // router.push("/waitlist");
   };
 
   const pricingData = useMemo(() => {
